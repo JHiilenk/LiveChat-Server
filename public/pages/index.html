@@ -378,6 +378,12 @@
         <form id="joinForm" autocomplete="off">
           <label for="nameInput" class="sr-only">Nama pengguna</label>
           <input id="nameInput" type="text" maxlength="24" placeholder="Contoh: Andi" required />
+          <div id="joinDirectAdminField" class="join-select-field">
+            <label for="joinDirectAdminInput" class="sr-only">Arah masuk awal</label>
+            <select id="joinDirectAdminInput" aria-label="Arah masuk awal">
+              <option value="admins" selected>Live Chat</option>
+            </select>
+          </div>
           <div id="joinTeamField" class="join-select-field">
             <label for="teamInput" class="sr-only">Pilih team</label>
             <select id="teamInput" aria-label="Pilih team"></select>
@@ -405,12 +411,6 @@
             <select id="joinRoleSelect" class="sr-only" aria-label="Pilih role akses">
               <option value="guest" selected>Guest</option>
               <option value="member">Member</option>
-            </select>
-          </div>
-          <div id="joinDirectAdminField" class="join-select-field">
-            <label for="joinDirectAdminInput" class="sr-only">Arah masuk awal</label>
-            <select id="joinDirectAdminInput" aria-label="Arah masuk awal">
-              <option value="admins" selected>Live Chat</option>
             </select>
           </div>
           <div id="joinPasswordField">
