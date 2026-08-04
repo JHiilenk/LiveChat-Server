@@ -101,6 +101,8 @@ const aiCooldownByContext = new Map();
 const joinHistoryByTeam = new Map();
 const fingerprintHistoryByTeam = new Map();
 const simulatedWelcomeNextEmitAtByChannel = new Map();
+const seenVisitorKeys = new Set();
+let globalVisitorTotal = 0;
 
 const parseOrigins = (originValue) => {
   if (!originValue || originValue.trim() === "*") {
@@ -595,6 +597,36 @@ const sanitizeRole = (value) => {
   return ROLE_MEMBER;
 };
 
+const buildVisitorIdentityKey = (user) => {
+  const safeName = sanitizeName(user?.name || "").trim().toLowerCase();
+  const safeRole = sanitizeRole(user?.role || ROLE_MEMBER);
+  const safeTeam = sanitizeCode(String(user?.teamCode || ""), DEFAULT_TEAM_CODE);
+  const fingerprintKey = String(user?.fingerprintKey || "").trim().toLowerCase();
+  if (fingerprintKey) {
+    if (safeName) {
+      return `fp:${fingerprintKey}:${safeRole}:${safeTeam}:${safeName}`;
+    }
+    return `fp:${fingerprintKey}:${safeRole}:${safeTeam}`;
+  }
+
+  if (!safeName) {
+    return "";
+  }
+
+  return `fallback:${safeRole}:${safeTeam}:${safeName}`;
+};
+
+const registerVisitorIdentity = (user) => {
+  const identityKey = buildVisitorIdentityKey(user);
+  if (!identityKey || seenVisitorKeys.has(identityKey)) {
+    return false;
+  }
+
+  seenVisitorKeys.add(identityKey);
+  globalVisitorTotal += 1;
+  return true;
+};
+
 const sanitizePassword = (value) => {
   return String(value || "").trim().slice(0, 120);
 };
@@ -865,12 +897,17 @@ const resetDefaultAdminPassword = async () => {
       continue;
     }
 
-    const hasDefaultAdmin = (safeDoc.admins || []).some((entry) => entry.key === defaultAdminKey);
+    const admins = [...(safeDoc.admins || [])];
+    const hasDefaultAdmin = admins.some((entry) => entry.key === defaultAdminKey);
     if (!hasDefaultAdmin) {
-      continue;
+      admins.push({
+        key: defaultAdminKey,
+        name: DEFAULT_ADMIN_USERNAME
+      });
     }
 
-    if (verifyPassword(DEFAULT_ADMIN_PASSWORD, safeDoc.adminPasswordHash)) {
+    const shouldResetPassword = !verifyPassword(DEFAULT_ADMIN_PASSWORD, safeDoc.adminPasswordHash);
+    if (!shouldResetPassword && hasDefaultAdmin) {
       continue;
     }
 
@@ -878,7 +915,10 @@ const resetDefaultAdminPassword = async () => {
       { _id: safeDoc._id },
       {
         $set: {
-          adminPasswordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
+          admins,
+          adminPasswordHash: shouldResetPassword
+            ? hashPassword(DEFAULT_ADMIN_PASSWORD)
+            : safeDoc.adminPasswordHash,
           updatedAt: now
         }
       }
@@ -1123,6 +1163,7 @@ const {
   channelsDb,
   messagesDb,
   appendPublicLoginConfigOption,
+  nameKey,
   nowIso,
   getMessageRetentionCutoff,
   defaultChannelCode: DEFAULT_CHANNEL_CODE,
@@ -1167,6 +1208,8 @@ const {
 const {
   buildDirectAdminDmKey,
   getDirectAdminRequesterNameFromDmKey,
+  getDirectAdminDmKeyDetails,
+  doesDirectAdminDmBelongToRequester,
   isDirectAdminDmKey,
   getOnlinePrivilegedRecipients,
   isAllowedSupportRole,
@@ -1181,7 +1224,8 @@ const {
 
 const {
   handleDirectAdminDmOpen,
-  handleDirectAdminChatMessage
+  handleDirectAdminChatMessage,
+  emitSupportDmAvailabilityForPrivilegedUser
 } = createDirectAdminDmHandlers({
   usersBySocketId,
   io,
@@ -1193,6 +1237,8 @@ const {
   buildChatMessage,
   buildDirectAdminDmKey,
   getDirectAdminRequesterNameFromDmKey,
+  getDirectAdminDmKeyDetails,
+  doesDirectAdminDmBelongToRequester,
   isDirectAdminDmKey,
   getOnlinePrivilegedRecipients,
   isAllowedSupportRole,
@@ -1204,6 +1250,24 @@ const {
   ROLE_ADMIN,
   ROLE_OWNER
 });
+
+const getGlobalStatsPayload = () => {
+  const connectedUsers = Array.from(usersBySocketId.values());
+  const guestOnline = connectedUsers.filter((entry) => sanitizeRole(entry?.role || ROLE_MEMBER) === ROLE_GUEST).length;
+  const memberOnline = Math.max(0, connectedUsers.length - guestOnline);
+
+  return {
+    onlineUsers: connectedUsers.length,
+    memberOnline,
+    guestOnline,
+    totalVisitors: globalVisitorTotal,
+    updatedAt: nowIso()
+  };
+};
+
+const emitGlobalStats = () => {
+  io.emit("stats:global", getGlobalStatsPayload());
+};
 
 const joinChannelForSocket = async ({ socket, user, channelCode, announce, joinAnnouncementText = "" }) => {
   const nextChannelCode = sanitizeCode(channelCode, DEFAULT_CHANNEL_CODE);
@@ -1284,6 +1348,10 @@ io.on("connection", (socket) => {
   socket.data.messageTimestamps = [];
   socket.data.explicitLogout = false;
 
+  socket.on("stats:global:request", () => {
+    socket.emit("stats:global", getGlobalStatsPayload());
+  });
+
   socket.on("session:logout", () => {
     socket.data.explicitLogout = true;
   });
@@ -1348,12 +1416,12 @@ io.on("connection", (socket) => {
       }
 
       const recipients = getOnlinePrivilegedRecipients(usersBySocketId, "", socket.id);
-      if (recipients.length === 0) {
-        socket.emit("join:error", { message: "Admin/owner belum online. Coba beberapa saat lagi." });
-        return;
-      }
 
-      const dmKey = buildDirectAdminDmKey(requestedName);
+      const dmKey = buildDirectAdminDmKey({
+        requesterName: requestedName,
+        teamCode: "",
+        fingerprintKey: clientFingerprint.fingerprintKey
+      });
       if (!dmKey) {
         socket.emit("join:error", { message: "Gagal membuat DM admin. Nama user tidak valid." });
         return;
@@ -1387,8 +1455,10 @@ io.on("connection", (socket) => {
 
       usersBySocketId.set(socket.id, user);
       socket.data.explicitLogout = false;
+      registerVisitorIdentity(user);
+      emitGlobalStats();
 
-      const history = await getDmHistory("", dmKey, "Customer Service");
+      const history = await getDmHistory("", dmKey, "Customer Service", user.name);
       socket.emit("dm:ready", {
         dmKey,
         peerName: "Customer Service",
@@ -1403,6 +1473,8 @@ io.on("connection", (socket) => {
           supportScope: "admins"
         });
       });
+
+      await emitSupportDmAvailabilityForPrivilegedUser(socket, user);
 
       return;
     }
@@ -1427,6 +1499,8 @@ io.on("connection", (socket) => {
     usersBySocketId.set(socket.id, user);
     socket.join(teamRoomKey(teamCode));
     socket.data.explicitLogout = false;
+    registerVisitorIdentity(user);
+    emitGlobalStats();
 
     const effectiveFingerprint = isSimulated
       ? {
@@ -1444,6 +1518,7 @@ io.on("connection", (socket) => {
     });
 
     await deliverOfflineMemberBroadcastInbox({ socket, user });
+    await emitSupportDmAvailabilityForPrivilegedUser(socket, user);
   });
 
   socket.on("channel:create", async (payload) => {
@@ -2104,7 +2179,7 @@ io.on("connection", (socket) => {
     user.activeDmProxyAliasName = shouldRedirectToAdmin ? targetDisplayName : null;
     usersBySocketId.set(socket.id, user);
 
-    const history = await getDmHistory(user.teamCode, dmKey, targetDisplayName);
+    const history = await getDmHistory(user.teamCode, dmKey, targetDisplayName, user.name);
     socket.emit("dm:ready", {
       dmKey,
       peerName: targetDisplayName,
@@ -2176,7 +2251,7 @@ io.on("connection", (socket) => {
     user.activeDmProxyAliasName = proxyTargetName ? displayPeerName : null;
     usersBySocketId.set(socket.id, user);
 
-    const history = await getDmHistory(user.teamCode, dmKey, displayPeerName);
+    const history = await getDmHistory(user.teamCode, dmKey, displayPeerName, user.name);
     socket.emit("dm:ready", {
       dmKey,
       peerName: displayPeerName,
@@ -2495,6 +2570,313 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("chat:history:clear", async (payload) => {
+    const user = usersBySocketId.get(socket.id);
+    if (!user) {
+      socket.emit("join:error", { message: "Silakan join dulu sebelum hapus history chat." });
+      return;
+    }
+
+    const mode = payload?.mode === "dm" ? "dm" : "channel";
+    const clearedAt = nowIso();
+
+    if (mode === "dm") {
+      const requesterUserKey = nameKey(user.name || "");
+      const requesterTeamCode = String(user.teamCode || "").trim();
+      const normalizedUserRole = sanitizeRole(user.role);
+      const clearMode = String(payload?.clearMode || "").trim().toLowerCase();
+      const wantsGlobalClear = clearMode === "global";
+      const canGlobalClear = normalizedUserRole === ROLE_OWNER || normalizedUserRole === ROLE_ADMIN;
+
+      if (wantsGlobalClear && !canGlobalClear) {
+        socket.emit("join:error", { message: "Hanya owner/admin yang bisa hapus chat massal global." });
+        return;
+      }
+
+      const emitDmHistoryClearedForRequester = (clearPayload) => {
+        const targetSockets = Array.from(usersBySocketId.values()).filter((entry) => {
+          if (!entry || entry.simulated) {
+            return false;
+          }
+
+          return nameKey(entry.name || "") === requesterUserKey
+            && String(entry.teamCode || "").trim() === requesterTeamCode;
+        });
+
+        if (targetSockets.length === 0) {
+          io.to(socket.id).emit("chat:history:cleared", clearPayload);
+          return;
+        }
+
+        targetSockets.forEach((entry) => {
+          io.to(entry.id).emit("chat:history:cleared", clearPayload);
+        });
+      };
+
+      const markDmHistoryHiddenForRequester = async (query) => {
+        if (!requesterUserKey) {
+          return 0;
+        }
+
+        let docs = [];
+        try {
+          docs = await messagesDb.find(query).exec();
+        } catch {
+          docs = [];
+        }
+
+        let updatedCount = 0;
+        for (const doc of docs) {
+          const hiddenForUsers = Array.isArray(doc?.hiddenForUsers) ? doc.hiddenForUsers : [];
+          if (hiddenForUsers.includes(requesterUserKey)) {
+            continue;
+          }
+
+          const nextHiddenForUsers = Array.from(new Set([...hiddenForUsers, requesterUserKey]));
+          try {
+            await messagesDb.update(
+              { _id: doc._id },
+              {
+                $set: {
+                  hiddenForUsers: nextHiddenForUsers,
+                  updatedAt: clearedAt
+                }
+              }
+            );
+            updatedCount += 1;
+          } catch {
+            // Ignore per-doc failures to keep DM clear flow responsive.
+          }
+        }
+
+        return updatedCount;
+      };
+
+      const dmKey = String(payload?.dmKey || "").trim();
+      const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
+      const isSupportDm = supportScope === "admins" || isDirectAdminDmKey(dmKey);
+
+      if (!dmKey) {
+        socket.emit("join:error", { message: "DM context tidak valid untuk hapus history." });
+        return;
+      }
+
+      if (isSupportDm) {
+        const requesterName = getDirectAdminRequesterNameFromDmKey(dmKey);
+        const supportDmKeyDetails = getDirectAdminDmKeyDetails(dmKey);
+        if (!requesterName) {
+          socket.emit("join:error", { message: "DM support tidak valid." });
+          return;
+        }
+
+        const isRequester = isRequesterRole(user.role) && doesDirectAdminDmBelongToRequester(dmKey, user);
+        const isPrivileged = [ROLE_OWNER, ROLE_ADMIN, ROLE_OPERATOR].includes(user.role);
+
+        if (!isRequester && !isPrivileged) {
+          socket.emit("join:error", { message: "Kamu tidak punya akses untuk hapus history DM ini." });
+          return;
+        }
+
+        const teamCodes = new Set();
+        const ownTeamCode = String(user.teamCode || "").trim();
+        teamCodes.add(ownTeamCode);
+        teamCodes.add("");
+        if (supportDmKeyDetails && !supportDmKeyDetails.isLegacy) {
+          teamCodes.add(String(supportDmKeyDetails.teamCode || "").trim());
+        }
+
+        Array.from(usersBySocketId.values())
+          .filter((entry) => !entry?.simulated)
+          .filter((entry) => isRequesterRole(entry?.role))
+          .filter((entry) => nameKey(entry?.name || "") === nameKey(requesterName))
+          .forEach((entry) => {
+            teamCodes.add(String(entry?.teamCode || "").trim());
+          });
+
+        const normalizedTeamCodes = Array.from(teamCodes);
+        const removeQuery = normalizedTeamCodes.length > 0
+          ? { scope: "dm", dmKey, teamCode: { $in: normalizedTeamCodes } }
+          : { scope: "dm", dmKey };
+
+        if (wantsGlobalClear) {
+          let removedCount = 0;
+          try {
+            removedCount = await messagesDb.remove(removeQuery, { multi: true });
+          } catch {
+            removedCount = 0;
+          }
+
+          const clearPayload = {
+            context: {
+              type: "dm",
+              dmKey,
+              peerName: requesterName,
+              supportScope: "admins"
+            },
+            clearedBy: user.name,
+            clearedAt,
+            removedCount,
+            clearMode: "global"
+          };
+
+          const dmRooms = normalizedTeamCodes
+            .map((teamCode) => dmRoomKey(teamCode, dmKey))
+            .filter(Boolean);
+          const uniqueDmRooms = Array.from(new Set(dmRooms));
+
+          if (uniqueDmRooms.length === 1) {
+            io.to(uniqueDmRooms[0]).emit("chat:history:cleared", clearPayload);
+          } else if (uniqueDmRooms.length > 1) {
+            let broadcast = io.to(uniqueDmRooms[0]);
+            for (let index = 1; index < uniqueDmRooms.length; index += 1) {
+              broadcast = broadcast.to(uniqueDmRooms[index]);
+            }
+            broadcast.emit("chat:history:cleared", clearPayload);
+          }
+
+          io.to(socket.id).emit("chat:history:cleared", clearPayload);
+
+          emitDmHistoryClearedForRequester(clearPayload);
+          return;
+        }
+
+        const removedCount = await markDmHistoryHiddenForRequester(removeQuery);
+        const clearPayload = {
+          context: {
+            type: "dm",
+            dmKey,
+            peerName: requesterName,
+            supportScope: "admins"
+          },
+          clearedBy: user.name,
+          clearedAt,
+          removedCount,
+          clearMode: "self"
+        };
+
+        emitDmHistoryClearedForRequester(clearPayload);
+
+        return;
+      }
+
+      const peerName = sanitizeName(payload?.peerName || "");
+      const expectedDmKey = buildDmKey(user.name, peerName);
+      if (wantsGlobalClear) {
+        let removedCount = 0;
+        try {
+          removedCount = await messagesDb.remove({
+            scope: "dm",
+            teamCode: user.teamCode,
+            dmKey
+          }, { multi: true });
+        } catch {
+          removedCount = 0;
+        }
+
+        const clearPayload = {
+          context: {
+            type: "dm",
+            dmKey,
+            peerName: peerName || "Direct Messages"
+          },
+          clearedBy: user.name,
+          clearedAt,
+          removedCount,
+          clearMode: "global"
+        };
+
+        io.to(dmRoomKey(user.teamCode, dmKey)).emit("chat:history:cleared", clearPayload);
+        io.to(socket.id).emit("chat:history:cleared", clearPayload);
+        emitDmHistoryClearedForRequester(clearPayload);
+        return;
+      }
+
+      if (!peerName || expectedDmKey !== dmKey) {
+        socket.emit("join:error", { message: "DM context tidak valid untuk hapus history." });
+        return;
+      }
+
+      const removedCount = await markDmHistoryHiddenForRequester({
+        scope: "dm",
+        teamCode: user.teamCode,
+        dmKey
+      });
+
+      const clearPayload = {
+        context: {
+          type: "dm",
+          dmKey,
+          peerName
+        },
+        clearedBy: user.name,
+        clearedAt,
+        removedCount,
+        clearMode: "self"
+      };
+
+      emitDmHistoryClearedForRequester(clearPayload);
+      return;
+    }
+
+    const channelCode = sanitizeCode(payload?.channelCode || "", user.channelCode || DEFAULT_CHANNEL_CODE);
+    if (!channelCode) {
+      socket.emit("join:error", { message: "Channel tidak valid untuk hapus history." });
+      return;
+    }
+
+    if (sanitizeRole(user.role) !== ROLE_ADMIN) {
+      console.warn("[audit] channel-history-clear denied", {
+        at: nowIso(),
+        userId: String(user.id || ""),
+        userName: String(user.name || ""),
+        role: String(user.role || ""),
+        teamCode: String(user.teamCode || ""),
+        channelCode,
+        socketId: String(socket.id || "")
+      });
+      socket.emit("join:error", { message: "Hanya admin yang bisa hapus history channel." });
+      return;
+    }
+
+    let removedCount = 0;
+    try {
+      removedCount = await messagesDb.remove({
+        scope: "channel",
+        teamCode: user.teamCode,
+        channelCode
+      }, { multi: true });
+    } catch {
+      removedCount = 0;
+    }
+
+    await channelsDb.update(
+      { teamCode: user.teamCode, channelCode },
+      {
+        $set: {
+          pinnedMessage: null,
+          updatedAt: nowIso()
+        }
+      }
+    );
+
+    const clearPayload = {
+      context: {
+        type: "channel",
+        channelCode
+      },
+      clearedBy: user.name,
+      clearedAt,
+      removedCount
+    };
+
+    io.to(channelRoomKey(user.teamCode, channelCode)).emit("chat:history:cleared", clearPayload);
+    io.to(channelRoomKey(user.teamCode, channelCode)).emit("channel:pinned", {
+      teamCode: user.teamCode,
+      channelCode,
+      pinnedMessage: null
+    });
+  });
+
   socket.on("typing:start", () => {
     const user = usersBySocketId.get(socket.id);
     if (!user) {
@@ -2519,6 +2901,7 @@ io.on("connection", (socket) => {
     const shouldAnnounceLeave = socket.data.explicitLogout === true;
     usersBySocketId.delete(socket.id);
     typingSocketIds.delete(socket.id);
+    emitGlobalStats();
 
     if (!user) {
       return;

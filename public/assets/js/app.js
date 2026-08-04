@@ -60,11 +60,15 @@ const messageList = document.getElementById("messageList");
 const chatBodyShell = document.querySelector(".chat-body-shell");
 const memberSearchInput = document.getElementById("memberSearchInput");
 const userList = document.getElementById("userList");
+const privilegedList = document.getElementById("privilegedList");
 const guestList = document.getElementById("guestList");
 const onlineCount = document.getElementById("onlineCount");
 const memberTotalCount = document.getElementById("memberTotalCount");
 const memberOnlineCount = document.getElementById("memberOnlineCount");
 const memberOfflineCount = document.getElementById("memberOfflineCount");
+const privilegedTotalCount = document.getElementById("privilegedTotalCount");
+const privilegedOnlineCount = document.getElementById("privilegedOnlineCount");
+const privilegedOfflineCount = document.getElementById("privilegedOfflineCount");
 const guestTotalCount = document.getElementById("guestTotalCount");
 const guestOnlineCount = document.getElementById("guestOnlineCount");
 const guestOfflineCount = document.getElementById("guestOfflineCount");
@@ -93,7 +97,10 @@ const channelInput = document.getElementById("channelInput");
 const dmList = document.getElementById("dmList");
 const liveChatRouteCard = document.getElementById("liveChatRouteCard");
 const liveChatRouteList = document.getElementById("liveChatRouteList");
+const liveChatFilterControls = document.getElementById("liveChatFilterControls");
+const dmFilterControls = document.getElementById("dmFilterControls");
 const backToChannelButton = document.getElementById("backToChannelButton");
+const clearHistoryButton = document.getElementById("clearHistoryButton");
 const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
 const sidebarCloseButton = document.getElementById("sidebarCloseButton");
 const mobileSidebarBackdrop = document.getElementById("mobileSidebarBackdrop");
@@ -108,13 +115,25 @@ const profileTeam = document.getElementById("profileTeam");
 const profileChannel = document.getElementById("profileChannel");
 const logoutButton = document.getElementById("logoutButton");
 const adminPanel = document.getElementById("adminPanel");
+const adminPanelTitle = document.getElementById("adminPanelTitle");
 const adminPanelRole = document.getElementById("adminPanelRole");
 const adminPanelHint = document.getElementById("adminPanelHint");
 const adminList = document.getElementById("adminList");
+const adminSettingsEntryLink = document.getElementById("adminSettingsEntryLink");
+const adminSettingsPage = document.getElementById("adminSettingsPage");
+const bulkDeleteWrap = document.getElementById("bulkDeleteWrap");
+const bulkDeleteChecklist = document.getElementById("bulkDeleteChecklist");
+const bulkDeleteScopeTrigger = document.getElementById("bulkDeleteScopeTrigger");
+const bulkDeleteScopeMenu = document.getElementById("bulkDeleteScopeMenu");
+const bulkDeleteLiveChatToggle = document.getElementById("bulkDeleteLiveChatToggle");
+const bulkDeleteDmToggle = document.getElementById("bulkDeleteDmToggle");
+const bulkDeleteActionButton = document.getElementById("bulkDeleteActionButton");
 const accountSettingsToggle = document.getElementById("accountSettingsToggle");
 const accountSettingsForm = document.getElementById("accountSettingsForm");
+const accountSettingsWrap = accountSettingsToggle?.closest(".admin-settings-wrap") || null;
 const broadcastMessageToggle = document.getElementById("broadcastMessageToggle");
 const broadcastMessageForm = document.getElementById("broadcastMessageForm");
+const broadcastMessageWrap = broadcastMessageToggle?.closest(".admin-settings-wrap") || null;
 const broadcastMessageInput = document.getElementById("broadcastMessageInput");
 const broadcastTeamChecklistTrigger = document.getElementById("broadcastTeamChecklistTrigger");
 const broadcastTeamChecklistMenu = document.getElementById("broadcastTeamChecklistMenu");
@@ -128,10 +147,13 @@ const broadcastSendSummary = document.getElementById("broadcastSendSummary");
 const broadcastSendMeta = document.getElementById("broadcastSendMeta");
 const loginConfigToggle = document.getElementById("loginConfigToggle");
 const loginConfigForm = document.getElementById("loginConfigForm");
+const loginConfigWrap = loginConfigToggle?.closest(".admin-settings-wrap") || null;
 const uploadConfigToggle = document.getElementById("uploadConfigToggle");
 const uploadConfigForm = document.getElementById("uploadConfigForm");
+const uploadConfigWrap = uploadConfigToggle?.closest(".admin-settings-wrap") || null;
 const directAdminConfigToggle = document.getElementById("directAdminConfigToggle");
 const directAdminConfigForm = document.getElementById("directAdminConfigForm");
+const directAdminConfigWrap = directAdminConfigToggle?.closest(".admin-settings-wrap") || null;
 const loginShowTeamToggle = document.getElementById("loginShowTeamToggle");
 const loginShowChannelToggle = document.getElementById("loginShowChannelToggle");
 const directAdminEnabledToggle = document.getElementById("directAdminEnabledToggle");
@@ -145,6 +167,14 @@ const directAdminDmButton = document.getElementById("directAdminDmButton");
 const directAdminDmHint = document.getElementById("directAdminDmHint");
 const settingsUsernameInput = document.getElementById("settingsUsernameInput");
 const settingsPasswordInput = document.getElementById("settingsPasswordInput");
+const adminGlobalOnlineTotal = document.getElementById("adminGlobalOnlineTotal");
+const adminGlobalVisitorTotal = document.getElementById("adminGlobalVisitorTotal");
+const adminGlobalMemberOnline = document.getElementById("adminGlobalMemberOnline");
+const adminGlobalGuestOnline = document.getElementById("adminGlobalGuestOnline");
+const adminGlobalStatsUpdatedAt = document.getElementById("adminGlobalStatsUpdatedAt");
+const adminGlobalStatsSource = document.getElementById("adminGlobalStatsSource");
+const adminGlobalStatsPeak = document.getElementById("adminGlobalStatsPeak");
+const adminGlobalStatsSparkline = document.getElementById("adminGlobalStatsSparkline");
 const teamNoticeText = document.getElementById("teamNoticeText");
 const previewModal = document.getElementById("previewModal");
 const previewFrame = document.getElementById("previewFrame");
@@ -164,6 +194,9 @@ const DEFAULT_CHANNEL = String(document.body?.dataset?.defaultChannelCode || "GE
   .toUpperCase() || "GENERAL";
 const DEFAULT_TEAM_NOTICE = "Gunakan kode team yang sama untuk gabung grup yang sama.";
 const MEMBER_LOGIN_STORAGE_KEY = "liveteams.memberLogin.v1";
+const ADMIN_PORTAL_SESSION_KEY = "liveteams.adminPortalLogin.v1";
+const DM_HISTORY_CLEAR_CUTOFF_STORAGE_KEY = "liveteams.dmHistoryClearCutoff.v1";
+const DM_HIDDEN_ROUTES_STORAGE_KEY = "liveteams.dmHiddenRoutes.v1";
 const TENOR_API_KEY = "LIVDSRZULELA";
 const TENOR_CLIENT_KEY = "liveteams-livechat";
 const MOBILE_SIDEBAR_BREAKPOINT = 900;
@@ -175,6 +208,8 @@ const AUTO_CROWD_ONLINE_MIN = 22;
 const AUTO_CROWD_ONLINE_MAX = 52;
 const SIMULATION_MEMBER_TARGET_TOTAL = 48;
 const SIMULATION_GUEST_TARGET_TOTAL = 30;
+const ADMIN_STATS_HISTORY_LIMIT = 28;
+const ADMIN_STATS_MIN_SAMPLE_GAP_MS = 2500;
 const AUTO_CROWD_REAL_MEMBER_PAUSE_THRESHOLD = 999;
 const AUTO_CROWD_THREAD_MESSAGE_GAP_MS = 7600;
 const AUTO_CROWD_TYPING_LEAD_MS = 1800;
@@ -184,7 +219,9 @@ const AUTO_CROWD_WAVE_RANDOM_DELAY_MS = 1800;
 const AUTO_CROWD_DISCUSSION_START_DELAY_MS = 3200;
 const AUTO_CROWD_DISCUSSION_RETRY_MS = 1400;
 const AUTO_CROWD_DISCUSSION_RETRY_MAX_ATTEMPTS = 12;
-const isAdminPortal = window.location.pathname.toLowerCase().startsWith("/admin");
+const currentPathname = window.location.pathname.toLowerCase();
+const isAdminPortal = currentPathname.startsWith("/admin");
+const isAdminSettingsPortal = currentPathname.startsWith("/admin/settings");
 const isMemberLoginPortal = window.location.pathname.toLowerCase().startsWith("/login");
 const isRegistrationPortal = window.location.pathname.toLowerCase().startsWith("/daftar");
 const pageQuery = new URLSearchParams(window.location.search);
@@ -246,6 +283,7 @@ let currentView = {
 };
 let dmConversations = [];
 const dmConversationMeta = new Map();
+let currentDmListFilter = "all";
 let demoBots = [];
 let demoModeEnabled = false;
 let autoCrowdChannelCode = "";
@@ -267,12 +305,18 @@ const knownChannelsByTeam = new Map([[DEFAULT_TEAM, [DEFAULT_CHANNEL]]]);
 let selectedBroadcastTeamCodes = new Set();
 let selectedBroadcastChannelCodes = new Set();
 let selectedBroadcastRecipientRoles = new Set();
+let selectedBulkDeleteTargets = new Set(["livechat", "directmessages"]);
 let broadcastNoticeTimerId = null;
 let broadcastSendPendingTimerId = null;
 let broadcastSendInFlight = false;
 let pendingAutoOpenBroadcastDm = null;
+const suppressedEmptyDmKeys = new Set();
 const pendingDetachedDmMessages = new Map();
 const pendingDetachedDmMessagesByPeer = new Map();
+const dmHistoryClearCutoffByKey = new Map();
+let dmHistoryClearCutoffProfileKey = "";
+const hiddenDmRoutesByKey = new Set();
+let hiddenDmRoutesProfileKey = "";
 let currentPresenceUsers = [];
 let knownTeamCodes = [DEFAULT_TEAM];
 let pendingTeamSwitchCode = "";
@@ -303,6 +347,17 @@ let currentUploadConfig = {
 let currentDirectAdminConfig = {
   enabled: true
 };
+let currentGlobalStats = {
+  onlineUsers: 0,
+  memberOnline: 0,
+  guestOnline: 0,
+  totalVisitors: 0,
+  updatedAt: "",
+  source: "sinkronisasi server"
+};
+let hasReceivedGlobalStatsFromServer = false;
+let lastAdminStatsSampleAt = 0;
+const adminStatsHistory = [];
 let pendingSettingsPassword = "";
 let lastGifQuery = "";
 let sidebarTouchStartX = 0;
@@ -313,8 +368,15 @@ let sidebarSwipeTracking = false;
 let statusNoticeTimerId = null;
 let keyboardAdjustmentTimerId = null;
 let messageListUserInteracting = false;
+let hasRequestedBrowserNotificationPermission = false;
+const incomingMessageNoticeIds = [];
+const MAX_INCOMING_NOTICE_IDS = 180;
 const simulationPresenceState = {
   member: {
+    lastResetAt: 0,
+    onlineById: new Map()
+  },
+  privileged: {
     lastResetAt: 0,
     onlineById: new Map()
   },
@@ -325,6 +387,11 @@ const simulationPresenceState = {
 };
 const audienceOrderState = {
   member: {
+    nextRank: 0,
+    entryByKey: new Map(),
+    rankByKey: new Map()
+  },
+  privileged: {
     nextRank: 0,
     entryByKey: new Map(),
     rankByKey: new Map()
@@ -448,6 +515,12 @@ const canManageRoles = (role) => role === "owner" || role === "admin";
 const canUseDemoUsers = (role) => role === "owner" || role === "admin" || role === "member" || role === "guest";
 const canPinMessages = (role) => role === "owner" || role === "admin";
 const canCreateChannels = (role) => role === "owner" || role === "admin" || role === "operator";
+
+const isLiveChatSupportConversation = (conversation, meta) => {
+  const scope = String(conversation?.supportScope || meta?.supportScope || "").trim().toLowerCase();
+  const dmKey = String(conversation?.dmKey || "").trim().toUpperCase();
+  return scope === "admins" || dmKey.startsWith("ADMINSUPPORT::");
+};
 
 const normalizeRole = (value) => {
   const role = String(value || "").trim().toLowerCase();
@@ -1550,9 +1623,106 @@ const notify = (message, type = "info", options = {}) => {
   }
 };
 
+const rememberIncomingMessageNotice = (messageId) => {
+  if (!messageId) {
+    return true;
+  }
+
+  if (incomingMessageNoticeIds.includes(messageId)) {
+    return false;
+  }
+
+  incomingMessageNoticeIds.push(messageId);
+  if (incomingMessageNoticeIds.length > MAX_INCOMING_NOTICE_IDS) {
+    incomingMessageNoticeIds.splice(0, incomingMessageNoticeIds.length - MAX_INCOMING_NOTICE_IDS);
+  }
+
+  return true;
+};
+
+const maybeNotifyIncomingMessage = (message) => {
+  if (!message || normalizeDisplayName(message?.user || "") === currentUser) {
+    return;
+  }
+
+  const messageId = String(message?.id || "").trim();
+  if (!rememberIncomingMessageNotice(messageId)) {
+    return;
+  }
+
+  const senderName = normalizeDisplayName(message?.user || "User");
+  const textContent = String(message?.text || "").trim() || "Pesan baru";
+  const compactText = textContent.length > 90 ? `${textContent.slice(0, 90)}...` : textContent;
+  notify(`${senderName}: ${compactText}`, "info", {
+    inline: false,
+    toast: true,
+    toastDuration: 4200
+  });
+
+  if (!("Notification" in window)) {
+    return;
+  }
+
+  if (Notification.permission === "default" && !hasRequestedBrowserNotificationPermission) {
+    hasRequestedBrowserNotificationPermission = true;
+    Notification.requestPermission().catch(() => {
+      // Ignore permission prompt failures.
+    });
+    return;
+  }
+
+  if (Notification.permission !== "granted" || !document.hidden) {
+    return;
+  }
+
+  const contextType = String(message?.context?.type || "").toLowerCase();
+  const contextTitle = contextType === "dm"
+    ? "DM baru"
+    : `Channel #${normalizeCode(message?.context?.channelCode, currentChannel || DEFAULT_CHANNEL)}`;
+
+  try {
+    const browserNotice = new Notification(`${senderName} · ${contextTitle}`, {
+      body: compactText,
+      tag: messageId || `${senderName}-${Date.now()}`,
+      renotify: false,
+      silent: false
+    });
+
+    window.setTimeout(() => {
+      browserNotice.close();
+    }, 5000);
+  } catch {
+    // Ignore browser notification runtime errors.
+  }
+};
+
 const configurePortalCopy = () => {
+  document.body.classList.toggle("portal-admin", isAdminPortal);
+  document.body.classList.toggle("admin-settings-mode", isAdminSettingsPortal);
   document.body.classList.toggle("portal-login", isMemberLoginPortal);
   document.body.classList.toggle("portal-registration", isRegistrationPortal);
+
+  if (isAdminPortal) {
+    document.title = "Admin Panel Login | LiveTeams";
+    if (joinModalEyebrow) {
+      joinModalEyebrow.textContent = "Login Admin Panel";
+    }
+    if (joinModalTitle) {
+      joinModalTitle.textContent = "Akses panel admin";
+    }
+    if (nameInput) {
+      nameInput.placeholder = "Contoh: admin utama";
+    }
+    if (joinSubmitPrimaryButton) {
+      joinSubmitPrimaryButton.textContent = "Masuk Panel";
+    }
+    if (realMembersButton) {
+      realMembersButton.classList.add("hidden");
+    }
+    if (joinPortalHelper) {
+      joinPortalHelper.textContent = "Portal ini khusus role Admin, Owner, atau Operator.";
+    }
+  }
 
   if (isMemberLoginPortal) {
     document.title = "Login Member | LiveTeams";
@@ -1569,6 +1739,7 @@ const configurePortalCopy = () => {
       joinSubmitPrimaryButton.textContent = "Masuk Login";
     }
     if (realMembersButton) {
+      realMembersButton.classList.remove("hidden");
       realMembersButton.textContent = "Daftar Member Baru";
     }
     if (joinPortalHelper) {
@@ -1615,22 +1786,72 @@ const clearSavedMemberLogin = () => {
   } catch {
     // Ignore storage errors on restricted browsers.
   }
+
+  try {
+    window.sessionStorage.removeItem(ADMIN_PORTAL_SESSION_KEY);
+  } catch {
+    // Ignore storage errors on restricted browsers.
+  }
 };
 
 const saveMemberLogin = () => {
-  if (normalizeRole(currentRole) !== "member") {
-    clearSavedMemberLogin();
+  const normalizedRole = normalizeRole(currentRole);
+  if (isAdminPortal && isPrivilegedRole(normalizedRole)) {
+    const safeName = normalizeDisplayName(currentUser);
+    const safePassword = String(currentAccessPassword || "").trim();
+
+    if (!safeName || !safePassword) {
+      try {
+        window.sessionStorage.removeItem(ADMIN_PORTAL_SESSION_KEY);
+      } catch {
+        // Ignore storage errors on restricted browsers.
+      }
+      return;
+    }
+
+    const adminPayload = {
+      name: safeName,
+      teamCode: normalizeCode(currentTeam, DEFAULT_TEAM),
+      channelCode: normalizeCode(currentChannel, DEFAULT_CHANNEL),
+      role: normalizedRole,
+      password: safePassword,
+      savedAt: Date.now()
+    };
+
+    try {
+      window.sessionStorage.setItem(ADMIN_PORTAL_SESSION_KEY, JSON.stringify(adminPayload));
+    } catch {
+      // Ignore storage errors on restricted browsers.
+    }
+
+    return;
+  }
+
+  if (normalizedRole !== "member") {
+    try {
+      window.localStorage.removeItem(MEMBER_LOGIN_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors on restricted browsers.
+    }
     return;
   }
 
   if (!normalizeCode(currentTeam, "") || !normalizeCode(currentChannel, "")) {
-    clearSavedMemberLogin();
+    try {
+      window.localStorage.removeItem(MEMBER_LOGIN_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors on restricted browsers.
+    }
     return;
   }
 
   const safeName = normalizeDisplayName(currentUser);
   if (!safeName) {
-    clearSavedMemberLogin();
+    try {
+      window.localStorage.removeItem(MEMBER_LOGIN_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors on restricted browsers.
+    }
     return;
   }
 
@@ -1656,8 +1877,73 @@ const restoreSavedMemberLogin = () => {
   }
 
   if (isAdminPortal) {
-    clearSavedMemberLogin();
-    return false;
+    let adminParsed = null;
+    try {
+      const rawAdmin = window.sessionStorage.getItem(ADMIN_PORTAL_SESSION_KEY);
+      if (!rawAdmin) {
+        return false;
+      }
+      adminParsed = JSON.parse(rawAdmin);
+    } catch {
+      try {
+        window.sessionStorage.removeItem(ADMIN_PORTAL_SESSION_KEY);
+      } catch {
+        // Ignore storage errors on restricted browsers.
+      }
+      return false;
+    }
+
+    const restoredRole = normalizeRole(adminParsed?.role || "");
+    const restoredName = normalizeDisplayName(adminParsed?.name || "");
+    const restoredPassword = String(adminParsed?.password || "").trim();
+    if (!isPrivilegedRole(restoredRole) || !restoredName || !restoredPassword) {
+      try {
+        window.sessionStorage.removeItem(ADMIN_PORTAL_SESSION_KEY);
+      } catch {
+        // Ignore storage errors on restricted browsers.
+      }
+      return false;
+    }
+
+    currentUser = restoredName;
+    currentTeam = normalizeCode(adminParsed?.teamCode, DEFAULT_TEAM);
+    currentChannel = normalizeCode(adminParsed?.channelCode, DEFAULT_CHANNEL);
+    currentRole = restoredRole;
+    currentUserIsRegisteredMember = false;
+    currentAccessPassword = restoredPassword;
+    currentView = {
+      type: "channel",
+      channelCode: currentChannel,
+      dmKey: "",
+      peerName: "",
+      supportScope: ""
+    };
+
+    if (nameInput) {
+      nameInput.value = currentUser;
+    }
+
+    if (teamInput) {
+      teamInput.value = currentTeam;
+    }
+
+    if (joinChannelInput) {
+      joinChannelInput.value = currentChannel;
+    }
+
+    if (joinRoleSelect) {
+      joinRoleSelect.value = currentRole;
+      joinRoleSelect.dispatchEvent(new Event("change"));
+    }
+
+    if (joinPasswordInput) {
+      joinPasswordInput.value = restoredPassword;
+    }
+
+    syncDmHistoryClearCutoffProfile();
+    syncHiddenDmRoutesProfile();
+
+    return true;
   }
 
   let parsed = null;
@@ -1714,7 +2000,166 @@ const restoreSavedMemberLogin = () => {
     joinPasswordInput.value = "";
   }
 
+  syncDmHistoryClearCutoffProfile();
+  syncHiddenDmRoutesProfile();
+
   return true;
+};
+
+const buildDmHistoryClearCutoffProfileKey = () => {
+  const safeUserName = normalizeDisplayName(currentUser || "");
+  if (!safeUserName) {
+    return "";
+  }
+
+  const safeTeamCode = normalizeCode(currentTeam, DEFAULT_TEAM);
+  return `${safeTeamCode}::${safeUserName.toLowerCase()}`;
+};
+
+const readDmHistoryClearCutoffStorage = () => {
+  try {
+    const raw = window.localStorage.getItem(DM_HISTORY_CLEAR_CUTOFF_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const syncDmHistoryClearCutoffProfile = () => {
+  const nextProfileKey = buildDmHistoryClearCutoffProfileKey();
+  if (nextProfileKey === dmHistoryClearCutoffProfileKey) {
+    return;
+  }
+
+  dmHistoryClearCutoffProfileKey = nextProfileKey;
+  dmHistoryClearCutoffByKey.clear();
+
+  if (!dmHistoryClearCutoffProfileKey) {
+    return;
+  }
+
+  const store = readDmHistoryClearCutoffStorage();
+  const profileData = store?.[dmHistoryClearCutoffProfileKey];
+  if (!profileData || typeof profileData !== "object") {
+    return;
+  }
+
+  Object.entries(profileData).forEach(([dmKey, cutoffMs]) => {
+    const safeDmKey = String(dmKey || "").trim();
+    const safeCutoffMs = Number(cutoffMs);
+    if (!safeDmKey || !Number.isFinite(safeCutoffMs) || safeCutoffMs <= 0) {
+      return;
+    }
+
+    dmHistoryClearCutoffByKey.set(safeDmKey, safeCutoffMs);
+  });
+};
+
+const persistDmHistoryClearCutoffProfile = () => {
+  if (!dmHistoryClearCutoffProfileKey) {
+    return;
+  }
+
+  const store = readDmHistoryClearCutoffStorage();
+  if (!store || typeof store !== "object") {
+    return;
+  }
+
+  const serializedProfile = {};
+  dmHistoryClearCutoffByKey.forEach((cutoffMs, dmKey) => {
+    const safeDmKey = String(dmKey || "").trim();
+    const safeCutoffMs = Number(cutoffMs);
+    if (!safeDmKey || !Number.isFinite(safeCutoffMs) || safeCutoffMs <= 0) {
+      return;
+    }
+
+    serializedProfile[safeDmKey] = safeCutoffMs;
+  });
+
+  if (Object.keys(serializedProfile).length === 0) {
+    delete store[dmHistoryClearCutoffProfileKey];
+  } else {
+    store[dmHistoryClearCutoffProfileKey] = serializedProfile;
+  }
+
+  try {
+    window.localStorage.setItem(DM_HISTORY_CLEAR_CUTOFF_STORAGE_KEY, JSON.stringify(store));
+  } catch {
+    // Ignore persistence failures on restricted browsers.
+  }
+};
+
+const readHiddenDmRoutesStorage = () => {
+  try {
+    const raw = window.localStorage.getItem(DM_HIDDEN_ROUTES_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const syncHiddenDmRoutesProfile = () => {
+  const nextProfileKey = buildDmHistoryClearCutoffProfileKey();
+  if (nextProfileKey === hiddenDmRoutesProfileKey) {
+    return;
+  }
+
+  hiddenDmRoutesProfileKey = nextProfileKey;
+  hiddenDmRoutesByKey.clear();
+
+  if (!hiddenDmRoutesProfileKey) {
+    return;
+  }
+
+  const store = readHiddenDmRoutesStorage();
+  const profileData = store?.[hiddenDmRoutesProfileKey];
+  if (!Array.isArray(profileData)) {
+    return;
+  }
+
+  profileData
+    .map((dmKey) => String(dmKey || "").trim())
+    .filter(Boolean)
+    .forEach((dmKey) => {
+      hiddenDmRoutesByKey.add(dmKey);
+    });
+};
+
+const persistHiddenDmRoutesProfile = () => {
+  if (!hiddenDmRoutesProfileKey) {
+    return;
+  }
+
+  const store = readHiddenDmRoutesStorage();
+  if (!store || typeof store !== "object") {
+    return;
+  }
+
+  const serialized = Array.from(hiddenDmRoutesByKey)
+    .map((dmKey) => String(dmKey || "").trim())
+    .filter(Boolean);
+
+  if (serialized.length === 0) {
+    delete store[hiddenDmRoutesProfileKey];
+  } else {
+    store[hiddenDmRoutesProfileKey] = serialized;
+  }
+
+  try {
+    window.localStorage.setItem(DM_HIDDEN_ROUTES_STORAGE_KEY, JSON.stringify(store));
+  } catch {
+    // Ignore persistence failures on restricted browsers.
+  }
 };
 
 const emitJoinRequest = () => {
@@ -1768,6 +2213,10 @@ const logoutCurrentSession = () => {
 
   dmConversations = [];
   dmConversationMeta.clear();
+  dmHistoryClearCutoffByKey.clear();
+  dmHistoryClearCutoffProfileKey = "";
+  hiddenDmRoutesByKey.clear();
+  hiddenDmRoutesProfileKey = "";
   pendingAutoOpenBroadcastDm = null;
   currentTeamMembers = [];
   currentPresenceUsers = [];
@@ -1957,6 +2406,7 @@ const closeMobileSidebar = () => {
     mobileSidebarBackdrop.classList.add("hidden");
   }
   syncMobileSidebarToggleState(false);
+  updateSidebarScrollIndicators();
 };
 
 const openMobileSidebar = () => {
@@ -1972,6 +2422,10 @@ const openMobileSidebar = () => {
     mobileSidebarBackdrop.classList.remove("hidden");
   }
   syncMobileSidebarToggleState(true);
+  requestAnimationFrame(() => {
+    updateSidebarScrollIndicators();
+    updateLiveChatRouteScrollIndicators();
+  });
 };
 
 const toggleMobileSidebar = () => {
@@ -2474,13 +2928,21 @@ const renderBotAvatarGlyph = (element, glyphClass = "avatar-glyph-ai") => {
   element.appendChild(glyphAi);
 };
 
-const applyDefaultAvatar = (element, name) => {
+const applyDefaultAvatar = (element, name, role = "") => {
   if (!element) {
     return;
   }
 
   const variant = getAvatarVariant(name);
-  element.classList.remove("avatar-female", "avatar-male", "avatar-ai");
+  const normalizedRole = normalizeRole(role || "");
+  element.classList.remove(
+    "avatar-female",
+    "avatar-male",
+    "avatar-ai",
+    "avatar-role-owner",
+    "avatar-role-admin",
+    "avatar-role-operator"
+  );
 
   if (variant === "female") {
     element.classList.add("avatar-female");
@@ -2510,6 +2972,25 @@ const applyDefaultAvatar = (element, name) => {
   glyph.appendChild(head);
   glyph.appendChild(body);
   element.appendChild(glyph);
+
+  if (["owner", "admin", "operator"].includes(normalizedRole)) {
+    const roleBadge = document.createElement("span");
+    roleBadge.className = "avatar-role-badge";
+
+    if (normalizedRole === "owner") {
+      element.classList.add("avatar-role-owner");
+      roleBadge.textContent = "OWN";
+    } else if (normalizedRole === "admin") {
+      element.classList.add("avatar-role-admin");
+      roleBadge.textContent = "ADM";
+    } else {
+      element.classList.add("avatar-role-operator");
+      roleBadge.textContent = "OPR";
+    }
+
+    roleBadge.setAttribute("aria-hidden", "true");
+    element.appendChild(roleBadge);
+  }
 };
 
 const getMessageRoleLabel = (name, role) => {
@@ -2663,6 +3144,131 @@ const closeJoinChecklistMenus = () => {
 
     menu.classList.add("hidden");
     trigger.setAttribute("aria-expanded", "false");
+  });
+};
+
+const closeBulkDeleteChecklistMenu = () => {
+  if (!bulkDeleteScopeMenu || !bulkDeleteScopeTrigger) {
+    return;
+  }
+
+  bulkDeleteScopeMenu.classList.add("hidden");
+  bulkDeleteScopeTrigger.setAttribute("aria-expanded", "false");
+};
+
+const updateBulkDeleteScopeTriggerLabel = () => {
+  if (!bulkDeleteScopeTrigger) {
+    return;
+  }
+
+  bulkDeleteScopeTrigger.textContent = "Hapus Jalur Massal";
+};
+
+const syncBulkDeleteScopeSelection = () => {
+  const nextSelection = new Set();
+  if (bulkDeleteLiveChatToggle?.checked) {
+    nextSelection.add("livechat");
+  }
+  if (bulkDeleteDmToggle?.checked) {
+    nextSelection.add("directmessages");
+  }
+  selectedBulkDeleteTargets = nextSelection;
+  updateBulkDeleteScopeTriggerLabel();
+};
+
+const emitBulkDeleteSelectedConversations = () => {
+  if (!hasJoinedServer) {
+    notify("Silakan join dulu sebelum hapus jalur massal.", "warning", { inlineDuration: 2600 });
+    return;
+  }
+
+  if (!canManageRoles(normalizeRole(currentRole))) {
+    notify("Hanya owner/admin yang bisa hapus jalur massal.", "warning", { inlineDuration: 2800 });
+    return;
+  }
+
+  if (selectedBulkDeleteTargets.size === 0) {
+    notify("Pilih minimal satu target: Live Chat atau Direct Messages.", "warning", { inlineDuration: 2600 });
+    return;
+  }
+
+  const selectedConversations = dmConversations.filter((conversation) => {
+    const meta = dmConversationMeta.get(conversation.dmKey) || null;
+    const isSupport = isLiveChatSupportConversation(conversation, meta);
+    if (isSupport && selectedBulkDeleteTargets.has("livechat")) {
+      return true;
+    }
+    if (!isSupport && selectedBulkDeleteTargets.has("directmessages")) {
+      return true;
+    }
+    return false;
+  });
+
+  const uniqueConversations = [];
+  const seenDmKeys = new Set();
+  selectedConversations.forEach((conversation) => {
+    const dmKey = String(conversation?.dmKey || "").trim();
+    if (!dmKey || seenDmKeys.has(dmKey)) {
+      return;
+    }
+    seenDmKeys.add(dmKey);
+    uniqueConversations.push(conversation);
+  });
+
+  if (uniqueConversations.length === 0) {
+    notify("Tidak ada jalur yang cocok dengan checklist untuk dihapus.", "info", { inlineDuration: 2600 });
+    return;
+  }
+
+  const targetLabels = [];
+  if (selectedBulkDeleteTargets.has("livechat")) {
+    targetLabels.push("Live Chat");
+  }
+  if (selectedBulkDeleteTargets.has("directmessages")) {
+    targetLabels.push("Direct Messages");
+  }
+
+  const confirmed = window.confirm(
+    `Hapus ${uniqueConversations.length} jalur dari ${targetLabels.join(" + ")} untuk akun kamu saja?`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const clearStartedAtMs = Date.now();
+  let activeDmRouteRemoved = false;
+  uniqueConversations.forEach((conversation) => {
+    const dmKey = String(conversation?.dmKey || "").trim();
+    if (!dmKey) {
+      return;
+    }
+
+    suppressedEmptyDmKeys.add(dmKey);
+    dmHistoryClearCutoffByKey.set(dmKey, clearStartedAtMs);
+    hiddenDmRoutesByKey.add(dmKey);
+    removeDmConversation(dmKey);
+
+    if (currentView.type === "dm" && currentView.dmKey === dmKey) {
+      activeDmRouteRemoved = true;
+    }
+  });
+
+  if (activeDmRouteRemoved) {
+    messageCache.clear();
+    messageList.replaceChildren();
+    renderTyping([]);
+    switchToChannelView();
+  }
+
+  renderDmList();
+  persistDmHistoryClearCutoffProfile();
+  persistHiddenDmRoutesProfile();
+
+  closeBulkDeleteChecklistMenu();
+  notify(`Jalur dihapus dari daftar kamu: ${uniqueConversations.length} item.`, "warning", {
+    inlineDuration: 3200,
+    toast: false
   });
 };
 
@@ -2864,6 +3470,157 @@ const setBroadcastSendSummary = (text = "", state = "idle", meta = "") => {
   }
 };
 
+const formatAdminStatNumber = (value) => {
+  const safeValue = Math.max(0, Number(value) || 0);
+  return new Intl.NumberFormat("id-ID").format(safeValue);
+};
+
+const formatAdminStatTime = (isoValue) => {
+  if (!isoValue) {
+    return "Belum ada update";
+  }
+
+  const parsed = new Date(isoValue);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Belum ada update";
+  }
+
+  return parsed.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+};
+
+const renderAdminStatsSparkline = () => {
+  if (!adminGlobalStatsSparkline) {
+    return;
+  }
+
+  if (adminStatsHistory.length === 0) {
+    adminGlobalStatsSparkline.innerHTML = "";
+    return;
+  }
+
+  const width = 320;
+  const height = 120;
+  const paddingX = 10;
+  const paddingY = 12;
+  const usableWidth = width - (paddingX * 2);
+  const usableHeight = height - (paddingY * 2);
+  const maxOnline = Math.max(1, ...adminStatsHistory.map((sample) => sample.onlineUsers));
+
+  const points = adminStatsHistory.map((sample, index) => {
+    const x = paddingX + ((adminStatsHistory.length <= 1 ? 0 : index / (adminStatsHistory.length - 1)) * usableWidth);
+    const y = paddingY + ((maxOnline - sample.onlineUsers) / maxOnline) * usableHeight;
+    return { x, y };
+  });
+
+  const linePoints = points.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(" ");
+  const areaPoints = [
+    `${paddingX},${height - paddingY}`,
+    ...points.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`),
+    `${width - paddingX},${height - paddingY}`
+  ].join(" ");
+
+  adminGlobalStatsSparkline.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  adminGlobalStatsSparkline.innerHTML = `
+    <defs>
+      <linearGradient id="adminStatsAreaGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(113, 196, 255, 0.62)"></stop>
+        <stop offset="100%" stop-color="rgba(113, 196, 255, 0.06)"></stop>
+      </linearGradient>
+    </defs>
+    <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="rgba(170, 210, 255, 0.24)" stroke-width="1"></line>
+    <line x1="${paddingX}" y1="${paddingY}" x2="${paddingX}" y2="${height - paddingY}" stroke="rgba(170, 210, 255, 0.24)" stroke-width="1"></line>
+    <polygon points="${areaPoints}" fill="url(#adminStatsAreaGradient)"></polygon>
+    <polyline points="${linePoints}" fill="none" stroke="rgba(131, 205, 255, 0.95)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <circle cx="${points[points.length - 1].x.toFixed(2)}" cy="${points[points.length - 1].y.toFixed(2)}" r="3.2" fill="#ffe29b"></circle>
+  `;
+
+  if (adminGlobalStatsPeak) {
+    adminGlobalStatsPeak.textContent = `Puncak: ${formatAdminStatNumber(maxOnline)} online`;
+  }
+};
+
+const appendAdminStatsHistory = (onlineUsers, updatedAt) => {
+  const timestamp = new Date(updatedAt || Date.now()).getTime();
+  const safeTimestamp = Number.isFinite(timestamp) ? timestamp : Date.now();
+  const safeOnline = Math.max(0, Number(onlineUsers) || 0);
+  const lastSample = adminStatsHistory[adminStatsHistory.length - 1] || null;
+
+  if (lastSample && lastSample.onlineUsers === safeOnline && (safeTimestamp - lastSample.timestamp) < ADMIN_STATS_MIN_SAMPLE_GAP_MS) {
+    lastSample.timestamp = safeTimestamp;
+    lastSample.updatedAt = updatedAt;
+    return;
+  }
+
+  if ((safeTimestamp - lastAdminStatsSampleAt) < 750 && lastSample && lastSample.onlineUsers !== safeOnline) {
+    lastSample.onlineUsers = safeOnline;
+    lastSample.timestamp = safeTimestamp;
+    lastSample.updatedAt = updatedAt;
+    return;
+  }
+
+  adminStatsHistory.push({
+    onlineUsers: safeOnline,
+    updatedAt,
+    timestamp: safeTimestamp
+  });
+
+  while (adminStatsHistory.length > ADMIN_STATS_HISTORY_LIMIT) {
+    adminStatsHistory.shift();
+  }
+
+  lastAdminStatsSampleAt = safeTimestamp;
+};
+
+const updateAdminRealtimeStats = ({
+  onlineUsers,
+  totalVisitors,
+  memberOnline,
+  guestOnline,
+  updatedAt,
+  source
+}) => {
+  const safeOnlineUsers = Math.max(0, Number(onlineUsers) || 0);
+  const safeVisitors = Math.max(0, Number(totalVisitors) || 0);
+  const safeMemberOnline = Math.max(0, Number(memberOnline) || 0);
+  const safeGuestOnline = Math.max(0, Number(guestOnline) || 0);
+
+  currentGlobalStats = {
+    onlineUsers: safeOnlineUsers,
+    memberOnline: safeMemberOnline,
+    guestOnline: safeGuestOnline,
+    totalVisitors: safeVisitors,
+    updatedAt: String(updatedAt || new Date().toISOString()),
+    source: String(source || "sinkronisasi server")
+  };
+
+  appendAdminStatsHistory(safeOnlineUsers, currentGlobalStats.updatedAt);
+
+  if (adminGlobalOnlineTotal) {
+    adminGlobalOnlineTotal.textContent = formatAdminStatNumber(safeOnlineUsers);
+  }
+  if (adminGlobalVisitorTotal) {
+    adminGlobalVisitorTotal.textContent = formatAdminStatNumber(safeVisitors);
+  }
+  if (adminGlobalMemberOnline) {
+    adminGlobalMemberOnline.textContent = formatAdminStatNumber(safeMemberOnline);
+  }
+  if (adminGlobalGuestOnline) {
+    adminGlobalGuestOnline.textContent = formatAdminStatNumber(safeGuestOnline);
+  }
+  if (adminGlobalStatsUpdatedAt) {
+    adminGlobalStatsUpdatedAt.textContent = `Update ${formatAdminStatTime(currentGlobalStats.updatedAt)}`;
+  }
+  if (adminGlobalStatsSource) {
+    adminGlobalStatsSource.textContent = `Sumber: ${currentGlobalStats.source}`;
+  }
+
+  renderAdminStatsSparkline();
+};
+
 const renderAdminPanel = () => {
   if (!adminPanel || !adminPanelRole || !adminPanelHint || !adminList) {
     return;
@@ -2873,14 +3630,56 @@ const renderAdminPanel = () => {
   const canView = isAdminPortal && canManageRoles(role);
 
   adminPanel.classList.toggle("hidden", !canView);
+  if (adminSettingsEntryLink) {
+    adminSettingsEntryLink.classList.toggle("hidden", !canView);
+    adminSettingsEntryLink.setAttribute("aria-current", isAdminSettingsPortal ? "page" : "false");
+  }
+  if (adminSettingsPage) {
+    const showSettingsPage = canView && isAdminSettingsPortal;
+    adminSettingsPage.classList.toggle("hidden", !showSettingsPage);
+    adminSettingsPage.setAttribute("aria-hidden", showSettingsPage ? "false" : "true");
+  }
+  if (bulkDeleteWrap) {
+    bulkDeleteWrap.classList.toggle("hidden", !canView);
+  }
+
   if (!canView) {
     return;
   }
 
+  const settingsOnlyWraps = [
+    accountSettingsWrap,
+    loginConfigWrap,
+    uploadConfigWrap,
+    directAdminConfigWrap
+  ];
+
+  settingsOnlyWraps.forEach((wrapElement) => {
+    if (!wrapElement) {
+      return;
+    }
+
+    // Keep these settings controls only in /admin/settings view.
+    wrapElement.classList.toggle("hidden", !isAdminSettingsPortal);
+  });
+
+  // Broadcast section stays in /admin home only to avoid duplicate controls in settings page.
+  if (broadcastMessageWrap) {
+    broadcastMessageWrap.classList.toggle("hidden", isAdminSettingsPortal);
+  }
+
+  if (adminPanelTitle) {
+    adminPanelTitle.textContent = isAdminSettingsPortal ? "Panel Management Settings" : "Panel Management";
+  }
+
   adminPanelRole.textContent = getRoleLabel(role).toUpperCase();
-  adminPanelHint.textContent = currentDirectAdminConfig.enabled
-    ? "Owner/Admin bisa atur role member dan fitur chat langsung ke semua admin/owner."
-    : "Owner/Admin bisa atur role member. Chat langsung ke admin saat ini OFF.";
+  if (isAdminSettingsPortal) {
+    adminPanelHint.textContent = "Halaman pengaturan panel management untuk akun, akses, dan statistik realtime admin.";
+  } else {
+    adminPanelHint.textContent = currentDirectAdminConfig.enabled
+      ? "Owner/Admin bisa atur role member dan fitur chat langsung ke semua admin/owner."
+      : "Owner/Admin bisa atur role member. Chat langsung ke admin saat ini OFF.";
+  }
 
   if (settingsUsernameInput && document.activeElement !== settingsUsernameInput) {
     settingsUsernameInput.placeholder = `Username saat ini: ${currentUser || "-"}`;
@@ -2974,6 +3773,7 @@ const updateProfileCard = () => {
   }
 
   updateDirectAdminActionVisibility();
+  updateClearHistoryButtonState();
   renderAdminPanel();
 };
 
@@ -3003,11 +3803,38 @@ const setHeader = () => {
     backToChannelButton.classList.add("hidden");
   }
 
+  updateClearHistoryButtonState();
   renderTeams();
   renderTeamNotice();
   renderPinnedNotice();
   updateProfileCard();
 };
+
+function updateClearHistoryButtonState() {
+  if (!clearHistoryButton) {
+    return;
+  }
+
+  const ready = Boolean(hasJoinedServer && currentUser);
+  const role = normalizeRole(currentRole);
+  const canClearChannelHistory = role === "admin";
+  const canViewButton = ready && (currentView.type === "dm" || canClearChannelHistory);
+
+  clearHistoryButton.classList.toggle("hidden", !canViewButton);
+  clearHistoryButton.disabled = !canViewButton;
+
+  if (!canViewButton) {
+    clearHistoryButton.textContent = "Hapus History";
+    return;
+  }
+
+  if (currentView.type === "dm") {
+    clearHistoryButton.textContent = "Hapus History DM";
+    return;
+  }
+
+  clearHistoryButton.textContent = "Hapus History Channel";
+}
 
 const buildAttachmentElement = (attachment) => {
   if (!attachment?.url) {
@@ -3256,6 +4083,34 @@ const updateMessageListScrollIndicators = () => {
   chatBodyShell.classList.toggle("can-scroll-up", hasOverflow && !nearTop);
   chatBodyShell.classList.toggle("can-scroll-down", hasOverflow && !nearBottom);
 };
+
+function updateSidebarScrollIndicators() {
+  if (!sidebarPanel) {
+    return;
+  }
+
+  const maxScrollTop = Math.max(0, sidebarPanel.scrollHeight - sidebarPanel.clientHeight);
+  const hasOverflow = maxScrollTop > 2;
+  const nearTop = sidebarPanel.scrollTop <= 2;
+  const nearBottom = maxScrollTop - sidebarPanel.scrollTop <= 2;
+
+  sidebarPanel.classList.toggle("can-scroll-up", hasOverflow && !nearTop);
+  sidebarPanel.classList.toggle("can-scroll-down", hasOverflow && !nearBottom);
+}
+
+function updateLiveChatRouteScrollIndicators() {
+  if (!liveChatRouteList || !liveChatRouteCard) {
+    return;
+  }
+
+  const maxScrollTop = Math.max(0, liveChatRouteList.scrollHeight - liveChatRouteList.clientHeight);
+  const hasOverflow = maxScrollTop > 2;
+  const nearTop = liveChatRouteList.scrollTop <= 2;
+  const nearBottom = maxScrollTop - liveChatRouteList.scrollTop <= 2;
+
+  liveChatRouteCard.classList.toggle("can-scroll-up", hasOverflow && !nearTop);
+  liveChatRouteCard.classList.toggle("can-scroll-down", hasOverflow && !nearBottom);
+}
 
 const shouldAutoScrollMessageList = (options = {}) => {
   const { force = false } = options;
@@ -3558,6 +4413,28 @@ const addDmConversation = (dmKey, peerName, options = {}) => {
   dmConversations.push({ dmKey, peerName: normalizedPeer, supportScope: supportScope || "" });
 };
 
+const removeDmConversation = (dmKey) => {
+  const safeDmKey = String(dmKey || "").trim();
+  if (!safeDmKey) {
+    return;
+  }
+
+  const removedPeers = dmConversations
+    .filter((conversation) => String(conversation?.dmKey || "").trim() === safeDmKey)
+    .map((conversation) => normalizeDisplayName(conversation?.peerName || ""))
+    .filter(Boolean);
+
+  dmConversations = dmConversations.filter(
+    (conversation) => String(conversation?.dmKey || "").trim() !== safeDmKey
+  );
+
+  dmConversationMeta.delete(safeDmKey);
+  pendingDetachedDmMessages.delete(safeDmKey);
+  removedPeers.forEach((peerName) => {
+    pendingDetachedDmMessagesByPeer.delete(peerName);
+  });
+};
+
 const formatDmMetaTime = (value) => {
   const dateValue = value ? new Date(value) : new Date();
   if (Number.isNaN(dateValue.getTime())) {
@@ -3585,11 +4462,16 @@ const touchDmConversationMeta = ({ dmKey, text = "", timestamp = null, increaseU
     previewText: "Belum ada pesan",
     timestamp: "",
     timestampRaw: "",
+    activityMs: 0,
     isBroadcast: false,
     supportScope: ""
   };
 
   const rawTimestamp = String(timestamp || "").trim();
+  const parsedActivityMs = rawTimestamp ? Date.parse(rawTimestamp) : Number.NaN;
+  const activityMs = Number.isFinite(parsedActivityMs)
+    ? parsedActivityMs
+    : Date.now();
   const previewText = String(text || "").trim() || existing.previewText || "Belum ada pesan";
   const unreadCount = increaseUnread ? (existing.unreadCount || 0) + 1 : (existing.unreadCount || 0);
   dmConversationMeta.set(safeDmKey, {
@@ -3597,6 +4479,7 @@ const touchDmConversationMeta = ({ dmKey, text = "", timestamp = null, increaseU
     previewText,
     timestamp: formatDmMetaTime(timestamp || new Date()),
     timestampRaw: rawTimestamp || existing.timestampRaw || "",
+    activityMs,
     isBroadcast: Boolean(existing.isBroadcast),
     supportScope: String(existing.supportScope || "")
   });
@@ -3613,6 +4496,7 @@ const markDmConversationBroadcast = (dmKey, isBroadcast) => {
     previewText: "Belum ada pesan",
     timestamp: "",
     timestampRaw: "",
+    activityMs: 0,
     isBroadcast: false,
     supportScope: ""
   };
@@ -3635,6 +4519,7 @@ const markDmConversationSupportScope = (dmKey, supportScope) => {
     previewText: "Belum ada pesan",
     timestamp: "",
     timestampRaw: "",
+    activityMs: 0,
     isBroadcast: false,
     supportScope: ""
   };
@@ -3655,6 +4540,29 @@ const clearDmConversationUnread = (dmKey) => {
   dmConversationMeta.set(safeDmKey, {
     ...existing,
     unreadCount: 0
+  });
+};
+
+const ensureDmConversationUnread = (dmKey, minimumUnread = 1) => {
+  const safeDmKey = String(dmKey || "").trim();
+  if (!safeDmKey) {
+    return;
+  }
+
+  const existing = dmConversationMeta.get(safeDmKey) || {
+    unreadCount: 0,
+    previewText: "Belum ada pesan",
+    timestamp: "",
+    timestampRaw: "",
+    activityMs: 0,
+    isBroadcast: false,
+    supportScope: ""
+  };
+
+  const nextUnread = Math.max(Number(existing.unreadCount || 0), Math.max(0, Number(minimumUnread || 0)));
+  dmConversationMeta.set(safeDmKey, {
+    ...existing,
+    unreadCount: nextUnread
   });
 };
 
@@ -3690,13 +4598,55 @@ const buildDmPreviewFallbackMessage = ({ dmKey, peerName, meta }) => {
   };
 };
 
-const renderDmList = () => {
-  const isLiveChatSupportConversation = (conversation, meta) => {
-    const scope = String(conversation?.supportScope || meta?.supportScope || "").trim().toLowerCase();
-    const dmKey = String(conversation?.dmKey || "").trim().toUpperCase();
-    return scope === "admins" || dmKey.startsWith("ADMINSUPPORT::");
-  };
+const normalizeDmListFilter = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "unread" ? "unread" : "all";
+};
 
+const syncDmFilterControls = () => {
+  const controls = [liveChatFilterControls, dmFilterControls];
+  controls.forEach((container) => {
+    if (!container) {
+      return;
+    }
+
+    const buttons = container.querySelectorAll("[data-dm-filter]");
+    buttons.forEach((button) => {
+      const filterValue = normalizeDmListFilter(button.getAttribute("data-dm-filter"));
+      const isActive = filterValue === currentDmListFilter;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+  });
+};
+
+const setDmListFilter = (nextFilter) => {
+  const normalized = normalizeDmListFilter(nextFilter);
+  if (normalized === currentDmListFilter) {
+    return;
+  }
+
+  currentDmListFilter = normalized;
+  syncDmFilterControls();
+  renderDmList();
+};
+
+const bindDmFilterControls = (container) => {
+  if (!container) {
+    return;
+  }
+
+  container.addEventListener("click", (event) => {
+    const targetButton = event.target.closest("[data-dm-filter]");
+    if (!targetButton || !container.contains(targetButton)) {
+      return;
+    }
+
+    setDmListFilter(targetButton.getAttribute("data-dm-filter"));
+  });
+};
+
+const renderDmList = () => {
   const renderConversationCollection = (listElement, conversations, emptyText) => {
     if (!listElement) {
       return;
@@ -3704,20 +4654,53 @@ const renderDmList = () => {
 
     listElement.replaceChildren();
 
-    if (!Array.isArray(conversations) || conversations.length === 0) {
+    const isUnreadOnlyFilter = currentDmListFilter === "unread";
+    const filteredConversations = isUnreadOnlyFilter
+      ? conversations.filter((conversation) => {
+        const meta = dmConversationMeta.get(conversation.dmKey) || null;
+        return Number(meta?.unreadCount || 0) > 0;
+      })
+      : conversations;
+
+    if (!Array.isArray(filteredConversations) || filteredConversations.length === 0) {
       const empty = document.createElement("li");
       empty.className = "dm-empty";
-      empty.textContent = emptyText;
+      empty.textContent = isUnreadOnlyFilter ? "Tidak ada chat belum dibuka" : emptyText;
       listElement.appendChild(empty);
+      if (listElement === liveChatRouteList) {
+        requestAnimationFrame(() => {
+          updateLiveChatRouteScrollIndicators();
+        });
+      }
       return;
     }
 
-    conversations.forEach((conversation) => {
+    const sortedConversations = [...filteredConversations].sort((left, right) => {
+      const leftMeta = dmConversationMeta.get(left.dmKey) || null;
+      const rightMeta = dmConversationMeta.get(right.dmKey) || null;
+      const leftUnread = Number(leftMeta?.unreadCount || 0);
+      const rightUnread = Number(rightMeta?.unreadCount || 0);
+
+      if (leftUnread !== rightUnread) {
+        return rightUnread - leftUnread;
+      }
+
+      const leftActivity = Number(leftMeta?.activityMs || Date.parse(String(leftMeta?.timestampRaw || "")) || 0);
+      const rightActivity = Number(rightMeta?.activityMs || Date.parse(String(rightMeta?.timestampRaw || "")) || 0);
+      if (leftActivity !== rightActivity) {
+        return rightActivity - leftActivity;
+      }
+
+      return normalizeDisplayName(left.peerName).localeCompare(normalizeDisplayName(right.peerName), "id");
+    });
+
+    sortedConversations.forEach((conversation) => {
     const meta = dmConversationMeta.get(conversation.dmKey) || {
       unreadCount: 0,
       previewText: "Belum ada pesan",
       timestamp: "",
       timestampRaw: "",
+      activityMs: 0,
       isBroadcast: false,
       supportScope: ""
     };
@@ -3735,8 +4718,10 @@ const renderDmList = () => {
 
     const nameText = document.createElement("span");
     nameText.className = "dm-item-name";
-    nameText.textContent = isLiveChatSupportConversation(conversation, meta)
-      ? "Customer Service"
+    const isSupportConversation = isLiveChatSupportConversation(conversation, meta);
+    const requesterName = normalizeDisplayName(conversation.peerName);
+    nameText.textContent = isSupportConversation
+      ? (isAdminPortal ? requesterName || "User" : "Customer Service")
       : `@${conversation.peerName}`;
 
     if (meta.isBroadcast) {
@@ -3807,13 +4792,19 @@ const renderDmList = () => {
       socket.emit("dm:open", {
         peerName: conversation.peerName,
         dmKey: conversation.dmKey,
-        supportScope: String(conversation.supportScope || "") || undefined
+        supportScope: supportScope || undefined
       });
     });
 
     li.appendChild(button);
       listElement.appendChild(li);
     });
+
+    if (listElement === liveChatRouteList) {
+      requestAnimationFrame(() => {
+        updateLiveChatRouteScrollIndicators();
+      });
+    }
   };
 
   const supportConversations = dmConversations.filter((conversation) => {
@@ -3927,6 +4918,11 @@ const getTargetAutoCrowdOnlineCount = (totalMembers) => {
 
 const buildMemberDirectory = () => {
   const membersById = new Map();
+  const isSupportConversation = (conversation) => {
+    const supportScope = String(conversation?.supportScope || "").trim().toLowerCase();
+    const dmKey = String(conversation?.dmKey || "").trim().toUpperCase();
+    return supportScope === "admins" || dmKey.startsWith("ADMINSUPPORT::");
+  };
 
   const upsertMember = (member, fallback = {}) => {
     if (!member || typeof member !== "object") {
@@ -3969,6 +4965,44 @@ const buildMemberDirectory = () => {
       registeredMember: Boolean(member?.registeredMember)
     });
   });
+
+  if (!isAdminPortal && !currentTeam && currentView.type === "dm" && normalizeRole(currentRole) === "guest") {
+    const selfGuestId = String(socket?.id || "").trim()
+      || `self-guest-${normalizeDisplayName(currentUser).toLowerCase().replace(/\s+/g, "-")}`;
+    upsertMember({
+      id: selfGuestId,
+      name: currentUser,
+      role: "guest",
+      simulated: false,
+      registeredMember: false,
+      online: true
+    });
+  }
+
+  if (isAdminPortal) {
+    dmConversations
+      .filter((conversation) => isSupportConversation(conversation))
+      .forEach((conversation) => {
+        const requesterName = normalizeDisplayName(conversation?.peerName || "");
+        if (!requesterName) {
+          return;
+        }
+
+        const syntheticId = `support-guest-${requesterName.toLowerCase().replace(/\s+/g, "-")}`;
+        if (Array.from(membersById.values()).some((entry) => normalizeDisplayName(entry.name) === requesterName)) {
+          return;
+        }
+
+        upsertMember({
+          id: syntheticId,
+          name: requesterName,
+          role: "guest",
+          simulated: false,
+          registeredMember: false,
+          online: true
+        });
+      });
+  }
 
   return Array.from(membersById.values())
     .sort((a, b) => a.name.localeCompare(b.name, "id"));
@@ -4214,6 +5248,9 @@ const setChatReadyState = (isReady) => {
   if (gifToggle) {
     gifToggle.disabled = !ready;
   }
+  if (clearHistoryButton) {
+    clearHistoryButton.disabled = !ready;
+  }
 
   if (!ready) {
     messageInput.value = "";
@@ -4221,6 +5258,7 @@ const setChatReadyState = (isReady) => {
     closeGifPicker();
   }
 
+  updateClearHistoryButtonState();
   updateChannelFormAccess();
 };
 
@@ -4406,11 +5444,13 @@ const ensureAutoCrowdUsers = () => {
 
 const renderUsers = (users) => {
   userList.replaceChildren();
+  privilegedList?.replaceChildren();
   guestList?.replaceChildren();
 
   currentPresenceUsers = Array.isArray(users) ? [...users] : [];
   const allMembers = buildMemberDirectory();
-  const memberUsers = allMembers.filter((entry) => normalizeRole(entry?.role || "member") !== "guest");
+  const memberUsers = allMembers.filter((entry) => normalizeRole(entry?.role || "member") === "member");
+  const privilegedUsers = allMembers.filter((entry) => isPrivilegedRole(normalizeRole(entry?.role || "member")));
   const guestUsers = allMembers.filter((entry) => normalizeRole(entry?.role || "member") === "guest");
 
   const buildAudienceWithQuota = (entries, role, targetTotal) => {
@@ -4579,6 +5619,11 @@ const renderUsers = (users) => {
     "member",
     SIMULATION_MEMBER_TARGET_TOTAL
   );
+  const privilegedUsersWithQuota = buildAudienceWithQuota(
+    privilegedUsers,
+    "privileged",
+    SIMULATION_MEMBER_TARGET_TOTAL
+  );
   const guestUsersWithQuota = buildAudienceWithQuota(
     guestUsers,
     "guest",
@@ -4588,13 +5633,18 @@ const renderUsers = (users) => {
   const preparedMemberUsers = currentSimulationConfig?.enabled
     ? getStableAudienceOnlineStatus(memberUsersWithQuota, "member", currentUser)
     : memberUsersWithQuota;
+  const preparedPrivilegedUsers = currentSimulationConfig?.enabled
+    ? getStableAudienceOnlineStatus(privilegedUsersWithQuota, "privileged")
+    : privilegedUsersWithQuota;
   const preparedGuestUsers = currentSimulationConfig?.enabled
     ? getStableAudienceOnlineStatus(guestUsersWithQuota, "guest")
     : guestUsersWithQuota;
 
   const orderedMemberUsers = getStableAudienceDisplayOrder(preparedMemberUsers, "member");
+  const orderedPrivilegedUsers = getStableAudienceDisplayOrder(preparedPrivilegedUsers, "privileged");
   const orderedGuestUsers = getStableAudienceDisplayOrder(preparedGuestUsers, "guest");
   const persistentMemberUsers = getPersistentAudienceRoster(orderedMemberUsers, "member", SIMULATION_MEMBER_TARGET_TOTAL);
+  const persistentPrivilegedUsers = getPersistentAudienceRoster(orderedPrivilegedUsers, "privileged", SIMULATION_MEMBER_TARGET_TOTAL);
   const persistentGuestUsers = getPersistentAudienceRoster(orderedGuestUsers, "guest", SIMULATION_GUEST_TARGET_TOTAL);
 
   const memberStats = {
@@ -4609,6 +5659,12 @@ const renderUsers = (users) => {
   };
   guestStats.offline = Math.max(0, guestStats.total - guestStats.online);
 
+  const privilegedStats = {
+    total: persistentPrivilegedUsers.length,
+    online: persistentPrivilegedUsers.filter((entry) => entry.online).length
+  };
+  privilegedStats.offline = Math.max(0, privilegedStats.total - privilegedStats.online);
+
   if (onlineCount) {
     onlineCount.textContent = String(memberStats.total);
   }
@@ -4621,6 +5677,15 @@ const renderUsers = (users) => {
   if (memberOfflineCount) {
     memberOfflineCount.textContent = String(memberStats.offline);
   }
+  if (privilegedTotalCount) {
+    privilegedTotalCount.textContent = String(privilegedStats.total);
+  }
+  if (privilegedOnlineCount) {
+    privilegedOnlineCount.textContent = String(privilegedStats.online);
+  }
+  if (privilegedOfflineCount) {
+    privilegedOfflineCount.textContent = String(privilegedStats.offline);
+  }
   if (guestTotalCount) {
     guestTotalCount.textContent = String(guestStats.total);
   }
@@ -4630,6 +5695,31 @@ const renderUsers = (users) => {
   if (guestOfflineCount) {
     guestOfflineCount.textContent = String(guestStats.offline);
   }
+
+  const derivedOnlineTotal = memberStats.online + privilegedStats.online + guestStats.online;
+  const nextOnlineTotal = hasReceivedGlobalStatsFromServer
+    ? Math.max(derivedOnlineTotal, currentGlobalStats.onlineUsers)
+    : derivedOnlineTotal;
+  const nextVisitorTotal = hasReceivedGlobalStatsFromServer
+    ? Math.max(memberStats.total + privilegedStats.total + guestStats.total, currentGlobalStats.totalVisitors)
+    : (memberStats.total + privilegedStats.total + guestStats.total);
+  const nextMemberOnline = hasReceivedGlobalStatsFromServer
+    ? Math.max(memberStats.online, currentGlobalStats.memberOnline)
+    : memberStats.online;
+  const nextGuestOnline = hasReceivedGlobalStatsFromServer
+    ? Math.max(guestStats.online, currentGlobalStats.guestOnline)
+    : guestStats.online;
+
+  updateAdminRealtimeStats({
+    onlineUsers: nextOnlineTotal,
+    totalVisitors: nextVisitorTotal,
+    memberOnline: nextMemberOnline,
+    guestOnline: nextGuestOnline,
+    updatedAt: new Date().toISOString(),
+    source: hasReceivedGlobalStatsFromServer
+      ? "sinkronisasi server + presence"
+      : "perhitungan presence team aktif"
+  });
 
   const query = String(memberSearchInput?.value || "").trim().toLowerCase();
   const filteredMemberUsers = query
@@ -4651,7 +5741,7 @@ const renderUsers = (users) => {
 
     const avatar = document.createElement("span");
     avatar.className = "member-avatar";
-    applyDefaultAvatar(avatar, formattedName);
+    applyDefaultAvatar(avatar, formattedName, role);
 
     const info = document.createElement("div");
     info.className = "member-content";
@@ -4798,6 +5888,19 @@ const renderUsers = (users) => {
     filteredMemberUsers.forEach((user) => {
       appendUserCard(userList, user, { enableRoleActions: true });
     });
+  }
+
+  if (privilegedList) {
+    if (persistentPrivilegedUsers.length === 0) {
+      const emptyPrivileged = document.createElement("li");
+      emptyPrivileged.className = "member-empty";
+      emptyPrivileged.textContent = "Belum ada user privileged pada team ini.";
+      privilegedList.appendChild(emptyPrivileged);
+    } else {
+      persistentPrivilegedUsers.forEach((user) => {
+        appendUserCard(privilegedList, user, { enableRoleActions: true });
+      });
+    }
   }
 
   if (!guestList) {
@@ -5164,6 +6267,7 @@ const switchToDmView = (payload) => {
   markDmConversationSupportScope(payload.dmKey, supportScope);
   clearDmConversationUnread(payload.dmKey);
   renderDmList();
+  renderUsers(currentPresenceUsers);
   setHeader();
 
   messageCache.clear();
@@ -5253,6 +6357,9 @@ const handleJoin = () => {
     peerName: privateJoinMode ? "Customer Service" : "",
     supportScope: privateJoinMode ? "admins" : ""
   };
+
+  syncDmHistoryClearCutoffProfile();
+  syncHiddenDmRoutesProfile();
 
   setHeader();
   renderDmList();
@@ -5563,6 +6670,9 @@ if (codeModeDropdown && codeModeTrigger && codeModeMenu && codeModeSelect) {
     if (document.activeElement === messageInput) {
       scrollMessageListToLatest();
     }
+
+    updateSidebarScrollIndicators();
+    updateLiveChatRouteScrollIndicators();
   });
 
   if (window.visualViewport) {
@@ -5602,6 +6712,10 @@ if (sidebarCloseButton) {
 }
 
 if (sidebarPanel) {
+  sidebarPanel.addEventListener("scroll", () => {
+    updateSidebarScrollIndicators();
+  }, { passive: true });
+
   sidebarPanel.addEventListener("touchstart", (event) => {
     if (!isMobileSidebarViewport() || !document.body.classList.contains("sidebar-open")) {
       resetSidebarSwipeTracking();
@@ -5653,6 +6767,10 @@ if (sidebarPanel) {
   sidebarPanel.addEventListener("touchcancel", () => {
     resetSidebarSwipeTracking();
   }, { passive: true });
+
+  requestAnimationFrame(() => {
+    updateSidebarScrollIndicators();
+  });
 }
 
 if (channelList) {
@@ -5666,6 +6784,21 @@ if (dmList) {
     closeMobileSidebar();
   });
 }
+
+if (liveChatRouteList) {
+  liveChatRouteList.addEventListener("scroll", () => {
+    updateLiveChatRouteScrollIndicators();
+  }, { passive: true });
+
+  requestAnimationFrame(() => {
+    updateLiveChatRouteScrollIndicators();
+  });
+}
+
+bindDmFilterControls(liveChatFilterControls);
+bindDmFilterControls(dmFilterControls);
+syncDmFilterControls();
+syncBulkDeleteScopeSelection();
 
 if (userList) {
   userList.addEventListener("click", () => {
@@ -5681,6 +6814,53 @@ if (memberSearchInput) {
 
 if (backToChannelButton) {
   backToChannelButton.addEventListener("click", switchToChannelView);
+}
+
+if (clearHistoryButton) {
+  clearHistoryButton.addEventListener("click", () => {
+    if (!hasJoinedServer) {
+      notify("Silakan join dulu sebelum hapus history chat.", "warning", { inlineDuration: 2600 });
+      return;
+    }
+
+    if (currentView.type === "dm") {
+      const dmKey = String(currentView.dmKey || "").trim();
+      if (!dmKey) {
+        notify("DM belum siap untuk dihapus history-nya.", "warning", { inlineDuration: 2600 });
+        return;
+      }
+
+      const peerLabel = normalizeDisplayName(currentView.peerName || "Customer Service");
+      const agreed = window.confirm(`Hapus semua history DM dengan ${peerLabel}?`);
+      if (!agreed) {
+        return;
+      }
+
+      socket.emit("chat:history:clear", {
+        mode: "dm",
+        dmKey,
+        peerName: currentView.peerName,
+        supportScope: String(currentView.supportScope || "") || undefined
+      });
+      return;
+    }
+
+    if (normalizeRole(currentRole) !== "admin") {
+      notify("Hanya admin yang bisa hapus history channel.", "warning", { inlineDuration: 2800 });
+      return;
+    }
+
+    const channelLabel = normalizeCode(currentChannel, DEFAULT_CHANNEL);
+    const agreed = window.confirm(`Hapus semua history channel #${channelLabel}?`);
+    if (!agreed) {
+      return;
+    }
+
+    socket.emit("chat:history:clear", {
+      mode: "channel",
+      channelCode: channelLabel
+    });
+  });
 }
 
 if (logoutButton) {
@@ -5733,6 +6913,43 @@ if (broadcastRoleChecklistTrigger && broadcastRoleChecklistMenu) {
   });
 }
 
+if (bulkDeleteScopeTrigger && bulkDeleteScopeMenu) {
+  bulkDeleteScopeTrigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = bulkDeleteScopeMenu.classList.contains("hidden");
+    closeBulkDeleteChecklistMenu();
+    closeBroadcastChecklistMenus();
+    closeJoinChecklistMenus();
+
+    if (willOpen) {
+      bulkDeleteScopeMenu.classList.remove("hidden");
+      bulkDeleteScopeTrigger.setAttribute("aria-expanded", "true");
+      return;
+    }
+
+    closeBulkDeleteChecklistMenu();
+  });
+}
+
+if (bulkDeleteActionButton) {
+  bulkDeleteActionButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    emitBulkDeleteSelectedConversations();
+  });
+}
+
+if (bulkDeleteLiveChatToggle) {
+  bulkDeleteLiveChatToggle.addEventListener("change", () => {
+    syncBulkDeleteScopeSelection();
+  });
+}
+
+if (bulkDeleteDmToggle) {
+  bulkDeleteDmToggle.addEventListener("change", () => {
+    syncBulkDeleteScopeSelection();
+  });
+}
+
 if (joinTeamChecklistTrigger && joinTeamChecklistMenu) {
   joinTeamChecklistTrigger.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -5756,12 +6973,18 @@ if (joinChannelChecklistTrigger && joinChannelChecklistMenu) {
 document.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) {
+    closeBulkDeleteChecklistMenu();
     closeBroadcastChecklistMenus();
     closeJoinChecklistMenus();
     return;
   }
 
   const insideChecklist = target.closest(".broadcast-checklist");
+  const insideBulkDeleteChecklist = target.closest("#bulkDeleteChecklist");
+  if (!insideBulkDeleteChecklist) {
+    closeBulkDeleteChecklistMenu();
+  }
+
   if (!insideChecklist) {
     closeBroadcastChecklistMenus();
     closeJoinChecklistMenus();
@@ -5847,6 +7070,8 @@ socket.on("connect", () => {
   setConnectionState(true);
   setChatReadyState(false);
 
+  socket.emit("stats:global:request");
+
   if (currentUser) {
     emitJoinRequest();
   }
@@ -5918,6 +7143,9 @@ socket.on("channel:joined", (payload) => {
 
   currentPinnedMessage = null;
 
+  syncDmHistoryClearCutoffProfile();
+  syncHiddenDmRoutesProfile();
+
   setHeader();
   renderDmList();
 
@@ -5932,6 +7160,7 @@ socket.on("channel:joined", (payload) => {
   joinModal.classList.add("hidden");
   joinModal.hidden = true;
   saveMemberLogin();
+  socket.emit("stats:global:request");
 
   setChatReadyState(true);
   const shouldAutoStartDirectAdmin = pendingDirectAdminAutoStartOnJoin
@@ -6025,9 +7254,59 @@ socket.on("chat:history", (history) => {
 });
 
 socket.on("dm:available", (payload) => {
+  const dmKey = String(payload?.dmKey || "").trim();
   const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
-  addDmConversation(payload?.dmKey, payload?.peerName, { supportScope });
-  markDmConversationSupportScope(payload?.dmKey, supportScope);
+  const previewText = String(payload?.previewText || "").trim();
+  const previewTimestamp = String(payload?.timestamp || "").trim();
+  const hasUnread = Boolean(payload?.hasUnread);
+  const isCurrentDmView = currentView.type === "dm" && currentView.dmKey === dmKey;
+  const clearCutoffMs = Number(dmHistoryClearCutoffByKey.get(dmKey) || 0);
+  const previewTimestampMs = Date.parse(previewTimestamp);
+  const hasValidPreviewTime = Number.isFinite(previewTimestampMs);
+  const isStalePreviewAfterClear = Boolean(previewText)
+    && clearCutoffMs > 0
+    && hasValidPreviewTime
+    && previewTimestampMs <= clearCutoffMs;
+  const effectivePreviewText = isStalePreviewAfterClear ? "" : previewText;
+  const effectiveHasUnread = isStalePreviewAfterClear ? false : hasUnread;
+  const shouldKeepHiddenRoute = hiddenDmRoutesByKey.has(dmKey)
+    && !effectivePreviewText
+    && !effectiveHasUnread;
+
+  if (shouldKeepHiddenRoute) {
+    suppressedEmptyDmKeys.add(dmKey);
+    return;
+  }
+
+  if (suppressedEmptyDmKeys.has(dmKey) && !effectivePreviewText && !effectiveHasUnread) {
+    return;
+  }
+
+  if (effectivePreviewText || effectiveHasUnread) {
+    if (hiddenDmRoutesByKey.delete(dmKey)) {
+      persistHiddenDmRoutesProfile();
+    }
+    suppressedEmptyDmKeys.delete(dmKey);
+  }
+
+  addDmConversation(dmKey, payload?.peerName, { supportScope });
+  markDmConversationSupportScope(dmKey, supportScope);
+
+  if (effectivePreviewText) {
+    touchDmConversationMeta({
+      dmKey,
+      text: effectivePreviewText,
+      timestamp: previewTimestamp || new Date().toISOString(),
+      increaseUnread: false
+    });
+  }
+
+  if (isCurrentDmView) {
+    clearDmConversationUnread(dmKey);
+  } else if (effectiveHasUnread) {
+    ensureDmConversationUnread(dmKey, 1);
+  }
+
   renderDmList();
 });
 
@@ -6098,6 +7377,18 @@ socket.on("team:state", (payload) => {
   renderAdminPanel();
 });
 
+socket.on("stats:global", (payload) => {
+  hasReceivedGlobalStatsFromServer = true;
+  updateAdminRealtimeStats({
+    onlineUsers: payload?.onlineUsers,
+    totalVisitors: payload?.totalVisitors,
+    memberOnline: payload?.memberOnline,
+    guestOnline: payload?.guestOnline,
+    updatedAt: payload?.updatedAt,
+    source: "sinkronisasi server"
+  });
+});
+
 socket.on("login:config:updated", (payload) => {
   applyLoginConfigToJoinForm(payload?.config || null);
   notify("Pengaturan login member diperbarui.", "success", { inlineDuration: 2600 });
@@ -6162,6 +7453,18 @@ socket.on("chat:message", (message) => {
   if (message?.context?.type === "dm") {
     const senderName = normalizeDisplayName(message?.user || "Unknown");
     const dmKey = String(message?.context?.dmKey || "").trim();
+    if (dmKey) {
+      const removedCutoff = dmHistoryClearCutoffByKey.delete(dmKey);
+      if (removedCutoff) {
+        persistDmHistoryClearCutoffProfile();
+      }
+
+      const removedHiddenRoute = hiddenDmRoutesByKey.delete(dmKey);
+      if (removedHiddenRoute) {
+        persistHiddenDmRoutesProfile();
+      }
+    }
+    suppressedEmptyDmKeys.delete(dmKey);
     const dmPeerName = message.user === currentUser ? message?.context?.peerName : senderName;
     const supportScope = String(message?.context?.supportScope || "").trim().toLowerCase();
     const isCurrentDmView = currentView.type === "dm" && currentView.dmKey === dmKey;
@@ -6187,6 +7490,8 @@ socket.on("chat:message", (message) => {
     renderDmList();
   }
 
+  maybeNotifyIncomingMessage(message);
+
   if (isMessageForCurrentView(message)) {
     pushMessage(message);
     return;
@@ -6195,6 +7500,97 @@ socket.on("chat:message", (message) => {
   if (message?.context?.type === "dm") {
     return;
   }
+});
+
+socket.on("chat:history:cleared", (payload) => {
+  const context = payload?.context;
+  if (!context) {
+    return;
+  }
+
+  const clearedBy = normalizeDisplayName(payload?.clearedBy || "User");
+  const clearedAt = String(payload?.clearedAt || new Date().toISOString()).trim();
+  const clearedAtMs = Date.parse(clearedAt);
+
+  if (context.type === "dm") {
+    const dmKey = String(context.dmKey || "").trim();
+    if (!dmKey) {
+      return;
+    }
+
+    const clearMode = String(payload?.clearMode || "").trim().toLowerCase();
+    const isGlobalClear = clearMode === "global";
+
+    if (isGlobalClear) {
+      if (Number.isFinite(clearedAtMs)) {
+        dmHistoryClearCutoffByKey.set(dmKey, clearedAtMs);
+        persistDmHistoryClearCutoffProfile();
+      }
+      hiddenDmRoutesByKey.add(dmKey);
+      persistHiddenDmRoutesProfile();
+      suppressedEmptyDmKeys.add(dmKey);
+      removeDmConversation(dmKey);
+
+      if (currentView.type === "dm" && currentView.dmKey === dmKey) {
+        messageCache.clear();
+        messageList.replaceChildren();
+        renderTyping([]);
+        switchToChannelView();
+      }
+
+      renderDmList();
+      notify(`History DM dihapus total oleh ${clearedBy}.`, "warning", { inlineDuration: 2600 });
+      return;
+    }
+
+    if (Number.isFinite(clearedAtMs)) {
+      dmHistoryClearCutoffByKey.set(dmKey, clearedAtMs);
+      persistDmHistoryClearCutoffProfile();
+    }
+
+    if (hiddenDmRoutesByKey.delete(dmKey)) {
+      persistHiddenDmRoutesProfile();
+    }
+
+    clearDmConversationUnread(dmKey);
+    touchDmConversationMeta({
+      dmKey,
+      text: "Belum ada pesan",
+      timestamp: clearedAt,
+      increaseUnread: false
+    });
+
+    pendingDetachedDmMessages.delete(dmKey);
+    const peerAlias = normalizeDisplayName(context.peerName || "");
+    if (peerAlias) {
+      pendingDetachedDmMessagesByPeer.delete(peerAlias);
+    }
+
+    if (currentView.type === "dm" && currentView.dmKey === dmKey) {
+      messageCache.clear();
+      messageList.replaceChildren();
+      renderTyping([]);
+    }
+
+    renderDmList();
+    notify(`History DM dihapus oleh ${clearedBy}.`, "warning", { inlineDuration: 2600 });
+    return;
+  }
+
+  if (context.type !== "channel") {
+    return;
+  }
+
+  const channelCode = normalizeCode(context.channelCode, DEFAULT_CHANNEL);
+  if (currentView.type === "channel" && channelCode === currentChannel) {
+    messageCache.clear();
+    messageList.replaceChildren();
+    renderTyping([]);
+    currentPinnedMessage = null;
+    renderPinnedNotice();
+  }
+
+  notify(`History channel #${channelCode} dihapus oleh ${clearedBy}.`, "warning", { inlineDuration: 2600 });
 });
 
 socket.on("chat:edited", (patch) => {
@@ -6283,6 +7679,8 @@ socket.on("presence:update", (payload) => {
     currentUser = nextUserName;
     currentRole = nextUserRole;
     currentUserIsRegisteredMember = Boolean(selfPresence.registeredMember);
+    syncDmHistoryClearCutoffProfile();
+    syncHiddenDmRoutesProfile();
 
     if (profileChanged && demoModeEnabled && hasJoinedServer) {
       clearDemoBots({ silent: true });
@@ -6405,7 +7803,11 @@ if (hasRestoredMemberLogin) {
   joinModal.hidden = true;
   setHeader();
   renderDmList();
-  notify("Menyambungkan ulang sesi member...", "info", { inlineDuration: 2600, toast: false });
+  notify(
+    isAdminPortal ? "Menyambungkan ulang sesi admin..." : "Menyambungkan ulang sesi member...",
+    "info",
+    { inlineDuration: 2600, toast: false }
+  );
   if (socket.connected) {
     emitJoinRequest();
   }
@@ -6618,6 +8020,8 @@ socket.on("auth:self-updated", (payload) => {
   const previousRole = currentRole;
   currentUser = normalizeDisplayName(payload?.name || currentUser);
   currentRole = normalizeRole(payload?.role || currentRole);
+  syncDmHistoryClearCutoffProfile();
+  syncHiddenDmRoutesProfile();
 
   if (pendingSettingsPassword) {
     currentAccessPassword = pendingSettingsPassword;

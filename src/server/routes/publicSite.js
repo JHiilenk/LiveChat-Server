@@ -133,11 +133,12 @@ const registerPublicSiteRoutes = ({
     });
   });
 
-  app.get(["/admin", "/admin/login", "/admin/panel", "/admin/dashboard"], (_req, res) => {
+  app.get(["/admin", "/admin/login", "/admin/panel", "/admin/dashboard", "/admin/settings", "/admin/settings/"], (req, res) => {
+    const isSettingsPage = String(req.path || "").toLowerCase().startsWith("/admin/settings");
     renderSeoPage(res, {
-      title: `${appName} Admin Panel`,
+      title: isSettingsPage ? `${appName} Admin Settings` : `${appName} Admin Panel`,
       description: `${appName} admin panel untuk pengaturan live chat, role, dan manajemen aplikasi.`,
-      canonicalUrl: `${publicBaseUrl}/admin`,
+      canonicalUrl: `${publicBaseUrl}${isSettingsPage ? "/admin/settings" : "/admin"}`,
       robots: "noindex,nofollow",
       bodyClass: "portal-admin"
     });

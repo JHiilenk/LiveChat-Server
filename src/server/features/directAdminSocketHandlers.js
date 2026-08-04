@@ -52,12 +52,12 @@ const registerDirectAdminSocketHandlers = ({
     }
 
     const recipients = getOnlinePrivilegedRecipients(usersBySocketId, user.teamCode, user.id);
-    if (recipients.length === 0) {
-      socket.emit("join:error", { message: "Admin/owner belum online. Coba beberapa saat lagi." });
-      return;
-    }
 
-    const dmKey = buildDirectAdminDmKey(user.name);
+    const dmKey = buildDirectAdminDmKey({
+      requesterName: user.name,
+      teamCode: user.teamCode,
+      fingerprintKey: user.fingerprintKey || ""
+    });
     if (!dmKey) {
       socket.emit("join:error", { message: "Gagal membuat DM admin. Nama user tidak valid." });
       return;
@@ -79,7 +79,7 @@ const registerDirectAdminSocketHandlers = ({
     user.activeDmProxyAliasName = null;
     usersBySocketId.set(socket.id, user);
 
-    const history = await getDmHistory(user.teamCode, dmKey, "Customer Service");
+    const history = await getDmHistory(user.teamCode, dmKey, "Customer Service", user.name);
     socket.emit("dm:ready", {
       dmKey,
       peerName: "Customer Service",

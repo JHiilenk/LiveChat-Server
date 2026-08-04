@@ -3,6 +3,7 @@ const createChannelUtils = ({
   channelsDb,
   messagesDb,
   appendPublicLoginConfigOption,
+  nameKey,
   nowIso,
   getMessageRetentionCutoff,
   defaultChannelCode,
@@ -83,15 +84,52 @@ const createChannelUtils = ({
     }));
   };
 
-  const getDmHistory = async (teamCode, dmKey, peerName) => {
+  const getDmHistory = async (teamCode, dmKey, peerName, viewerName = "") => {
     const cutoff = getMessageRetentionCutoff();
+    const cutoffMs = cutoff.getTime();
+    const viewerKey = nameKey(viewerName || "");
     const docs = await messagesDb
-      .find({ scope: "dm", teamCode, dmKey, createdAt: { $gte: cutoff } })
+      .find({ scope: "dm", teamCode, dmKey })
       .sort({ createdAt: -1 })
-      .limit(messageHistoryLimit)
+      .limit(Math.max(messageHistoryLimit * 8, messageHistoryLimit))
       .exec();
 
-    return docs.reverse().map((doc) => ({
+    const retainedDocs = docs.filter((doc) => {
+      const createdAtValue = doc?.createdAt;
+      const timestampValue = doc?.timestamp;
+      let eventMs = Number.NaN;
+
+      if (createdAtValue instanceof Date) {
+        eventMs = createdAtValue.getTime();
+      } else {
+        const parsedCreatedAt = Date.parse(String(createdAtValue || ""));
+        if (Number.isFinite(parsedCreatedAt)) {
+          eventMs = parsedCreatedAt;
+        } else {
+          const parsedTimestamp = Date.parse(String(timestampValue || ""));
+          if (Number.isFinite(parsedTimestamp)) {
+            eventMs = parsedTimestamp;
+          }
+        }
+      }
+
+      if (!Number.isFinite(eventMs)) {
+        return true;
+      }
+
+      return eventMs >= cutoffMs;
+    });
+
+    const visibleDocs = viewerKey
+      ? retainedDocs.filter((doc) => {
+        const hiddenForUsers = Array.isArray(doc?.hiddenForUsers) ? doc.hiddenForUsers : [];
+        return !hiddenForUsers.includes(viewerKey);
+      })
+      : retainedDocs;
+
+    const limitedVisibleDocs = visibleDocs.slice(0, messageHistoryLimit);
+
+    return limitedVisibleDocs.reverse().map((doc) => ({
       id: doc.messageId || doc._id,
       type: doc.type || "chat",
       user: doc.user,
