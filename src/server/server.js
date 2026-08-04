@@ -93,7 +93,7 @@ const AUTH_SCHEMA_VERSION = 2;
 const DEFAULT_OWNER_USERNAME = String(process.env.DEFAULT_OWNER_USERNAME || "owner").trim() || "owner";
 const DEFAULT_ADMIN_USERNAME = String(process.env.DEFAULT_ADMIN_USERNAME || "admin").trim() || "admin";
 const DEFAULT_OWNER_PASSWORD = String(process.env.DEFAULT_OWNER_PASSWORD || "change-owner-password").trim() || "change-owner-password";
-const DEFAULT_ADMIN_PASSWORD = String(process.env.DEFAULT_ADMIN_PASSWORD || "change-admin-password").trim() || "change-admin-password";
+const DEFAULT_ADMIN_PASSWORD = String(process.env.DEFAULT_ADMIN_PASSWORD || "admin123").trim() || "admin123";
 
 const usersBySocketId = new Map();
 const typingSocketIds = new Set();
