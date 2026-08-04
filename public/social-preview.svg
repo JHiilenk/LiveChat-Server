@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="60" x2="1040" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#081C10"/>
+      <stop offset="1" stop-color="#041008"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="190" y1="148" x2="921" y2="537" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9BFF63"/>
+      <stop offset="0.5" stop-color="#5EDB4A"/>
+      <stop offset="1" stop-color="#F0B29B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/>
+  <circle cx="140" cy="98" r="180" fill="#15331D" opacity="0.55"/>
+  <circle cx="1080" cy="558" r="210" fill="#2C1E18" opacity="0.42"/>
+  <rect x="118" y="118" width="964" height="394" rx="34" fill="#0A2413" stroke="#234F2B" stroke-width="2"/>
+  <rect x="156" y="156" width="172" height="172" rx="40" fill="url(#accent)"/>
+  <path d="M203 199h77v20h-30v79h-23v-79h-24v-20Z" fill="#092012"/>
+  <path d="M285 199h21v60c0 26-14 39-41 39h-13v-20h11c15 0 22-7 22-20v-59Z" fill="#092012"/>
+  <text x="380" y="238" fill="#EAF7D8" font-family="'Space Grotesk', sans-serif" font-size="74" font-weight="700">Jeetalk Live Chat</text>
+  <text x="380" y="310" fill="#A8C49E" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="500">Realtime chat komunitas, team, channel, dan DM yang cepat, ringan, dan siap online.</text>
+  <rect x="380" y="362" width="316" height="66" rx="33" fill="url(#accent)"/>
+  <text x="423" y="405" fill="#09150C" font-family="'Space Grotesk', sans-serif" font-size="30" font-weight="700">https://jeetalk.onrender.com</text>
+</svg>

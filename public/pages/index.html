@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>__SEO_TITLE__</title>
+    <meta name="description" content="__SEO_DESCRIPTION__" />
+    <meta name="keywords" content="live chat, chat komunitas, realtime chat, chat team, jeetalk, live chat indonesia" />
+    <meta name="author" content="Jeetalk" />
+    <meta name="application-name" content="Jeetalk" />
+    <meta name="robots" content="__SEO_ROBOTS__" />
+    <meta name="theme-color" content="#08180e" />
+    <link rel="canonical" href="__SEO_CANONICAL__" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jeetalk" />
+    <meta property="og:title" content="__SEO_OG_TITLE__" />
+    <meta property="og:description" content="__SEO_OG_DESCRIPTION__" />
+    <meta property="og:url" content="__SEO_CANONICAL__" />
+    <meta property="og:image" content="__SEO_OG_IMAGE__" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="__SEO_OG_TITLE__" />
+    <meta name="twitter:description" content="__SEO_OG_DESCRIPTION__" />
+    <meta name="twitter:image" content="__SEO_OG_IMAGE__" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <link rel="stylesheet" href="/styles.css?v=20260804ax" />
+    <script type="application/ld+json">__SEO_JSON_LD__</script>
+  </head>
+  <body class="__SEO_BODY_CLASS__" data-default-team-code="__DEFAULT_TEAM_CODE__" data-default-channel-code="__DEFAULT_CHANNEL_CODE__">
+    <div class="background-decor" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="grid-overlay"></span>
+    </div>
+
+    <main class="app-shell">
+      <section class="sidebar">
+        <div class="brand-block">
+          <button id="sidebarCloseButton" type="button" class="sidebar-close-button hidden" aria-label="Tutup sidebar">Tutup</button>
+          <p class="eyebrow">Realtime Community</p>
+          <h1><span class="tone-a">Jee</span><span class="tone-b">talk</span></h1>
+          <p class="subtitle">Live chat cepat, ringan, dan siap online.</p>
+        </div>
+
+        <div class="presence-card profile-card">
+          <div class="profile-top">
+            <div id="profileAvatar" class="profile-avatar">JT</div>
+            <div class="profile-info">
+              <p class="profile-name-wrap"><span id="profileName" class="profile-name">Guest User</span><span id="profileRegisteredBadge" class="profile-registered-badge hidden" aria-hidden="true" title="">★</span></p>
+              <p id="profileRole" class="profile-role">Member</p>
+            </div>
+            <span id="profileStatus" class="profile-status offline">Offline</span>
+          </div>
+          <div class="profile-meta">
+            <div>
+              <p class="meta-label">Team</p>
+              <p id="profileTeam" class="meta-value">__DEFAULT_TEAM_CODE__</p>
+            </div>
+            <div>
+              <p class="meta-label">Channel</p>
+              <p id="profileChannel" class="meta-value">#__DEFAULT_CHANNEL_CODE__</p>
+            </div>
+          </div>
+
+          <button id="logoutButton" type="button" class="profile-logout-btn hidden">Logout</button>
+
+          <div id="adminPanel" class="admin-panel hidden">
+            <div class="presence-head">
+              <h2>Panel Management</h2>
+              <span id="adminPanelRole" class="badge">MEMBER</span>
+            </div>
+            <p id="adminPanelHint" class="member-note">Akses khusus owner/admin.</p>
+            <div class="admin-settings-wrap">
+              <button
+                id="accountSettingsToggle"
+                type="button"
+                class="admin-settings-toggle"
+                aria-expanded="false"
+                aria-controls="accountSettingsForm"
+              >
+                Ubah Akun Login
+              </button>
+              <form id="accountSettingsForm" class="admin-settings-form collapsed" autocomplete="off">
+                <input id="settingsUsernameInput" type="text" maxlength="24" placeholder="Username baru (opsional)" />
+                <input id="settingsPasswordInput" type="password" maxlength="120" placeholder="Password baru (opsional)" />
+                <button id="settingsSaveButton" type="submit" class="member-role-btn">Simpan Akun</button>
+              </form>
+            </div>
+            <div class="admin-settings-wrap">
+              <button
+                id="broadcastMessageToggle"
+                type="button"
+                class="admin-settings-toggle"
+                aria-expanded="false"
+                aria-controls="broadcastMessageForm"
+              >
+                Broadcast Penting
+              </button>
+              <form id="broadcastMessageForm" class="admin-settings-form collapsed" autocomplete="off">
+                <textarea id="broadcastMessageInput" maxlength="500" rows="3" placeholder="Tulis info penting untuk broadcast..."></textarea>
+                <div class="broadcast-checklist" id="broadcastTeamChecklist">
+                  <button id="broadcastTeamChecklistTrigger" type="button" class="broadcast-checklist-trigger" aria-expanded="false">Pilih Team (Checklist)</button>
+                  <div id="broadcastTeamChecklistMenu" class="broadcast-checklist-menu hidden" role="listbox" aria-label="Checklist team target"></div>
+                </div>
+                <div class="broadcast-checklist" id="broadcastChannelChecklist">
+                  <button id="broadcastChannelChecklistTrigger" type="button" class="broadcast-checklist-trigger" aria-expanded="false">Pilih Channels (Checklist)</button>
+                  <div id="broadcastChannelChecklistMenu" class="broadcast-checklist-menu hidden" role="listbox" aria-label="Checklist channel target"></div>
+                </div>
+                <div class="broadcast-checklist" id="broadcastRoleChecklist">
+                  <button id="broadcastRoleChecklistTrigger" type="button" class="broadcast-checklist-trigger" aria-expanded="false">Pilih Penerima (Checklist)</button>
+                  <div id="broadcastRoleChecklistMenu" class="broadcast-checklist-menu hidden" role="listbox" aria-label="Checklist penerima broadcast"></div>
+                </div>
+                <input id="broadcastDurationInput" type="number" min="5" max="180" step="1" value="18" placeholder="Durasi tampilan broadcast (detik), contoh: 18" />
+                <button id="broadcastMessageSendButton" type="submit" class="member-role-btn">Kirim Broadcast</button>
+                <div id="broadcastSendStatusCard" class="broadcast-send-status-card" data-state="idle">
+                  <p class="broadcast-send-status-label">Status Broadcast</p>
+                  <p id="broadcastSendSummary" class="broadcast-send-status-text">Status kirim broadcast akan muncul di sini.</p>
+                  <p id="broadcastSendMeta" class="broadcast-send-status-meta">Menunggu pengiriman.</p>
+                </div>
+              </form>
+            </div>
+            <div class="admin-settings-wrap">
+              <button
+                id="loginConfigToggle"
+                type="button"
+                class="admin-settings-toggle"
+                aria-expanded="false"
+                aria-controls="loginConfigForm"
+              >
+                Login Member Settings
+              </button>
+              <form id="loginConfigForm" class="admin-settings-form collapsed" autocomplete="off">
+                <div class="admin-toggle-row">
+                  <span>Tampilkan pilihan Team di login member</span>
+                  <button id="loginShowTeamToggle" type="button" class="admin-toggle-pill" aria-pressed="true">ON</button>
+                </div>
+                <div class="admin-toggle-row">
+                  <span>Tampilkan pilihan Channel di login member</span>
+                  <button id="loginShowChannelToggle" type="button" class="admin-toggle-pill" aria-pressed="true">ON</button>
+                </div>
+                <input id="loginTeamOptionsInput" type="text" maxlength="280" placeholder="Daftar Team (pisahkan koma), contoh: NOBAR,VIP,PUBLIK" />
+                <input id="loginChannelOptionsInput" type="text" maxlength="280" placeholder="Daftar Channel (pisahkan koma), contoh: GENERAL,SPORT,NEWS" />
+                <button id="loginConfigSaveButton" type="submit" class="member-role-btn">Simpan Login Member</button>
+              </form>
+            </div>
+            <div class="admin-settings-wrap">
+              <button
+                id="uploadConfigToggle"
+                type="button"
+                class="admin-settings-toggle"
+                aria-expanded="false"
+                aria-controls="uploadConfigForm"
+              >
+                Upload Limit Settings
+              </button>
+              <form id="uploadConfigForm" class="admin-settings-form collapsed" autocomplete="off">
+                <input id="uploadImageLimitInput" type="number" min="1" max="250" step="1" placeholder="Batas gambar (MB), contoh: 8" />
+                <input id="uploadVideoLimitInput" type="number" min="1" max="250" step="1" placeholder="Batas video (MB), contoh: 20" />
+                <input id="uploadAudioLimitInput" type="number" min="1" max="250" step="1" placeholder="Batas audio (MB), contoh: 12" />
+                <input id="uploadFileLimitInput" type="number" min="1" max="250" step="1" placeholder="Batas file lain (MB), contoh: 10" />
+                <button id="uploadConfigSaveButton" type="submit" class="member-role-btn">Simpan Batas Upload</button>
+              </form>
+            </div>
+            <div class="admin-list-wrap">
+              <p class="eyebrow">Daftar Admin</p>
+              <ul id="adminList" class="admin-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="presence-card dm-card">
+          <div class="presence-head">
+            <h2>Direct Messages</h2>
+            <span class="badge dm-badge">DM</span>
+          </div>
+          <ul id="dmList" class="dm-list"></ul>
+        </div>
+
+        <div class="presence-card">
+          <div class="presence-head">
+            <h2>Members</h2>
+            <span id="onlineCount" class="badge">0</span>
+          </div>
+          <p class="member-note">Klik member untuk chat privat 1-on-1.</p>
+          <div class="audience-stats" aria-label="Statistik member">
+            <span class="audience-stat-chip">Total <strong id="memberTotalCount">0</strong></span>
+            <span class="audience-stat-chip online">Online <strong id="memberOnlineCount">0</strong></span>
+            <span class="audience-stat-chip offline">Offline <strong id="memberOfflineCount">0</strong></span>
+          </div>
+          <div class="member-search-wrap">
+            <label for="memberSearchInput" class="sr-only">Cari member</label>
+            <input id="memberSearchInput" type="search" class="member-search-input" placeholder="Cari teman sja," autocomplete="off" />
+          </div>
+          <ul id="userList" class="user-list"></ul>
+        </div>
+
+        <div class="presence-card guest-card">
+          <div class="presence-head">
+            <h2>Guests</h2>
+            <span class="badge guest-badge">Tamu</span>
+          </div>
+          <p class="member-note">Daftar guest aktif dan offline.</p>
+          <div class="audience-stats" aria-label="Statistik guest">
+            <span class="audience-stat-chip">Total <strong id="guestTotalCount">0</strong></span>
+            <span class="audience-stat-chip online">Online <strong id="guestOnlineCount">0</strong></span>
+            <span class="audience-stat-chip offline">Offline <strong id="guestOfflineCount">0</strong></span>
+          </div>
+          <ul id="guestList" class="user-list guest-list"></ul>
+        </div>
+
+        <div class="presence-card team-card">
+          <div class="presence-head">
+            <h2>Team</h2>
+          </div>
+          <ul id="teamList" class="channel-list"></ul>
+          <p class="member-note team-list-hint">Klik team untuk pindah langsung.</p>
+          <form id="teamCreateForm" class="channel-form hidden" autocomplete="off">
+            <label for="teamCreateInput" class="sr-only">Buat team baru</label>
+            <input id="teamCreateInput" type="text" maxlength="20" placeholder="Buat team baru, contoh: vip" />
+            <button type="submit">Buat</button>
+          </form>
+        </div>
+
+        <div class="presence-card channel-card">
+          <div class="presence-head">
+            <h2>Channels</h2>
+          </div>
+          <ul id="channelList" class="channel-list"></ul>
+          <form id="channelForm" class="channel-form" autocomplete="off">
+            <label for="channelInput" class="sr-only">Tambah channel</label>
+            <input id="channelInput" type="text" maxlength="20" placeholder="Tambah channel, contoh: dev" />
+            <button type="submit">Tambah</button>
+          </form>
+        </div>
+
+      </section>
+
+      <section class="chat-panel">
+        <header class="chat-header">
+          <div class="chat-header-main">
+            <p id="roomLabel" class="eyebrow">TEAM</p>
+            <h2 id="roomTitle">__DEFAULT_TEAM_CODE__ · #__DEFAULT_CHANNEL_CODE__</h2>
+          </div>
+          <div class="header-actions">
+            <button id="mobileSidebarToggle" type="button" class="mobile-menu-button" aria-label="Buka panel" aria-expanded="false">
+              <span class="menu-icon" aria-hidden="true">
+                <span class="menu-icon-line"></span>
+                <span class="menu-icon-line"></span>
+                <span class="menu-icon-line"></span>
+              </span>
+              <span class="sr-only menu-toggle-label">Buka panel</span>
+            </button>
+            <button id="backToChannelButton" type="button" class="back-channel-button hidden">Kembali Ke Channel</button>
+            <span id="connectionStatus" class="status-dot status-offline">Disconnected</span>
+          </div>
+        </header>
+
+        <section id="pinnedNotice" class="pinned-notice hidden" aria-live="polite">
+          <div class="pinned-notice-content">
+            <p class="pinned-notice-label">Pinned Message</p>
+            <p id="pinnedNoticeText" class="pinned-notice-text"></p>
+            <p id="pinnedNoticeMeta" class="pinned-notice-meta"></p>
+          </div>
+          <button id="pinnedNoticeClear" type="button" class="message-action-btn hidden">Unpin</button>
+        </section>
+
+        <section id="broadcastNotice" class="broadcast-notice hidden" aria-live="assertive">
+          <div class="broadcast-notice-dot" aria-hidden="true"></div>
+          <div class="broadcast-notice-content">
+            <p class="broadcast-notice-label">Pengumuman Penting</p>
+            <p id="broadcastNoticeText" class="broadcast-notice-text"></p>
+            <p id="broadcastNoticeMeta" class="broadcast-notice-meta"></p>
+          </div>
+          <button id="broadcastNoticeClose" type="button" class="message-action-btn" aria-label="Tutup pengumuman">×</button>
+        </section>
+
+        <div class="chat-body-shell">
+          <ul id="messageList" class="message-list" aria-live="polite"></ul>
+
+          <div class="chat-meta">
+            <p id="typingIndicator" class="typing-indicator"></p>
+            <p id="throttleNotice" class="throttle-notice" role="alert"></p>
+          </div>
+          <div id="notificationStack" class="notification-stack" aria-live="polite" aria-atomic="false"></div>
+        </div>
+
+        <form id="chatForm" class="chat-form" autocomplete="off">
+          <div class="chat-input-wrap">
+            <label for="messageInput" class="sr-only">Ketik pesan</label>
+            <textarea
+              id="messageInput"
+              name="message"
+              maxlength="500"
+              rows="2"
+              placeholder="Ketik pesan... Enter kirim, Shift+Enter baris baru"
+              required
+            ></textarea>
+            <div id="emojiPicker" class="emoji-picker hidden" aria-label="Pilihan emoji"></div>
+            <div id="gifPicker" class="gif-picker hidden" aria-label="Pilihan GIF">
+              <div id="gifSearchForm" class="gif-search-form" autocomplete="off">
+                <input id="gifSearchInput" type="text" maxlength="60" placeholder="Cari GIF, contoh: funny cat" />
+                <button id="gifSearchButton" type="button">Cari</button>
+              </div>
+              <div id="gifResultGrid" class="gif-result-grid"></div>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <input id="fileInput" type="file" class="sr-only" />
+            <button id="fileToggle" type="button" class="file-toggle" aria-label="Lampirkan file">+</button>
+            <label for="codeModeSelect" class="sr-only">Pilih mode code</label>
+            <div id="codeModeDropdown" class="code-mode-dropdown">
+              <button
+                id="codeModeTrigger"
+                type="button"
+                class="code-mode-trigger"
+                aria-label="Pilih mode code"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                OFF
+              </button>
+              <div id="codeModeMenu" class="code-mode-menu hidden" role="listbox" aria-label="Pilihan mode code">
+                <button type="button" class="code-mode-option" data-code-mode="html" role="option" aria-selected="false">HTML</button>
+                <button type="button" class="code-mode-option" data-code-mode="css" role="option" aria-selected="false">CSS</button>
+                <button type="button" class="code-mode-option" data-code-mode="js" role="option" aria-selected="false">JS</button>
+                <button type="button" class="code-mode-option code-mode-option-off active" data-code-mode="off" role="option" aria-selected="true">OFF</button>
+              </div>
+              <select id="codeModeSelect" class="code-mode-select sr-only" aria-label="Pilih mode code">
+                <option value="html">Code: HTML</option>
+                <option value="css">Code: CSS</option>
+                <option value="js">Code: JS</option>
+                <option value="off" selected>Code: Off</option>
+              </select>
+            </div>
+            <button id="emojiToggle" type="button" class="emoji-toggle" aria-label="Buka emoji">🙂</button>
+            <button id="gifToggle" type="button" class="gif-toggle" aria-label="Buka GIF">GIF</button>
+            <button type="submit" class="chat-send-button">Kirim</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop hidden" aria-hidden="true"></div>
+
+    <section id="joinModal" class="join-modal" aria-modal="true" role="dialog">
+      <div class="join-card">
+        <p id="joinModalEyebrow" class="eyebrow">Masuk Ke Team</p>
+        <h2 id="joinModalTitle">Siapa nama kamu?</h2>
+        <form id="joinForm" autocomplete="off">
+          <label for="nameInput" class="sr-only">Nama pengguna</label>
+          <input id="nameInput" type="text" maxlength="24" placeholder="Contoh: Andi" required />
+          <div id="joinTeamField" class="join-select-field">
+            <label for="teamInput" class="sr-only">Pilih team</label>
+            <select id="teamInput" aria-label="Pilih team"></select>
+          </div>
+          <div id="joinChannelField" class="join-select-field">
+            <label for="joinChannelInput" class="sr-only">Pilih channel awal</label>
+            <select id="joinChannelInput" aria-label="Pilih channel awal"></select>
+          </div>
+          <label for="joinRoleSelect" class="sr-only">Role akses</label>
+          <div id="joinRoleDropdown" class="join-role-dropdown">
+            <button
+              id="joinRoleTrigger"
+              type="button"
+              class="join-role-trigger"
+              aria-label="Pilih role akses"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              Guest
+            </button>
+            <div id="joinRoleMenu" class="join-role-menu hidden" role="listbox" aria-label="Pilihan role akses">
+              <button type="button" class="join-role-option active" data-join-role="guest" role="option" aria-selected="true">Guest</button>
+              <button type="button" class="join-role-option" data-join-role="member" role="option" aria-selected="false">Member</button>
+            </div>
+            <select id="joinRoleSelect" class="sr-only" aria-label="Pilih role akses">
+              <option value="guest" selected>Guest</option>
+              <option value="member">Member</option>
+            </select>
+          </div>
+          <div id="joinPasswordField">
+            <label for="joinPasswordInput" class="sr-only">Password</label>
+            <input
+              id="joinPasswordInput"
+              type="password"
+              maxlength="120"
+              placeholder="Password"
+            />
+          </div>
+          <div class="join-actions">
+            <button id="realMembersButton" type="button" class="join-secondary-button">Daftar Member Baru</button>
+            <button id="joinSubmitPrimaryButton" type="submit">Mulai Chat</button>
+          </div>
+          <p id="joinPortalHelper" class="portal-helper">Belum punya akun member? <a id="joinPortalLink" class="portal-link" href="/daftar">Daftar di sini</a></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="realMembersModal" class="join-modal hidden" aria-modal="true" role="dialog" aria-label="Pendaftaran member baru">
+      <div class="join-card real-members-card">
+        <p id="realMembersModalEyebrow" class="eyebrow">Pendaftaran Member</p>
+        <h2 id="realMembersModalTitle">Member Baru</h2>
+        <p id="realMembersMeta" class="member-note">Isi form ini untuk mendaftarkan member baru agar mendapat badge gold.</p>
+        <form id="realMembersForm" autocomplete="off">
+          <label for="realMemberNameInput" class="sr-only">Nama member baru</label>
+          <input id="realMemberNameInput" type="text" maxlength="24" placeholder="Nama member baru" required />
+          <label for="realMemberPasswordInput" class="sr-only">Password member baru</label>
+          <input id="realMemberPasswordInput" type="password" maxlength="120" placeholder="Buat password member baru" required />
+          <div class="join-select-field">
+            <label for="realMemberTeamPreview" class="sr-only">Team pendaftaran</label>
+            <input id="realMemberTeamPreview" type="text" readonly placeholder="Team pendaftaran" />
+          </div>
+          <div class="join-select-field">
+            <label for="realMemberChannelPreview" class="sr-only">Channel awal</label>
+            <input id="realMemberChannelPreview" type="text" readonly placeholder="Channel awal" />
+          </div>
+          <div class="join-actions">
+            <button id="realMembersCloseButton" type="button" class="join-secondary-button">Batal</button>
+            <button id="realMembersSubmitButton" type="submit">Simpan Pendaftaran</button>
+          </div>
+          <p id="realMembersPortalHelper" class="portal-helper">Sudah punya akun member? <a id="realMembersPortalLink" class="portal-link" href="/login">Masuk login</a></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="previewModal" class="preview-modal hidden" aria-modal="true" role="dialog" aria-label="Live preview kode">
+      <div class="preview-card">
+        <div class="preview-head">
+          <p class="eyebrow">Live Preview</p>
+          <button id="previewCloseButton" type="button" class="preview-close-button" aria-label="Tutup preview">Tutup</button>
+        </div>
+        <p id="previewMeta" class="preview-meta">Preview aman dalam sandbox.</p>
+        <iframe
+          id="previewFrame"
+          class="preview-frame"
+          title="Live preview frame"
+          sandbox="allow-scripts allow-forms"
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+    </section>
+
+    <section id="editModal" class="edit-modal hidden" aria-modal="true" role="dialog" aria-label="Edit pesan kode">
+      <div class="edit-card">
+        <div class="edit-head">
+          <p class="eyebrow">Edit Script</p>
+          <button id="editCloseButton" type="button" class="preview-close-button" aria-label="Tutup edit">Tutup</button>
+        </div>
+        <form id="editForm" class="edit-form" autocomplete="off">
+          <label for="editMessageInput" class="sr-only">Edit pesan</label>
+          <textarea
+            id="editMessageInput"
+            rows="10"
+            maxlength="4000"
+            placeholder="Edit isi script kamu..."
+            required
+          ></textarea>
+          <div class="edit-actions">
+            <button id="editCancelButton" type="button" class="file-toggle">Batal</button>
+            <button id="editSaveButton" type="submit" class="chat-send-button">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <template id="messageTemplate">
+      <li class="message-item">
+        <article class="message-row">
+          <div class="message-avatar" aria-hidden="true"></div>
+          <div class="bubble">
+            <p class="meta"><span class="name"></span><span class="message-crowd-badge hidden" aria-hidden="true">★</span><span class="time"></span></p>
+            <p class="role-line"><span class="role-badge"></span></p>
+            <p class="text"></p>
+          </div>
+        </article>
+      </li>
+    </template>
+
+    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+    <script src="./app.js?v=20260804ar"></script>
+  </body>
+</html>
