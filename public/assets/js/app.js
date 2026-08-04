@@ -5682,13 +5682,29 @@ socket.on("presence:update", (payload) => {
     }
   }
 
-  const selfPresence = Array.isArray(payload?.users)
-    ? payload.users.find((member) => String(member?.id || "") === String(socket?.id || ""))
-      || payload.users.find((member) => normalizeDisplayName(member?.name || "") === currentUser)
-    : null;
+  const presenceUsers = Array.isArray(payload?.users) ? payload.users : [];
+  const selfPresenceById = presenceUsers.find(
+    (member) => String(member?.id || "") === String(socket?.id || "")
+  );
+  const selfPresenceByName = !selfPresenceById
+    ? presenceUsers.filter((member) => normalizeDisplayName(member?.name || "") === currentUser)
+    : [];
+
+  let selfPresence = selfPresenceById || null;
+  if (!selfPresence && selfPresenceByName.length === 1) {
+    selfPresence = selfPresenceByName[0];
+  }
+
+  if (!selfPresence && selfPresenceByName.length > 1 && isPrivilegedRole(normalizeRole(currentRole))) {
+    selfPresence = selfPresenceByName.find((member) => normalizeRole(member?.role || "") === normalizeRole(currentRole)) || null;
+  }
+
   if (selfPresence) {
     const nextUserName = normalizeDisplayName(selfPresence.name || currentUser);
-    const nextUserRole = normalizeRole(selfPresence.role || currentRole);
+    let nextUserRole = normalizeRole(selfPresence.role || currentRole);
+    if (!selfPresenceById && isPrivilegedRole(normalizeRole(currentRole)) && !isPrivilegedRole(nextUserRole)) {
+      nextUserRole = normalizeRole(currentRole);
+    }
     const profileChanged = nextUserName !== currentUser || nextUserRole !== currentRole;
 
     currentUser = nextUserName;
