@@ -312,7 +312,7 @@
               <a href="/sitemap.xml">Sitemap</a>
               <a href="/robots.txt">Robots</a>
               <a href="/site.webmanifest">Web Manifest</a>
-              <a href="https://github.com/Goobline/Live-Chat-JEEtalk" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+              <a href="https://github.com/Goobline/Server-LiveChat" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
             </section>
 
             <section class="landing-footer-col" aria-label="Company LiveTeams">
@@ -378,7 +378,7 @@
 
         triggers.forEach((trigger) => {
           trigger.addEventListener("click", () => {
-            window.dispatchEvent(new CustomEvent("jeetalk:open-widget"));
+            window.dispatchEvent(new CustomEvent("liveteams:open-widget"));
           });
         });
       })();

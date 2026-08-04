@@ -214,7 +214,7 @@
     }
   });
 
-  window.addEventListener("jeetalk:open-widget", () => {
+  window.addEventListener("liveteams:open-widget", () => {
     openPanel({ maximize: isDesktopViewport() });
   });
 

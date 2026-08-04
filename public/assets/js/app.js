@@ -150,9 +150,9 @@ const DEFAULT_CHANNEL = String(document.body?.dataset?.defaultChannelCode || "GE
   .trim()
   .toUpperCase() || "GENERAL";
 const DEFAULT_TEAM_NOTICE = "Gunakan kode team yang sama untuk gabung grup yang sama.";
-const MEMBER_LOGIN_STORAGE_KEY = "jeetalk.memberLogin.v1";
+const MEMBER_LOGIN_STORAGE_KEY = "liveteams.memberLogin.v1";
 const TENOR_API_KEY = "LIVDSRZULELA";
-const TENOR_CLIENT_KEY = "jeetalk-livechat";
+const TENOR_CLIENT_KEY = "liveteams-livechat";
 const MOBILE_SIDEBAR_BREAKPOINT = 900;
 const AUTO_CROWD_USER_COUNT = 108;
 const AUTO_CROWD_ACTIVE_CHATTERS = 24;
@@ -2070,7 +2070,7 @@ const getAvatarVariant = (name) => {
   const source = normalizeDisplayName(name) || "Guest";
   const lowerSource = source.toLowerCase();
 
-  if (lowerSource.includes("jee ai") || /\bai\b/.test(lowerSource)) {
+  if (lowerSource.includes("liveteams ai") || /\bai\b/.test(lowerSource)) {
     return "ai";
   }
 
