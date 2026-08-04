@@ -5521,9 +5521,26 @@ socket.on("team:state", (payload) => {
       : []
   };
 
-  const selfMember = currentTeamMembers.find((member) => normalizeDisplayName(member.name) === currentUser);
+  const selfMemberById = currentTeamMembers.find(
+    (member) => String(member?.id || "") === String(socket?.id || "")
+  );
+  const selfMemberByName = !selfMemberById
+    ? currentTeamMembers.filter((member) => normalizeDisplayName(member.name) === currentUser)
+    : [];
+
+  let selfMember = selfMemberById || null;
+  if (!selfMember && selfMemberByName.length === 1) {
+    selfMember = selfMemberByName[0];
+  }
+  if (!selfMember && selfMemberByName.length > 1 && isPrivilegedRole(normalizeRole(currentRole))) {
+    selfMember = selfMemberByName.find((member) => normalizeRole(member?.role || "") === normalizeRole(currentRole)) || null;
+  }
+
   if (selfMember?.role) {
-    currentRole = normalizeRole(selfMember.role);
+    const nextRole = normalizeRole(selfMember.role);
+    if (!(isPrivilegedRole(normalizeRole(currentRole)) && !isPrivilegedRole(nextRole) && !selfMemberById)) {
+      currentRole = nextRole;
+    }
   }
   if (selfMember) {
     currentUserIsRegisteredMember = Boolean(selfMember.registeredMember);
