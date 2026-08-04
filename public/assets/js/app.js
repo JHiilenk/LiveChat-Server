@@ -5902,6 +5902,7 @@ socket.on("channel:joined", (payload) => {
 });
 
 socket.on("dm:ready", (payload) => {
+  setChatReadyState(true);
   switchToDmView(payload);
 
   const dmKey = String(payload?.dmKey || "").trim();
@@ -5930,16 +5931,19 @@ socket.on("dm:ready", (payload) => {
   }
 
   if (!pendingAutoOpenBroadcastDm || pendingAutoOpenBroadcastDm.dmKey !== dmKey) {
+    focusMessageInputWithoutScroll();
     return;
   }
 
   const pendingMessage = pendingAutoOpenBroadcastDm.message;
   pendingAutoOpenBroadcastDm = null;
   if (!pendingMessage?.id || getCachedMessageById(pendingMessage.id)) {
+    focusMessageInputWithoutScroll();
     return;
   }
 
   pushMessage(pendingMessage);
+  focusMessageInputWithoutScroll();
 });
 
 socket.on("channel:pinned", (payload) => {
