@@ -6,8 +6,8 @@ const registerPublicSiteRoutes = ({
   app,
   projectRoot,
   publicBaseUrl,
-  appName = "Jeetalk",
-  appDescription = "Server live chat realtime untuk banyak client."
+  appName = "LiveTeams",
+  appDescription = "Server live chat realtime untuk kolaborasi tim modern."
 }) => {
   const publicDirectory = path.join(projectRoot, "public");
   const pageDirectory = path.join(publicDirectory, "pages");

@@ -28,8 +28,8 @@ const server = http.createServer(app);
 const PORT = Number(process.env.PORT) || 3000;
 const APP_ORIGIN = process.env.APP_ORIGIN || "*";
 const SOCKET_CORS_ORIGIN = process.env.SOCKET_CORS_ORIGIN || APP_ORIGIN;
-const APP_NAME = String(process.env.APP_NAME || "Jeetalk").trim() || "Jeetalk";
-const APP_DESCRIPTION = String(process.env.APP_DESCRIPTION || `${APP_NAME} adalah server live chat realtime untuk banyak client.`).trim() || `${APP_NAME} adalah server live chat realtime untuk banyak client.`;
+const APP_NAME = String(process.env.APP_NAME || "LiveTeams").trim() || "LiveTeams";
+const APP_DESCRIPTION = String(process.env.APP_DESCRIPTION || `${APP_NAME} adalah server live chat realtime untuk kolaborasi tim modern.`).trim() || `${APP_NAME} adalah server live chat realtime untuk kolaborasi tim modern.`;
 
 const normalizeDefaultCode = (value, fallback) => {
   const cleaned = String(value || "")

@@ -1224,7 +1224,7 @@ const configurePortalCopy = () => {
   document.body.classList.toggle("portal-registration", isRegistrationPortal);
 
   if (isMemberLoginPortal) {
-    document.title = "Login Member | Jeetalk";
+    document.title = "Login Member | LiveTeams";
     if (joinModalEyebrow) {
       joinModalEyebrow.textContent = "Login Member";
     }
@@ -1251,7 +1251,7 @@ const configurePortalCopy = () => {
   }
 
   if (isRegistrationPortal) {
-    document.title = "Daftar Member | Jeetalk";
+    document.title = "Daftar Member | LiveTeams";
     if (realMembersModalEyebrow) {
       realMembersModalEyebrow.textContent = "Portal Pendaftaran";
     }
@@ -1981,7 +1981,7 @@ const getPreviewDocumentFromMessageText = (text) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jeetalk Preview</title>
+  <title>LiveTeams Preview</title>
   ${styleTag}
 </head>
 <body>

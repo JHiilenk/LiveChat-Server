@@ -1,11 +1,11 @@
 {
-  "name": "Jeetalk Live Chat",
-  "short_name": "Jeetalk",
+  "name": "LiveTeams Live Chat",
+  "short_name": "LiveTeams",
   "description": "Live chat realtime untuk komunitas, team, dan kolaborasi online.",
   "start_url": "/app",
   "display": "standalone",
-  "background_color": "#08180e",
-  "theme_color": "#08180e",
+  "background_color": "#081a34",
+  "theme_color": "#081a34",
   "icons": [
     {
       "src": "/favicon.svg",

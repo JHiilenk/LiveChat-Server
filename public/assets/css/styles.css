@@ -1,14 +1,14 @@
 :root {
-  --bg-1: #050907;
-  --bg-2: #08180e;
-  --panel: rgba(7, 20, 12, 0.94);
-  --panel-soft: rgba(10, 28, 17, 0.92);
-  --text: #e8f3d6;
-  --muted: #97ad92;
-  --line: rgba(95, 205, 95, 0.45);
-  --line-soft: rgba(95, 205, 95, 0.25);
-  --accent: #7ff05a;
-  --accent-2: #dca395;
+  --bg-1: #030816;
+  --bg-2: #0a1f40;
+  --panel: rgba(8, 23, 46, 0.94);
+  --panel-soft: rgba(11, 29, 57, 0.92);
+  --text: #e4efff;
+  --muted: #9db3d4;
+  --line: rgba(102, 157, 255, 0.42);
+  --line-soft: rgba(102, 157, 255, 0.24);
+  --accent: #70adff;
+  --accent-2: #ff9b54;
   --shadow: 0 16px 34px rgba(0, 0, 0, 0.48);
   --app-mobile-vh: 100dvh;
   --app-mobile-keyboard-offset: 0px;
@@ -28,8 +28,8 @@ body {
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 15% 8%, rgba(119, 232, 86, 0.18), transparent 34%),
-    radial-gradient(circle at 85% 90%, rgba(237, 164, 145, 0.16), transparent 35%),
+    radial-gradient(circle at 14% 10%, rgba(96, 153, 255, 0.22), transparent 36%),
+    radial-gradient(circle at 86% 88%, rgba(255, 157, 87, 0.14), transparent 34%),
     linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
   overflow-x: hidden;
   overflow-y: auto;
@@ -136,11 +136,11 @@ body.embed-mode .chat-form {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border: 1px solid rgba(126, 225, 90, 0.16);
+  border: 1px solid rgba(106, 162, 255, 0.22);
   border-radius: 999px;
   padding: 0.7rem 0.9rem;
   margin-top: 0;
-  background: rgba(7, 20, 12, 0.72);
+  background: rgba(8, 23, 46, 0.78);
   backdrop-filter: blur(10px);
   position: relative;
 }
@@ -160,7 +160,7 @@ body.embed-mode .chat-form {
 }
 
 .landing-brand-text {
-  color: #edf8db;
+  color: #eff6ff;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -200,23 +200,23 @@ body.embed-mode .chat-form {
 }
 
 .landing-nav-ghost {
-  border: 1px solid rgba(135, 228, 98, 0.22);
-  background: rgba(11, 28, 16, 0.82);
-  color: #dff0d4;
+  border: 1px solid rgba(106, 162, 255, 0.36);
+  background: rgba(10, 30, 59, 0.82);
+  color: #dbe9ff;
 }
 
 .landing-nav-primary {
-  background: linear-gradient(90deg, #92fb66 0%, #63da4b 56%, #ebb39d 100%);
-  color: #08150b;
+  background: linear-gradient(90deg, #6ba7ff 0%, #3e7de0 56%, #ff9f58 100%);
+  color: #0b1424;
 }
 
 .landing-menu-toggle {
   display: none;
   width: 3rem;
   height: 3rem;
-  border: 1px solid rgba(132, 225, 96, 0.2);
+  border: 1px solid rgba(106, 162, 255, 0.32);
   border-radius: 0.95rem;
-  background: rgba(10, 26, 15, 0.88);
+  background: rgba(9, 27, 54, 0.9);
   box-shadow: none;
   padding: 0.65rem;
 }
@@ -226,7 +226,7 @@ body.embed-mode .chat-form {
   width: 100%;
   height: 2px;
   border-radius: 999px;
-  background: #eaf7da;
+  background: #edf5ff;
 }
 
 .landing-menu-toggle span + span {
@@ -293,21 +293,21 @@ body.embed-mode .chat-form {
 }
 
 .landing-stat-card {
-  border: 1px solid rgba(124, 220, 88, 0.14);
+  border: 1px solid rgba(106, 162, 255, 0.2);
   border-radius: 1rem;
   padding: 0.8rem;
-  background: rgba(9, 24, 14, 0.74);
+  background: rgba(9, 24, 48, 0.76);
   display: grid;
   gap: 0.28rem;
 }
 
 .landing-stat-card strong {
-  color: #e7f4d7;
+  color: #eef6ff;
   font-size: 0.92rem;
 }
 
 .landing-stat-card span {
-  color: #a7bc9d;
+  color: #a8bddd;
   line-height: 1.45;
   font-size: 0.82rem;
 }
@@ -329,10 +329,10 @@ body.embed-mode .chat-form {
 }
 
 .landing-preview-metric {
-  border: 1px solid rgba(119, 219, 87, 0.2);
+  border: 1px solid rgba(106, 162, 255, 0.28);
   border-radius: 0.9rem;
   padding: 0.58rem 0.72rem;
-  background: linear-gradient(180deg, rgba(10, 28, 17, 0.9) 0%, rgba(7, 19, 12, 0.94) 100%);
+  background: linear-gradient(180deg, rgba(11, 32, 63, 0.92) 0%, rgba(8, 23, 46, 0.96) 100%);
   min-height: 4.2rem;
   display: grid;
   align-content: center;
@@ -341,7 +341,7 @@ body.embed-mode .chat-form {
 
 .landing-preview-metric-label {
   margin: 0;
-  color: #93aa8c;
+  color: #9fb6d8;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -350,20 +350,20 @@ body.embed-mode .chat-form {
 
 .landing-preview-metric-value {
   margin: 0;
-  color: #ebf8dc;
+  color: #edf5ff;
   font-size: 1.04rem;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
 
 .landing-preview-metric.online .landing-preview-metric-value {
-  color: #99fb69;
+  color: #ffab6d;
 }
 
 .landing-preview-visual {
-  border: 1px solid rgba(125, 223, 92, 0.18);
+  border: 1px solid rgba(106, 162, 255, 0.24);
   border-radius: 0.95rem;
-  background: radial-gradient(circle at 12% 15%, rgba(136, 241, 97, 0.2), transparent 46%), rgba(8, 23, 14, 0.82);
+  background: radial-gradient(circle at 12% 15%, rgba(106, 162, 255, 0.24), transparent 46%), radial-gradient(circle at 82% 82%, rgba(255, 159, 88, 0.16), transparent 52%), rgba(8, 23, 46, 0.84);
   padding: 0.8rem;
   display: flex;
   align-items: flex-end;
@@ -588,11 +588,11 @@ body.route-public-home .app-shell {
 .seo-proof-pill {
   display: inline-flex;
   align-items: center;
-  border: 1px solid rgba(125, 221, 88, 0.2);
+  border: 1px solid rgba(106, 162, 255, 0.26);
   border-radius: 999px;
   padding: 0.38rem 0.72rem;
-  background: rgba(11, 29, 16, 0.82);
-  color: #cfe8bf;
+  background: rgba(11, 30, 59, 0.82);
+  color: #d7e5ff;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -611,23 +611,23 @@ body.route-public-home .app-shell {
 
 .seo-feature-item,
 .seo-faq-item {
-  border: 1px solid rgba(122, 214, 88, 0.18);
+  border: 1px solid rgba(106, 162, 255, 0.24);
   border-radius: 0.88rem;
   padding: 0.85rem;
-  background: rgba(10, 26, 16, 0.78);
+  background: rgba(9, 24, 48, 0.8);
 }
 
 .seo-feature-item h3,
 .seo-faq-item h3 {
   margin: 0;
   font-size: 1rem;
-  color: #e8f6d5;
+  color: #edf5ff;
 }
 
 .seo-feature-item p,
 .seo-faq-item p {
   margin: 0.42rem 0 0;
-  color: #a9bd9f;
+  color: #aec2de;
   line-height: 1.55;
   font-size: 0.92rem;
 }
@@ -661,29 +661,29 @@ body.route-public-home .app-shell {
 .landing-testimonial-card,
 .landing-pricing-card,
 .landing-demo-card {
-  border: 1px solid rgba(122, 214, 88, 0.18);
+  border: 1px solid rgba(106, 162, 255, 0.24);
   border-radius: 1rem;
   padding: 1rem;
-  background: linear-gradient(180deg, rgba(9, 24, 14, 0.92) 0%, rgba(5, 15, 9, 0.92) 100%);
+  background: linear-gradient(180deg, rgba(9, 24, 48, 0.92) 0%, rgba(6, 16, 33, 0.94) 100%);
   box-shadow: var(--shadow);
 }
 
 .landing-testimonial-card.featured,
 .landing-pricing-card.featured {
-  border-color: rgba(237, 184, 117, 0.36);
-  background: linear-gradient(180deg, rgba(24, 22, 11, 0.96) 0%, rgba(15, 12, 7, 0.96) 100%);
+  border-color: rgba(255, 159, 88, 0.46);
+  background: linear-gradient(180deg, rgba(47, 33, 20, 0.96) 0%, rgba(24, 16, 11, 0.98) 100%);
 }
 
 .landing-quote {
   margin: 0;
-  color: #e6f4d8;
+  color: #e6f0ff;
   font-size: 0.98rem;
   line-height: 1.7;
 }
 
 .landing-testimonial-name {
   margin: 0.8rem 0 0;
-  color: #9ef66d;
+  color: #ffac70;
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -693,7 +693,7 @@ body.route-public-home .app-shell {
 .landing-pricing-kicker,
 .landing-demo-label {
   margin: 0;
-  color: #9ef66d;
+  color: #ffac70;
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -703,12 +703,12 @@ body.route-public-home .app-shell {
 .landing-pricing-card h3 {
   margin: 0.4rem 0 0;
   font-size: 1.35rem;
-  color: #eef9de;
+  color: #eef6ff;
 }
 
 .landing-pricing-price {
   margin: 0.42rem 0 0;
-  color: #f1d190;
+  color: #ffbf8d;
   font-size: 1rem;
   font-weight: 700;
 }
@@ -717,7 +717,7 @@ body.route-public-home .app-shell {
 .landing-demo-list {
   margin: 0.85rem 0 0;
   padding-left: 1.1rem;
-  color: #b3c6aa;
+  color: #b8cae6;
   display: grid;
   gap: 0.52rem;
   line-height: 1.5;
@@ -730,15 +730,15 @@ body.route-public-home .app-shell {
 
 .landing-code-block {
   margin: 0.7rem 0 0;
-  border: 1px solid rgba(127, 224, 92, 0.18);
+  border: 1px solid rgba(106, 162, 255, 0.24);
   border-radius: 0.88rem;
   padding: 0.9rem;
-  background: rgba(7, 18, 11, 0.94);
+  background: rgba(7, 20, 40, 0.96);
   overflow-x: auto;
 }
 
 .landing-code-block code {
-  color: #e6f7d3;
+  color: #e8f1ff;
   font-family: "Consolas", "Cascadia Code", monospace;
   font-size: 0.86rem;
   white-space: pre;
@@ -746,7 +746,7 @@ body.route-public-home .app-shell {
 
 .landing-demo-copy {
   margin: 0.8rem 0 0;
-  color: #afc4a5;
+  color: #aec2de;
   line-height: 1.6;
 }
 
@@ -756,9 +756,9 @@ body.route-public-home .app-shell {
 }
 
 .landing-footer-shell {
-  border: 1px solid rgba(125, 221, 88, 0.2);
+  border: 1px solid rgba(106, 162, 255, 0.26);
   border-radius: 1.2rem;
-  background: linear-gradient(180deg, rgba(8, 22, 13, 0.96) 0%, rgba(5, 14, 8, 0.98) 100%);
+  background: linear-gradient(180deg, rgba(8, 23, 46, 0.96) 0%, rgba(6, 16, 32, 0.98) 100%);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -771,22 +771,22 @@ body.route-public-home .app-shell {
 }
 
 .landing-footer-featured {
-  border: 1px solid rgba(127, 224, 92, 0.18);
+  border: 1px solid rgba(106, 162, 255, 0.26);
   border-radius: 1rem;
   padding: 1.1rem;
-  background: radial-gradient(circle at 8% 8%, rgba(131, 240, 91, 0.18), transparent 42%), rgba(9, 26, 15, 0.82);
+  background: radial-gradient(circle at 8% 8%, rgba(106, 162, 255, 0.24), transparent 42%), radial-gradient(circle at 88% 90%, rgba(255, 159, 88, 0.14), transparent 52%), rgba(9, 24, 48, 0.84);
 }
 
 .landing-footer-featured h2 {
   margin: 0.4rem 0 0;
   font-size: clamp(1.35rem, 2.8vw, 2.25rem);
   line-height: 1.12;
-  color: #eef9de;
+  color: #eef6ff;
 }
 
 .landing-footer-lead {
   margin: 0.8rem 0 0;
-  color: #b4c8ab;
+  color: #b5cae4;
   line-height: 1.62;
   max-width: 56ch;
 }
@@ -809,11 +809,11 @@ body.route-public-home .app-shell {
   display: inline-flex;
   align-items: center;
   min-height: 1.95rem;
-  border: 1px solid rgba(138, 232, 103, 0.24);
+  border: 1px solid rgba(255, 159, 88, 0.34);
   border-radius: 999px;
   padding: 0.3rem 0.7rem;
-  background: rgba(8, 21, 13, 0.84);
-  color: #d5ebc7;
+  background: rgba(16, 31, 57, 0.84);
+  color: #ffe0c6;
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -825,10 +825,10 @@ body.route-public-home .app-shell {
 }
 
 .landing-footer-col {
-  border: 1px solid rgba(121, 214, 88, 0.16);
+  border: 1px solid rgba(106, 162, 255, 0.22);
   border-radius: 0.9rem;
   padding: 0.9rem;
-  background: rgba(9, 24, 14, 0.76);
+  background: rgba(9, 24, 48, 0.76);
   display: grid;
   align-content: start;
   gap: 0.45rem;
@@ -836,25 +836,25 @@ body.route-public-home .app-shell {
 
 .landing-footer-col h3 {
   margin: 0 0 0.22rem;
-  color: #edf8da;
+  color: #eef6ff;
   font-size: 0.96rem;
   letter-spacing: 0.02em;
 }
 
 .landing-footer-col a {
-  color: #b9cdb0;
+  color: #b8cae5;
   text-decoration: none;
   font-size: 0.88rem;
   line-height: 1.5;
 }
 
 .landing-footer-col a:hover {
-  color: #ebf9db;
+  color: #eef6ff;
 }
 
 .landing-footer-bottom {
-  border-top: 1px solid rgba(124, 219, 89, 0.16);
-  background: rgba(4, 10, 6, 0.92);
+  border-top: 1px solid rgba(106, 162, 255, 0.2);
+  background: rgba(6, 15, 32, 0.92);
   padding: 0.8rem 1.2rem;
   display: flex;
   flex-wrap: wrap;
@@ -865,18 +865,18 @@ body.route-public-home .app-shell {
 
 .landing-footer-copy {
   margin: 0;
-  color: #8ea484;
+  color: #94adcb;
   font-size: 0.8rem;
 }
 
 .landing-footer-brand-link {
-  color: #a9f574;
+  color: #ffac70;
   text-decoration: none;
   font-weight: 700;
 }
 
 .landing-footer-brand-link:hover {
-  color: #d9ffb6;
+  color: #ffd0aa;
 }
 
 .landing-footer-mini-nav {
@@ -886,14 +886,14 @@ body.route-public-home .app-shell {
 }
 
 .landing-footer-mini-nav a {
-  color: #b8cdae;
+  color: #b9cce7;
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 700;
 }
 
 .landing-footer-mini-nav a:hover {
-  color: #ebf8dc;
+  color: #eef6ff;
 }
 
 body.embed-mode .seo-landing,
@@ -952,10 +952,10 @@ body.portal-admin .seo-landing {
     right: 0;
     left: 0;
     display: none;
-    border: 1px solid rgba(126, 225, 90, 0.16);
+    border: 1px solid rgba(106, 162, 255, 0.24);
     border-radius: 1rem;
     padding: 0.9rem;
-    background: rgba(7, 20, 12, 0.96);
+    background: rgba(8, 23, 46, 0.96);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow);
     flex-direction: column;
@@ -1117,7 +1117,7 @@ body.portal-admin .seo-landing {
 
 .sidebar,
 .chat-panel {
-  background: linear-gradient(180deg, rgba(9, 25, 15, 0.95) 0%, rgba(5, 14, 9, 0.95) 100%);
+  background: linear-gradient(180deg, rgba(9, 27, 54, 0.95) 0%, rgba(5, 15, 33, 0.95) 100%);
   border: 1px solid var(--line);
   border-radius: 1.15rem;
   box-shadow: var(--shadow);
@@ -1145,9 +1145,9 @@ body.portal-admin .seo-landing {
   height: 2.35rem;
   padding: 0.4rem 0.72rem;
   border-radius: 0.9rem;
-  border: 1px solid rgba(141, 233, 107, 0.46);
-  background: rgba(19, 47, 27, 0.94);
-  color: #dff3cb;
+  border: 1px solid rgba(120, 172, 255, 0.46);
+  background: rgba(20, 47, 89, 0.94);
+  color: #e4eeff;
   -webkit-text-fill-color: currentColor;
   font-size: 0.78rem;
   font-weight: 700;
@@ -1166,16 +1166,16 @@ body.portal-admin .seo-landing {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   font-weight: 900;
-  text-shadow: 0 0 18px rgba(136, 239, 97, 0.2);
+  text-shadow: 0 0 20px rgba(114, 169, 255, 0.25);
   word-break: keep-all;
 }
 
 .brand-block h1 .tone-a {
-  color: #8dfb67;
+  color: #71afff;
 }
 
 .brand-block h1 .tone-b {
-  color: #e2a194;
+  color: #ff9f5a;
 }
 
 .eyebrow {
@@ -1218,11 +1218,11 @@ body.portal-admin .seo-landing {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(139, 233, 103, 0.45);
+  border: 1px solid rgba(114, 172, 255, 0.45);
   border-radius: 0.62rem;
   padding: 0.42rem 0.58rem;
-  background: rgba(17, 46, 25, 0.9);
-  color: #9af06a;
+  background: rgba(14, 39, 74, 0.9);
+  color: #9dc4ff;
   -webkit-text-fill-color: currentColor;
   box-shadow: none;
   font-size: 0.78rem;
@@ -1534,9 +1534,9 @@ body.portal-admin .seo-landing {
   width: 2.95rem;
   height: 2.95rem;
   border-radius: 0.95rem;
-  border: 1px solid rgba(167, 238, 105, 0.45);
-  background: linear-gradient(130deg, #7eea5c 0%, #d7a18e 100%);
-  color: #0a150b;
+  border: 1px solid rgba(119, 176, 255, 0.45);
+  background: linear-gradient(130deg, #5f9cff 0%, #ff9f5a 100%);
+  color: #eef5ff;
   font-weight: 800;
   font-size: 1rem;
   display: inline-flex;
@@ -1672,11 +1672,11 @@ body.portal-admin .seo-landing {
   min-width: 2rem;
   padding: 0.1rem 0.75rem;
   border-radius: 999px;
-  background: linear-gradient(120deg, #81f25a 0%, #badb77 56%, #dea093 100%);
-  color: #071308;
+  background: linear-gradient(120deg, #5f9cff 0%, #73b3ff 56%, #ff9f5a 100%);
+  color: #06152b;
   font-weight: 800;
   font-size: 0.9rem;
-  box-shadow: 0 0 16px rgba(127, 233, 86, 0.25);
+  box-shadow: 0 0 16px rgba(95, 156, 255, 0.26);
 }
 
 #teamList {
@@ -2047,11 +2047,11 @@ body.portal-admin .seo-landing {
 .widget-launcher {
   width: 58px;
   height: 58px;
-  border: 1px solid rgba(137, 235, 94, 0.55);
+  border: 1px solid rgba(106, 162, 255, 0.55);
   border-radius: 999px;
-  background: linear-gradient(180deg, #96f65f 0%, #61d34c 100%);
-  color: #081208;
-  box-shadow: 0 16px 30px rgba(12, 26, 11, 0.42);
+  background: linear-gradient(180deg, #63a0ff 0%, #3473d8 100%);
+  color: #f1f6ff;
+  box-shadow: 0 16px 30px rgba(6, 16, 34, 0.46);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2078,8 +2078,8 @@ body.portal-admin .seo-landing {
   height: min(640px, calc(100vh - 5rem));
   border-radius: 22px;
   overflow: hidden;
-  background: rgba(5, 12, 7, 0.96);
-  border: 1px solid rgba(137, 235, 94, 0.28);
+  background: rgba(8, 23, 46, 0.96);
+  border: 1px solid rgba(106, 162, 255, 0.28);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
   display: flex;
   flex-direction: column;
@@ -2095,8 +2095,8 @@ body.portal-admin .seo-landing {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 0.9rem;
-  background: linear-gradient(180deg, rgba(14, 34, 19, 0.98) 0%, rgba(8, 22, 12, 0.98) 100%);
-  border-bottom: 1px solid rgba(137, 235, 94, 0.18);
+  background: linear-gradient(180deg, rgba(12, 34, 70, 0.98) 0%, rgba(8, 23, 46, 0.98) 100%);
+  border-bottom: 1px solid rgba(106, 162, 255, 0.22);
 }
 
 .widget-panel-title {
@@ -2111,14 +2111,14 @@ body.portal-admin .seo-landing {
 
 .widget-panel-title span {
   font-size: 0.72rem;
-  color: #92a78e;
+  color: #a5bbdb;
 }
 
 .widget-panel-close {
-  border: 1px solid rgba(137, 235, 94, 0.18);
+  border: 1px solid rgba(255, 159, 88, 0.28);
   border-radius: 999px;
-  background: rgba(8, 20, 11, 0.95);
-  color: #eef7e4;
+  background: rgba(49, 31, 17, 0.95);
+  color: #ffddc4;
   width: 34px;
   height: 34px;
   cursor: pointer;
@@ -2128,7 +2128,7 @@ body.portal-admin .seo-landing {
   flex: 1 1 auto;
   width: 100%;
   border: 0;
-  background: #061008;
+  background: #081a34;
 }
 
 @media (max-width: 520px) {
@@ -2698,10 +2698,10 @@ body.portal-admin .seo-landing {
   min-width: 2.3rem;
   height: 2.3rem;
   padding: 0.36rem 0.48rem;
-  border: 1px solid rgba(141, 233, 107, 0.46);
+  border: 1px solid rgba(114, 172, 255, 0.46);
   border-radius: 0.62rem;
-  background: rgba(19, 47, 27, 0.9);
-  color: #ddf3ca;
+  background: rgba(16, 41, 78, 0.9);
+  color: #ddecff;
   -webkit-text-fill-color: currentColor;
   box-shadow: none;
   font-size: 1.05rem;
@@ -2717,9 +2717,9 @@ body.portal-admin .seo-landing {
 }
 
 .mobile-menu-button.active {
-  border-color: rgba(181, 241, 129, 0.8);
-  background: linear-gradient(180deg, rgba(37, 82, 44, 0.95) 0%, rgba(25, 56, 31, 0.95) 100%);
-  color: #efffd8;
+  border-color: rgba(139, 190, 255, 0.84);
+  background: linear-gradient(180deg, rgba(45, 92, 160, 0.95) 0%, rgba(28, 63, 120, 0.95) 100%);
+  color: #f0f6ff;
 }
 
 .menu-icon {
@@ -2796,7 +2796,7 @@ body.portal-admin .seo-landing {
 }
 
 .status-online::before {
-  background: #6ee14a;
+  background: #6faeff;
 }
 
 .back-channel-button {
@@ -3322,20 +3322,20 @@ body.portal-admin .seo-landing {
 }
 
 .dm-item-outgoing .message-avatar {
-  border-color: rgba(155, 232, 113, 0.62);
+  border-color: rgba(255, 166, 98, 0.56);
 }
 
 .dm-bubble-outgoing {
-  border-color: rgba(145, 221, 98, 0.52);
-  background: linear-gradient(150deg, rgba(23, 51, 30, 0.95) 0%, rgba(16, 38, 24, 0.95) 100%);
+  border-color: rgba(106, 162, 255, 0.5);
+  background: linear-gradient(150deg, rgba(13, 34, 67, 0.95) 0%, rgba(9, 25, 49, 0.95) 100%);
 }
 
 .message-code-block {
   margin-top: 0.5rem;
-  border: 1px solid rgba(125, 220, 88, 0.3);
+  border: 1px solid rgba(106, 162, 255, 0.32);
   border-radius: 0.62rem;
   overflow: hidden;
-  background: rgba(6, 16, 10, 0.96);
+  background: rgba(6, 18, 37, 0.96);
 }
 
 .message-code-meta {
@@ -3343,9 +3343,9 @@ body.portal-admin .seo-landing {
   font-size: 0.69rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #b7f88a;
-  background: rgba(18, 42, 25, 0.95);
-  border-bottom: 1px solid rgba(112, 211, 84, 0.22);
+  color: #ffbf8f;
+  background: rgba(16, 35, 64, 0.95);
+  border-bottom: 1px solid rgba(106, 162, 255, 0.26);
 }
 
 .message-code-block pre {
@@ -4008,9 +4008,10 @@ button:hover {
   overscroll-behavior: contain;
   box-shadow: var(--shadow);
   background:
-    linear-gradient(180deg, rgba(10, 31, 17, 0.98) 0%, rgba(6, 18, 11, 0.98) 100%),
-    radial-gradient(circle at 20% 12%, rgba(123, 227, 81, 0.18), transparent 40%);
-  color: #e8f4d4;
+    linear-gradient(180deg, rgba(11, 32, 63, 0.98) 0%, rgba(7, 19, 38, 0.98) 100%),
+    radial-gradient(circle at 20% 12%, rgba(106, 162, 255, 0.2), transparent 40%),
+    radial-gradient(circle at 86% 86%, rgba(255, 159, 88, 0.14), transparent 46%);
+  color: #e8f2ff;
 }
 
 body.embed-mode .join-modal {
