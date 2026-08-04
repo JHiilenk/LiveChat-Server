@@ -2646,6 +2646,20 @@ const closeBroadcastChecklistMenus = () => {
   });
 };
 
+const closeJoinChecklistMenus = () => {
+  [
+    [joinTeamChecklistMenu, joinTeamChecklistTrigger],
+    [joinChannelChecklistMenu, joinChannelChecklistTrigger]
+  ].forEach(([menu, trigger]) => {
+    if (!menu || !trigger) {
+      return;
+    }
+
+    menu.classList.add("hidden");
+    trigger.setAttribute("aria-expanded", "false");
+  });
+};
+
 const getBroadcastSelectableChannels = () => {
   const selectedTeams = Array.from(selectedBroadcastTeamCodes)
     .map((teamCode) => normalizeCode(teamCode, ""))
@@ -5667,16 +5681,38 @@ if (broadcastRoleChecklistTrigger && broadcastRoleChecklistMenu) {
   });
 }
 
+if (joinTeamChecklistTrigger && joinTeamChecklistMenu) {
+  joinTeamChecklistTrigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = joinTeamChecklistMenu.classList.contains("hidden");
+    closeJoinChecklistMenus();
+    joinTeamChecklistMenu.classList.toggle("hidden", !willOpen);
+    joinTeamChecklistTrigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
+}
+
+if (joinChannelChecklistTrigger && joinChannelChecklistMenu) {
+  joinChannelChecklistTrigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = joinChannelChecklistMenu.classList.contains("hidden");
+    closeJoinChecklistMenus();
+    joinChannelChecklistMenu.classList.toggle("hidden", !willOpen);
+    joinChannelChecklistTrigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
+}
+
 document.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) {
     closeBroadcastChecklistMenus();
+    closeJoinChecklistMenus();
     return;
   }
 
-  const insideBroadcastChecklist = target.closest(".broadcast-checklist");
-  if (!insideBroadcastChecklist) {
+  const insideChecklist = target.closest(".broadcast-checklist");
+  if (!insideChecklist) {
     closeBroadcastChecklistMenus();
+    closeJoinChecklistMenus();
   }
 });
 
