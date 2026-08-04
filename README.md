@@ -1,4 +1,4 @@
-# Project Live Chat Server
+# Server-LiveChat
 
 Versi ini adalah project terpisah untuk deploy live chat saja, tanpa landing marketing dari folder `PEMULA`. Folder ini bisa dipakai sebagai instance khusus per client dengan domain, origin, akun admin, dan kode team default yang berbeda.
 
@@ -21,7 +21,7 @@ Versi ini adalah project terpisah untuk deploy live chat saja, tanpa landing mar
 ## Menjalankan Lokal
 
 ```bash
-cd Project
+cd Server-LiveChat
 npm install
 npm start
 ```

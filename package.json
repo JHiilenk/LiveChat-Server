@@ -1,5 +1,5 @@
 {
-  "name": "project-livechat-server",
+  "name": "server-livechat",
   "version": "1.0.0",
   "description": "Standalone live chat server deployment for client-specific hosting.",
   "main": "src/server/server.js",
