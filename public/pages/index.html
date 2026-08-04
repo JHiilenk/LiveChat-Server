@@ -388,8 +388,11 @@
           <label for="nameInput" class="sr-only">Nama pengguna</label>
           <input id="nameInput" type="text" maxlength="24" placeholder="Contoh: Andi" required />
           <div id="joinDirectAdminField" class="join-select-field">
+            <div class="live-chat-default-banner" role="status" aria-live="polite" aria-label="Jalur masuk default">
+              <span class="live-chat-default-text">Live Chat</span>
+            </div>
             <label for="joinDirectAdminInput" class="sr-only">Arah masuk awal</label>
-            <select id="joinDirectAdminInput" aria-label="Arah masuk awal">
+            <select id="joinDirectAdminInput" class="sr-only" aria-label="Arah masuk awal" tabindex="-1">
               <option value="admins" selected>Live Chat</option>
             </select>
           </div>

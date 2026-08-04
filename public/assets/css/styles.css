@@ -4116,6 +4116,67 @@ body.embed-mode .join-card::-webkit-scrollbar {
   display: block;
 }
 
+.live-chat-default-banner {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 3.55rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 190, 84, 0.56);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 196, 92, 0.2), transparent 46%),
+    radial-gradient(circle at 84% 82%, rgba(255, 157, 83, 0.16), transparent 48%),
+    linear-gradient(130deg, rgba(40, 23, 9, 0.98) 0%, rgba(26, 15, 6, 0.98) 100%);
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 128, 0.22),
+    0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.live-chat-default-banner::before {
+  content: "";
+  position: absolute;
+  inset: -24% -30%;
+  background: linear-gradient(105deg, transparent 28%, rgba(255, 210, 120, 0.3) 50%, transparent 72%);
+  animation: liveChatBannerSweep 3.4s ease-in-out infinite;
+}
+
+.live-chat-default-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 203, 97, 0.22);
+}
+
+.live-chat-default-text {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.38rem, 2.8vw, 1.72rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffd66f;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(255, 180, 72, 0.35);
+}
+
+@keyframes liveChatBannerSweep {
+  0% {
+    transform: translateX(-28%) translateY(0) rotate(0.5deg);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translateX(22%) translateY(-1.5%) rotate(-0.5deg);
+    opacity: 0.92;
+  }
+  100% {
+    transform: translateX(58%) translateY(0) rotate(0.5deg);
+    opacity: 0.22;
+  }
+}
+
 .join-team-channel-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
