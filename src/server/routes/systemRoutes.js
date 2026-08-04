@@ -2,7 +2,8 @@ const registerSystemRoutes = ({
   app,
   getPublicLoginConfig,
   getPublicSimulationConfig,
-  getPublicUploadConfig
+  getPublicUploadConfig,
+  getPublicDirectAdminConfig
 }) => {
   app.get("/health", (_req, res) => {
     res.status(200).json({
@@ -37,6 +38,15 @@ const registerSystemRoutes = ({
       res.status(200).json({ ok: true, config });
     } catch {
       res.status(500).json({ ok: false, message: "Gagal memuat pengaturan batas upload." });
+    }
+  });
+
+  app.get("/api/direct-admin-config", async (_req, res) => {
+    try {
+      const config = await getPublicDirectAdminConfig();
+      res.status(200).json({ ok: true, config });
+    } catch {
+      res.status(500).json({ ok: false, message: "Gagal memuat pengaturan chat langsung ke admin." });
     }
   });
 };

@@ -170,6 +170,24 @@
                 <button id="uploadConfigSaveButton" type="submit" class="member-role-btn">Simpan Batas Upload</button>
               </form>
             </div>
+            <div class="admin-settings-wrap">
+              <button
+                id="directAdminConfigToggle"
+                type="button"
+                class="admin-settings-toggle"
+                aria-expanded="false"
+                aria-controls="directAdminConfigForm"
+              >
+                Chat Langsung Ke Admin
+              </button>
+              <form id="directAdminConfigForm" class="admin-settings-form collapsed" autocomplete="off">
+                <div class="admin-toggle-row">
+                  <span>Tampilkan tombol chat ke admin pada akses member/public</span>
+                  <button id="directAdminEnabledToggle" type="button" class="admin-toggle-pill" aria-pressed="true">ON</button>
+                </div>
+                <button id="directAdminConfigSaveButton" type="submit" class="member-role-btn">Simpan Pengaturan Chat Admin</button>
+              </form>
+            </div>
             <div class="admin-list-wrap">
               <p class="eyebrow">Daftar Admin</p>
               <ul id="adminList" class="admin-list"></ul>
@@ -182,6 +200,8 @@
             <h2>Direct Messages</h2>
             <span class="badge dm-badge">DM</span>
           </div>
+          <button id="directAdminDmButton" type="button" class="member-role-btn direct-admin-dm-btn hidden">Chat Langsung Ke Admin/Owner</button>
+          <p id="directAdminDmHint" class="member-note hidden">Pesan privat kamu akan masuk ke semua akun role Admin dan Owner yang online.</p>
           <ul id="dmList" class="dm-list"></ul>
         </div>
 

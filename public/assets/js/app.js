@@ -122,14 +122,19 @@ const loginConfigToggle = document.getElementById("loginConfigToggle");
 const loginConfigForm = document.getElementById("loginConfigForm");
 const uploadConfigToggle = document.getElementById("uploadConfigToggle");
 const uploadConfigForm = document.getElementById("uploadConfigForm");
+const directAdminConfigToggle = document.getElementById("directAdminConfigToggle");
+const directAdminConfigForm = document.getElementById("directAdminConfigForm");
 const loginShowTeamToggle = document.getElementById("loginShowTeamToggle");
 const loginShowChannelToggle = document.getElementById("loginShowChannelToggle");
+const directAdminEnabledToggle = document.getElementById("directAdminEnabledToggle");
 const loginTeamOptionsInput = document.getElementById("loginTeamOptionsInput");
 const loginChannelOptionsInput = document.getElementById("loginChannelOptionsInput");
 const uploadImageLimitInput = document.getElementById("uploadImageLimitInput");
 const uploadVideoLimitInput = document.getElementById("uploadVideoLimitInput");
 const uploadAudioLimitInput = document.getElementById("uploadAudioLimitInput");
 const uploadFileLimitInput = document.getElementById("uploadFileLimitInput");
+const directAdminDmButton = document.getElementById("directAdminDmButton");
+const directAdminDmHint = document.getElementById("directAdminDmHint");
 const settingsUsernameInput = document.getElementById("settingsUsernameInput");
 const settingsPasswordInput = document.getElementById("settingsPasswordInput");
 const teamNoticeText = document.getElementById("teamNoticeText");
@@ -228,7 +233,8 @@ let currentView = {
   type: "channel",
   channelCode: DEFAULT_CHANNEL,
   dmKey: "",
-  peerName: ""
+  peerName: "",
+  supportScope: ""
 };
 let dmConversations = [];
 const dmConversationMeta = new Map();
@@ -282,6 +288,9 @@ let currentUploadConfig = {
   videoLimitMb: 20,
   audioLimitMb: 12,
   fileLimitMb: 10
+};
+let currentDirectAdminConfig = {
+  enabled: true
 };
 let pendingSettingsPassword = "";
 let lastGifQuery = "";
@@ -597,9 +606,27 @@ const normalizeUploadConfig = (rawConfig) => {
   };
 };
 
+const normalizeDirectAdminConfig = (rawConfig) => {
+  const config = rawConfig && typeof rawConfig === "object" ? rawConfig : {};
+  return {
+    enabled: config.enabled !== false
+  };
+};
+
 const optionsToCsv = (options) => options.join(", ");
 
 const setLoginToggleButtonState = (button, enabled) => {
+  if (!button) {
+    return;
+  }
+
+  const isEnabled = Boolean(enabled);
+  button.textContent = isEnabled ? "ON" : "OFF";
+  button.setAttribute("aria-pressed", isEnabled ? "true" : "false");
+  button.classList.toggle("is-on", isEnabled);
+};
+
+const setDirectAdminToggleButtonState = (button, enabled) => {
   if (!button) {
     return;
   }
@@ -648,6 +675,14 @@ const syncUploadConfigAdminForm = (configInput = currentUploadConfig) => {
   }
 };
 
+const syncDirectAdminConfigAdminForm = (configInput = currentDirectAdminConfig) => {
+  const config = normalizeDirectAdminConfig(configInput);
+  setDirectAdminToggleButtonState(directAdminEnabledToggle, config.enabled);
+  if (directAdminEnabledToggle) {
+    directAdminEnabledToggle.dataset.enabled = config.enabled ? "true" : "false";
+  }
+};
+
 const applySimulationConfig = (configInput) => {
   void configInput;
   currentSimulationConfig = { enabled: false };
@@ -659,6 +694,29 @@ const applySimulationConfig = (configInput) => {
 const applyUploadConfig = (configInput) => {
   currentUploadConfig = normalizeUploadConfig(configInput || currentUploadConfig);
   syncUploadConfigAdminForm(currentUploadConfig);
+};
+
+const updateDirectAdminActionVisibility = () => {
+  const normalizedRole = normalizeRole(currentRole);
+  const canUseDirectAdmin = !isAdminPortal
+    && currentDirectAdminConfig.enabled
+    && (normalizedRole === "guest" || normalizedRole === "member")
+    && Boolean(currentUser);
+
+  if (directAdminDmButton) {
+    directAdminDmButton.classList.toggle("hidden", !canUseDirectAdmin);
+    directAdminDmButton.disabled = !canUseDirectAdmin || !hasJoinedServer;
+  }
+
+  if (directAdminDmHint) {
+    directAdminDmHint.classList.toggle("hidden", !canUseDirectAdmin);
+  }
+};
+
+const applyDirectAdminConfig = (configInput) => {
+  currentDirectAdminConfig = normalizeDirectAdminConfig(configInput || currentDirectAdminConfig);
+  syncDirectAdminConfigAdminForm(currentDirectAdminConfig);
+  updateDirectAdminActionVisibility();
 };
 
 const populateLoginSelectOptions = (selectElement, options, fallback) => {
@@ -754,13 +812,15 @@ const requestTeamSwitch = (teamCode) => {
     type: currentView.type,
     channelCode: currentView.channelCode,
     dmKey: currentView.dmKey,
-    peerName: currentView.peerName
+    peerName: currentView.peerName,
+    supportScope: currentView.supportScope
   };
   currentView = {
     type: "channel",
     channelCode: getPreferredChannelForTeam(nextTeamCode),
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
   renderTeams();
   setChatReadyState(false);
@@ -937,6 +997,22 @@ const fetchUploadConfig = async () => {
 
     const payload = await response.json();
     applyUploadConfig(payload?.config || null);
+  } catch {
+    // Keep default config when request fails.
+  }
+};
+
+const fetchDirectAdminConfig = async () => {
+  try {
+    const response = await fetch("/api/direct-admin-config", {
+      headers: { Accept: "application/json" }
+    });
+    if (!response.ok) {
+      return;
+    }
+
+    const payload = await response.json();
+    applyDirectAdminConfig(payload?.config || null);
   } catch {
     // Keep default config when request fails.
   }
@@ -1354,7 +1430,8 @@ const restoreSavedMemberLogin = () => {
     type: "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
 
   if (nameInput) {
@@ -1421,7 +1498,8 @@ const logoutCurrentSession = () => {
     type: "channel",
     channelCode: DEFAULT_CHANNEL,
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
 
   dmConversations = [];
@@ -2518,7 +2596,9 @@ const renderAdminPanel = () => {
   }
 
   adminPanelRole.textContent = getRoleLabel(role).toUpperCase();
-  adminPanelHint.textContent = "Owner/Admin bisa atur role member menjadi Admin, Operator, atau Member.";
+  adminPanelHint.textContent = currentDirectAdminConfig.enabled
+    ? "Owner/Admin bisa atur role member dan fitur chat langsung ke semua admin/owner."
+    : "Owner/Admin bisa atur role member. Chat langsung ke admin saat ini OFF.";
 
   if (settingsUsernameInput && document.activeElement !== settingsUsernameInput) {
     settingsUsernameInput.placeholder = `Username saat ini: ${currentUser || "-"}`;
@@ -2609,6 +2689,7 @@ const updateProfileCard = () => {
     clearDemoBots({ silent: true });
   }
 
+  updateDirectAdminActionVisibility();
   renderAdminPanel();
 };
 
@@ -2804,7 +2885,8 @@ const buildEditPayload = (message, text) => {
       text,
       mode: "dm",
       dmKey: context.dmKey,
-      peerName: context.peerName || currentView.peerName
+      peerName: context.peerName || currentView.peerName,
+      supportScope: String(context.supportScope || currentView.supportScope || "") || undefined
     };
   }
 
@@ -3132,11 +3214,13 @@ const emitChatMessage = ({ text, attachment }) => {
   };
 
   if (currentView.type === "dm") {
+    const supportScope = String(currentView.supportScope || "").trim().toLowerCase();
     socket.emit("chat:message", {
       ...payload,
       mode: "dm",
       dmKey: currentView.dmKey,
-      peerName: currentView.peerName
+      peerName: currentView.peerName,
+      supportScope: supportScope || undefined
     });
     return;
   }
@@ -3166,8 +3250,9 @@ const renderTyping = (typingUsers) => {
   typingIndicator.textContent = `${filtered.length} orang sedang mengetik...`;
 };
 
-const addDmConversation = (dmKey, peerName) => {
+const addDmConversation = (dmKey, peerName, options = {}) => {
   const normalizedPeer = normalizeDisplayName(peerName);
+  const supportScope = String(options?.supportScope || "").trim().toLowerCase();
   if (!dmKey || !normalizedPeer) {
     return;
   }
@@ -3175,10 +3260,11 @@ const addDmConversation = (dmKey, peerName) => {
   const existing = dmConversations.find((item) => item.dmKey === dmKey);
   if (existing) {
     existing.peerName = normalizedPeer;
+    existing.supportScope = supportScope || existing.supportScope || "";
     return;
   }
 
-  dmConversations.push({ dmKey, peerName: normalizedPeer });
+  dmConversations.push({ dmKey, peerName: normalizedPeer, supportScope: supportScope || "" });
 };
 
 const formatDmMetaTime = (value) => {
@@ -3208,7 +3294,8 @@ const touchDmConversationMeta = ({ dmKey, text = "", timestamp = null, increaseU
     previewText: "Belum ada pesan",
     timestamp: "",
     timestampRaw: "",
-    isBroadcast: false
+    isBroadcast: false,
+    supportScope: ""
   };
 
   const rawTimestamp = String(timestamp || "").trim();
@@ -3219,7 +3306,8 @@ const touchDmConversationMeta = ({ dmKey, text = "", timestamp = null, increaseU
     previewText,
     timestamp: formatDmMetaTime(timestamp || new Date()),
     timestampRaw: rawTimestamp || existing.timestampRaw || "",
-    isBroadcast: Boolean(existing.isBroadcast)
+    isBroadcast: Boolean(existing.isBroadcast),
+    supportScope: String(existing.supportScope || "")
   });
 };
 
@@ -3234,12 +3322,35 @@ const markDmConversationBroadcast = (dmKey, isBroadcast) => {
     previewText: "Belum ada pesan",
     timestamp: "",
     timestampRaw: "",
-    isBroadcast: false
+    isBroadcast: false,
+    supportScope: ""
   };
 
   dmConversationMeta.set(safeDmKey, {
     ...existing,
     isBroadcast: Boolean(isBroadcast)
+  });
+};
+
+const markDmConversationSupportScope = (dmKey, supportScope) => {
+  const safeDmKey = String(dmKey || "").trim();
+  if (!safeDmKey) {
+    return;
+  }
+
+  const normalizedScope = String(supportScope || "").trim().toLowerCase();
+  const existing = dmConversationMeta.get(safeDmKey) || {
+    unreadCount: 0,
+    previewText: "Belum ada pesan",
+    timestamp: "",
+    timestampRaw: "",
+    isBroadcast: false,
+    supportScope: ""
+  };
+
+  dmConversationMeta.set(safeDmKey, {
+    ...existing,
+    supportScope: normalizedScope
   });
 };
 
@@ -3282,7 +3393,8 @@ const buildDmPreviewFallbackMessage = ({ dmKey, peerName, meta }) => {
       type: "dm",
       dmKey: safeDmKey,
       peerName: safePeerName,
-      isBroadcast: Boolean(meta?.isBroadcast)
+      isBroadcast: Boolean(meta?.isBroadcast),
+      supportScope: String(meta?.supportScope || "")
     }
   };
 };
@@ -3304,7 +3416,8 @@ const renderDmList = () => {
       previewText: "Belum ada pesan",
       timestamp: "",
       timestampRaw: "",
-      isBroadcast: false
+      isBroadcast: false,
+      supportScope: ""
     };
     const li = document.createElement("li");
     const button = document.createElement("button");
@@ -3327,6 +3440,13 @@ const renderDmList = () => {
       broadcastBadge.className = "dm-origin-badge";
       broadcastBadge.textContent = "Broadcast Admin";
       nameText.appendChild(broadcastBadge);
+    }
+
+    if (String(conversation.supportScope || "").toLowerCase() === "admins") {
+      const supportBadge = document.createElement("span");
+      supportBadge.className = "dm-origin-badge";
+      supportBadge.textContent = "Support Admin";
+      nameText.appendChild(supportBadge);
     }
 
     const rightInfo = document.createElement("span");
@@ -3378,7 +3498,11 @@ const renderDmList = () => {
         });
       }
 
-      socket.emit("dm:open", { peerName: conversation.peerName });
+      socket.emit("dm:open", {
+        peerName: conversation.peerName,
+        dmKey: conversation.dmKey,
+        supportScope: String(conversation.supportScope || "") || undefined
+      });
     });
 
     li.appendChild(button);
@@ -4685,14 +4809,17 @@ const isMessageForCurrentView = (message) => {
 
 const switchToDmView = (payload) => {
   hideBroadcastNotice();
+  const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
   currentView = {
     type: "dm",
     channelCode: currentChannel,
     dmKey: payload.dmKey,
-    peerName: normalizeDisplayName(payload.peerName)
+    peerName: normalizeDisplayName(payload.peerName),
+    supportScope
   };
 
-  addDmConversation(payload.dmKey, payload.peerName);
+  addDmConversation(payload.dmKey, payload.peerName, { supportScope });
+  markDmConversationSupportScope(payload.dmKey, supportScope);
   clearDmConversationUnread(payload.dmKey);
   renderDmList();
   setHeader();
@@ -4708,6 +4835,7 @@ const switchToDmView = (payload) => {
         increaseUnread: false
       });
       markDmConversationBroadcast(message.context.dmKey, Boolean(message?.context?.isBroadcast));
+      markDmConversationSupportScope(message.context.dmKey, message?.context?.supportScope);
     }
     pushMessage(message);
   });
@@ -4722,7 +4850,8 @@ const switchToChannelView = () => {
     type: "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
 
   messageCache.clear();
@@ -4772,7 +4901,8 @@ const handleJoin = () => {
     type: "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
 
   setHeader();
@@ -4825,6 +4955,7 @@ if (joinRoleSelect && joinPasswordInput) {
 
 fetchLoginConfig();
 fetchUploadConfig();
+fetchDirectAdminConfig();
 
 if (teamInput) {
   teamInput.addEventListener("change", () => {
@@ -5271,6 +5402,14 @@ if (uploadConfigToggle && uploadConfigForm) {
   });
 }
 
+if (directAdminConfigToggle && directAdminConfigForm) {
+  setAdminSectionExpanded(directAdminConfigToggle, directAdminConfigForm, false);
+  directAdminConfigToggle.addEventListener("click", () => {
+    const isExpanded = directAdminConfigToggle.getAttribute("aria-expanded") === "true";
+    setAdminSectionExpanded(directAdminConfigToggle, directAdminConfigForm, !isExpanded);
+  });
+}
+
 if (messageList) {
   messageList.addEventListener("touchstart", () => {
     messageListUserInteracting = true;
@@ -5343,7 +5482,8 @@ socket.on("join:error", (payload) => {
       type: pendingTeamSwitchView.type,
       channelCode: pendingTeamSwitchView.channelCode,
       dmKey: pendingTeamSwitchView.dmKey,
-      peerName: pendingTeamSwitchView.peerName
+      peerName: pendingTeamSwitchView.peerName,
+      supportScope: String(pendingTeamSwitchView.supportScope || "")
     };
     setHeader();
     renderDmList();
@@ -5389,7 +5529,8 @@ socket.on("channel:joined", (payload) => {
     type: "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: ""
+    peerName: "",
+    supportScope: ""
   };
 
   currentPinnedMessage = null;
@@ -5488,7 +5629,9 @@ socket.on("chat:history", (history) => {
 });
 
 socket.on("dm:available", (payload) => {
-  addDmConversation(payload?.dmKey, payload?.peerName);
+  const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
+  addDmConversation(payload?.dmKey, payload?.peerName, { supportScope });
+  markDmConversationSupportScope(payload?.dmKey, supportScope);
   renderDmList();
 });
 
@@ -5550,6 +5693,10 @@ socket.on("team:state", (payload) => {
     applyLoginConfigToJoinForm(payload.loginConfig);
   }
 
+  if (payload?.directAdminConfig) {
+    applyDirectAdminConfig(payload.directAdminConfig);
+  }
+
   setHeader();
   renderChannels(payload?.channels || [DEFAULT_CHANNEL]);
   renderAdminPanel();
@@ -5563,6 +5710,11 @@ socket.on("login:config:updated", (payload) => {
 socket.on("upload:config:updated", (payload) => {
   applyUploadConfig(payload?.config || null);
   notify("Batas upload diperbarui.", "success", { inlineDuration: 2600 });
+});
+
+socket.on("direct-admin:config:updated", (payload) => {
+  applyDirectAdminConfig(payload?.config || null);
+  notify("Pengaturan chat langsung ke admin diperbarui.", "success", { inlineDuration: 2600 });
 });
 
 socket.on("team:created", (payload) => {
@@ -5599,9 +5751,15 @@ socket.on("chat:message", (message) => {
         dmKey: String(message?.context?.dmKey || "").trim(),
         message
       };
-      addDmConversation(message?.context?.dmKey, senderName);
+      addDmConversation(message?.context?.dmKey, senderName, {
+        supportScope: message?.context?.supportScope
+      });
       renderDmList();
-      socket.emit("dm:open", { peerName: senderName });
+      socket.emit("dm:open", {
+        peerName: senderName,
+        dmKey: String(message?.context?.dmKey || "").trim() || undefined,
+        supportScope: String(message?.context?.supportScope || "") || undefined
+      });
     }
   }
 
@@ -5609,10 +5767,11 @@ socket.on("chat:message", (message) => {
     const senderName = normalizeDisplayName(message?.user || "Unknown");
     const dmKey = String(message?.context?.dmKey || "").trim();
     const dmPeerName = message.user === currentUser ? message?.context?.peerName : senderName;
+    const supportScope = String(message?.context?.supportScope || "").trim().toLowerCase();
     const isCurrentDmView = currentView.type === "dm" && currentView.dmKey === dmKey;
     const isIncomingDm = senderName !== currentUser;
 
-    addDmConversation(dmKey, dmPeerName);
+    addDmConversation(dmKey, dmPeerName, { supportScope });
     touchDmConversationMeta({
       dmKey,
       text: String(message?.text || "").trim() || "Pesan masuk",
@@ -5620,6 +5779,7 @@ socket.on("chat:message", (message) => {
       increaseUnread: isIncomingDm && !isCurrentDmView
     });
     markDmConversationBroadcast(dmKey, Boolean(message?.context?.isBroadcast));
+    markDmConversationSupportScope(dmKey, supportScope);
     if (isCurrentDmView) {
       clearDmConversationUnread(dmKey);
       pendingDetachedDmMessages.delete(dmKey);
@@ -5998,6 +6158,47 @@ if (uploadConfigForm) {
     });
 
     socket.emit("upload:config:update", { config: nextConfig });
+  });
+}
+
+if (directAdminEnabledToggle) {
+  directAdminEnabledToggle.addEventListener("click", () => {
+    const nextEnabled = !(directAdminEnabledToggle.dataset.enabled === "true");
+    setDirectAdminToggleButtonState(directAdminEnabledToggle, nextEnabled);
+    directAdminEnabledToggle.dataset.enabled = nextEnabled ? "true" : "false";
+  });
+}
+
+if (directAdminConfigForm) {
+  directAdminConfigForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!canManageRoles(normalizeRole(currentRole))) {
+      notify("Hanya owner/admin yang bisa ubah chat langsung ke admin.", "warning", { inlineDuration: 2800 });
+      return;
+    }
+
+    const nextConfig = normalizeDirectAdminConfig({
+      enabled: directAdminEnabledToggle?.dataset.enabled !== "false"
+    });
+
+    socket.emit("direct-admin:config:update", { config: nextConfig });
+  });
+}
+
+if (directAdminDmButton) {
+  directAdminDmButton.addEventListener("click", () => {
+    if (!hasJoinedServer) {
+      notify("Join team dulu sebelum chat langsung ke admin.", "warning", { inlineDuration: 2600 });
+      return;
+    }
+
+    if (!currentDirectAdminConfig.enabled) {
+      notify("Fitur chat langsung ke admin sedang dinonaktifkan.", "warning", { inlineDuration: 2800 });
+      return;
+    }
+
+    socket.emit("dm:direct-admin:start");
   });
 }
 

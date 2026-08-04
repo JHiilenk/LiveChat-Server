@@ -12,6 +12,7 @@ const createPresenceUtils = ({
   getPublicLoginConfig,
   getPublicSimulationConfig,
   getPublicUploadConfig,
+  getPublicDirectAdminConfig,
   teamRoomKey,
   channelRoomKey,
   roleMember,
@@ -20,6 +21,7 @@ const createPresenceUtils = ({
   loginConfigDocKey,
   simulationConfigDocKey,
   uploadConfigDocKey,
+  directAdminConfigDocKey,
   defaultTeamNoticeMessage
 }) => {
   const getTeamMembers = (teamCode) => {
@@ -74,7 +76,8 @@ const createPresenceUtils = ({
           .filter((code) => code
             && code !== loginConfigDocKey
             && code !== simulationConfigDocKey
-            && code !== uploadConfigDocKey)
+            && code !== uploadConfigDocKey
+            && code !== directAdminConfigDocKey)
       )
     );
     const availableTeams = [];
@@ -92,6 +95,7 @@ const createPresenceUtils = ({
     const loginConfig = await getPublicLoginConfig();
     const simulationConfig = await getPublicSimulationConfig();
     const uploadConfig = await getPublicUploadConfig();
+    const directAdminConfig = await getPublicDirectAdminConfig();
 
     io.to(teamRoomKey(teamCode)).emit("team:state", {
       teamCode,
@@ -102,7 +106,8 @@ const createPresenceUtils = ({
       auth: buildTeamAuthState(authDoc),
       loginConfig,
       simulationConfig,
-      uploadConfig
+      uploadConfig,
+      directAdminConfig
     });
   };
 

@@ -62,6 +62,7 @@ const DEFAULT_TEAM_NOTICE_MESSAGE = "Gunakan kode team yang sama untuk gabung gr
 const LOGIN_CONFIG_DOC_KEY = "__LOGIN_CONFIG__";
 const SIMULATION_CONFIG_DOC_KEY = "__SIMULATION_CONFIG__";
 const UPLOAD_CONFIG_DOC_KEY = "__UPLOAD_CONFIG__";
+const DIRECT_ADMIN_CONFIG_DOC_KEY = "__DIRECT_ADMIN_CONFIG__";
 const DEFAULT_LOGIN_CONFIG = {
   showTeamSelect: true,
   showChannelSelect: true,
@@ -76,6 +77,9 @@ const DEFAULT_UPLOAD_CONFIG = {
   videoLimitMb: 20,
   audioLimitMb: 12,
   fileLimitMb: 10
+};
+const DEFAULT_DIRECT_ADMIN_CONFIG = {
+  enabled: true
 };
 const ROLE_GUEST = "guest";
 const ROLE_MEMBER = "member";
@@ -148,7 +152,8 @@ registerSystemRoutes({
   app,
   getPublicLoginConfig: () => getPublicLoginConfig(),
   getPublicSimulationConfig: () => getPublicSimulationConfig(),
-  getPublicUploadConfig: () => getPublicUploadConfig()
+  getPublicUploadConfig: () => getPublicUploadConfig(),
+  getPublicDirectAdminConfig: () => getPublicDirectAdminConfig()
 });
 
 const io = new Server(server, {
@@ -263,6 +268,13 @@ const sanitizeUploadConfig = (rawConfig) => {
   };
 };
 
+const sanitizeDirectAdminConfig = (rawConfig) => {
+  const config = rawConfig && typeof rawConfig === "object" ? rawConfig : {};
+  return {
+    enabled: config.enabled !== false
+  };
+};
+
 const getPublicLoginConfig = async () => {
   const doc = await teamsDb.findOne({ teamCode: LOGIN_CONFIG_DOC_KEY });
   return sanitizeLoginConfig(doc?.loginConfig || DEFAULT_LOGIN_CONFIG);
@@ -276,6 +288,11 @@ const getPublicSimulationConfig = async () => {
 const getPublicUploadConfig = async () => {
   const doc = await teamsDb.findOne({ teamCode: UPLOAD_CONFIG_DOC_KEY });
   return sanitizeUploadConfig(doc?.uploadConfig || DEFAULT_UPLOAD_CONFIG);
+};
+
+const getPublicDirectAdminConfig = async () => {
+  const doc = await teamsDb.findOne({ teamCode: DIRECT_ADMIN_CONFIG_DOC_KEY });
+  return sanitizeDirectAdminConfig(doc?.directAdminConfig || DEFAULT_DIRECT_ADMIN_CONFIG);
 };
 
 const appendPublicLoginConfigOption = async (kind, code) => {
@@ -364,6 +381,26 @@ const savePublicUploadConfig = async (nextConfig, updatedBy = "system") => {
   );
 
   return uploadConfig;
+};
+
+const savePublicDirectAdminConfig = async (nextConfig, updatedBy = "system") => {
+  const directAdminConfig = sanitizeDirectAdminConfig(nextConfig);
+  const timestamp = nowIso();
+
+  await teamsDb.update(
+    { teamCode: DIRECT_ADMIN_CONFIG_DOC_KEY },
+    {
+      $set: {
+        teamCode: DIRECT_ADMIN_CONFIG_DOC_KEY,
+        directAdminConfig,
+        updatedBy: sanitizeName(updatedBy) || "system",
+        updatedAt: timestamp
+      }
+    },
+    { upsert: true }
+  );
+
+  return directAdminConfig;
 };
 
 const upsertRealMemberRecord = async ({ name, teamCode, channelCode = DEFAULT_CHANNEL_CODE, register = false, countLogin = true, password = "" }) => {
@@ -1111,6 +1148,7 @@ const {
   getPublicLoginConfig,
   getPublicSimulationConfig,
   getPublicUploadConfig,
+  getPublicDirectAdminConfig,
   teamRoomKey,
   channelRoomKey,
   roleMember: ROLE_MEMBER,
@@ -1119,8 +1157,39 @@ const {
   loginConfigDocKey: LOGIN_CONFIG_DOC_KEY,
   simulationConfigDocKey: SIMULATION_CONFIG_DOC_KEY,
   uploadConfigDocKey: UPLOAD_CONFIG_DOC_KEY,
+  directAdminConfigDocKey: DIRECT_ADMIN_CONFIG_DOC_KEY,
   defaultTeamNoticeMessage: DEFAULT_TEAM_NOTICE_MESSAGE
 });
+
+const DIRECT_ADMIN_DM_KEY_PREFIX = "ADMINSUPPORT::";
+
+const buildDirectAdminDmKey = (requesterName) => {
+  const safeRequesterName = sanitizeName(requesterName || "");
+  if (!safeRequesterName) {
+    return "";
+  }
+
+  return `${DIRECT_ADMIN_DM_KEY_PREFIX}${safeRequesterName}`;
+};
+
+const getDirectAdminRequesterNameFromDmKey = (dmKey) => {
+  const rawKey = String(dmKey || "").trim();
+  if (!rawKey.startsWith(DIRECT_ADMIN_DM_KEY_PREFIX)) {
+    return "";
+  }
+
+  return sanitizeName(rawKey.slice(DIRECT_ADMIN_DM_KEY_PREFIX.length));
+};
+
+const isDirectAdminDmKey = (dmKey) => Boolean(getDirectAdminRequesterNameFromDmKey(dmKey));
+
+const getOnlinePrivilegedRecipients = (teamCode, requesterId = "") => {
+  return Array.from(usersBySocketId.values())
+    .filter((entry) => entry?.teamCode === teamCode)
+    .filter((entry) => entry?.id && entry.id !== requesterId)
+    .filter((entry) => !entry?.simulated)
+    .filter((entry) => entry.role === ROLE_OWNER || entry.role === ROLE_ADMIN);
+};
 
 const joinChannelForSocket = async ({ socket, user, channelCode, announce, joinAnnouncementText = "" }) => {
   const nextChannelCode = sanitizeCode(channelCode, DEFAULT_CHANNEL_CODE);
@@ -1682,6 +1751,26 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("direct-admin:config:update", async (payload) => {
+    const user = usersBySocketId.get(socket.id);
+    if (!user) {
+      socket.emit("join:error", { message: "Join team dulu sebelum mengubah pengaturan chat admin." });
+      return;
+    }
+
+    if (![ROLE_OWNER, ROLE_ADMIN].includes(user.role)) {
+      socket.emit("join:error", { message: "Hanya owner/admin yang bisa ubah chat langsung ke admin." });
+      return;
+    }
+
+    const savedConfig = await savePublicDirectAdminConfig(payload?.config || {}, user.name);
+    io.emit("direct-admin:config:updated", {
+      config: savedConfig,
+      updatedBy: user.name,
+      updatedAt: nowIso()
+    });
+  });
+
   socket.on("simulation:config:update", async (payload) => {
     const user = usersBySocketId.get(socket.id);
     if (!user) {
@@ -1883,6 +1972,69 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("dm:direct-admin:start", async () => {
+    const user = usersBySocketId.get(socket.id);
+    if (!user) {
+      socket.emit("join:error", { message: "Join team dulu sebelum chat langsung ke admin." });
+      return;
+    }
+
+    if (![ROLE_MEMBER, ROLE_GUEST].includes(user.role)) {
+      socket.emit("join:error", { message: "Fitur ini khusus akses member/guest." });
+      return;
+    }
+
+    const directAdminConfig = await getPublicDirectAdminConfig();
+    if (!directAdminConfig.enabled) {
+      socket.emit("join:error", { message: "Chat langsung ke admin sedang dinonaktifkan oleh admin." });
+      return;
+    }
+
+    const recipients = getOnlinePrivilegedRecipients(user.teamCode, user.id);
+    if (recipients.length === 0) {
+      socket.emit("join:error", { message: "Admin/owner belum online. Coba beberapa saat lagi." });
+      return;
+    }
+
+    const dmKey = buildDirectAdminDmKey(user.name);
+    if (!dmKey) {
+      socket.emit("join:error", { message: "Gagal membuat DM admin. Nama user tidak valid." });
+      return;
+    }
+
+    const room = dmRoomKey(user.teamCode, dmKey);
+    socket.join(room);
+    recipients.forEach((recipient) => {
+      const recipientSocket = io.sockets.sockets.get(recipient.id);
+      if (recipientSocket) {
+        recipientSocket.join(room);
+      }
+    });
+
+    user.activeMode = "dm";
+    user.activeDmKey = dmKey;
+    user.activeDmPeerName = "Admin/Owner";
+    user.activeDmProxyTargetName = null;
+    user.activeDmProxyAliasName = null;
+    usersBySocketId.set(socket.id, user);
+
+    const history = await getDmHistory(user.teamCode, dmKey, "Admin/Owner");
+    socket.emit("dm:ready", {
+      dmKey,
+      peerName: "Admin/Owner",
+      supportScope: "admins",
+      history
+    });
+
+    recipients.forEach((recipient) => {
+      io.to(recipient.id).emit("dm:available", {
+        dmKey,
+        peerName: user.name,
+        supportScope: "admins"
+      });
+    });
+  });
+
   socket.on("dm:start", async (payload) => {
     const user = usersBySocketId.get(socket.id);
     if (!user) {
@@ -1955,6 +2107,74 @@ io.on("connection", (socket) => {
 
     let peerName = sanitizeName(payload?.peerName || "");
     if (!peerName) {
+      return;
+    }
+
+    const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
+    const requestedDmKey = String(payload?.dmKey || "").trim();
+    if (supportScope === "admins" && requestedDmKey && isDirectAdminDmKey(requestedDmKey)) {
+      const requesterName = getDirectAdminRequesterNameFromDmKey(requestedDmKey);
+      if (!requesterName) {
+        socket.emit("join:error", { message: "DM admin tidak valid." });
+        return;
+      }
+
+      if (![ROLE_MEMBER, ROLE_GUEST, ROLE_ADMIN, ROLE_OWNER].includes(user.role)) {
+        socket.emit("join:error", { message: "Role ini tidak punya akses DM admin." });
+        return;
+      }
+
+      if ([ROLE_MEMBER, ROLE_GUEST].includes(user.role)) {
+        const expectedDmKey = buildDirectAdminDmKey(user.name);
+        if (requestedDmKey !== expectedDmKey) {
+          socket.emit("join:error", { message: "DM admin hanya untuk percakapan akunmu sendiri." });
+          return;
+        }
+      }
+
+      const directAdminConfig = await getPublicDirectAdminConfig();
+      if (!directAdminConfig.enabled && [ROLE_MEMBER, ROLE_GUEST].includes(user.role)) {
+        socket.emit("join:error", { message: "Chat langsung ke admin sedang dinonaktifkan." });
+        return;
+      }
+
+      const dmRoom = dmRoomKey(user.teamCode, requestedDmKey);
+      socket.join(dmRoom);
+
+      if ([ROLE_MEMBER, ROLE_GUEST].includes(user.role)) {
+        const recipients = getOnlinePrivilegedRecipients(user.teamCode, user.id);
+        recipients.forEach((recipient) => {
+          const recipientSocket = io.sockets.sockets.get(recipient.id);
+          if (recipientSocket) {
+            recipientSocket.join(dmRoom);
+          }
+          io.to(recipient.id).emit("dm:available", {
+            dmKey: requestedDmKey,
+            peerName: requesterName,
+            supportScope: "admins"
+          });
+        });
+      }
+
+      user.activeMode = "dm";
+      user.activeDmKey = requestedDmKey;
+      user.activeDmPeerName = [ROLE_MEMBER, ROLE_GUEST].includes(user.role) ? "Admin/Owner" : requesterName;
+      user.activeDmProxyTargetName = null;
+      user.activeDmProxyAliasName = null;
+      usersBySocketId.set(socket.id, user);
+
+      const history = await getDmHistory(
+        user.teamCode,
+        requestedDmKey,
+        [ROLE_MEMBER, ROLE_GUEST].includes(user.role) ? "Admin/Owner" : requesterName
+      );
+
+      socket.emit("dm:ready", {
+        dmKey: requestedDmKey,
+        peerName: [ROLE_MEMBER, ROLE_GUEST].includes(user.role) ? "Admin/Owner" : requesterName,
+        supportScope: "admins",
+        history
+      });
       return;
     }
 
@@ -2042,6 +2262,117 @@ io.on("connection", (socket) => {
     const mode = payload?.mode === "dm" ? "dm" : "channel";
 
     if (mode === "dm") {
+      const supportScope = String(payload?.supportScope || "").trim().toLowerCase();
+      const supportDmKey = String(payload?.dmKey || "").trim();
+
+      if (supportScope === "admins") {
+        if (!isDirectAdminDmKey(supportDmKey)) {
+          socket.emit("join:error", { message: "DM admin tidak valid." });
+          return;
+        }
+
+        const requesterName = getDirectAdminRequesterNameFromDmKey(supportDmKey);
+        if (!requesterName) {
+          socket.emit("join:error", { message: "Requester DM admin tidak valid." });
+          return;
+        }
+
+        if (![ROLE_MEMBER, ROLE_GUEST, ROLE_ADMIN, ROLE_OWNER].includes(user.role)) {
+          socket.emit("join:error", { message: "Role ini tidak punya akses DM admin." });
+          return;
+        }
+
+        if ([ROLE_MEMBER, ROLE_GUEST].includes(user.role)) {
+          const expectedDmKey = buildDirectAdminDmKey(user.name);
+          if (supportDmKey !== expectedDmKey) {
+            socket.emit("join:error", { message: "DM admin hanya untuk percakapan akunmu sendiri." });
+            return;
+          }
+
+          const directAdminConfig = await getPublicDirectAdminConfig();
+          if (!directAdminConfig.enabled) {
+            socket.emit("join:error", { message: "Chat langsung ke admin sedang dinonaktifkan." });
+            return;
+          }
+        }
+
+        const room = dmRoomKey(user.teamCode, supportDmKey);
+        socket.join(room);
+
+        const recipients = getOnlinePrivilegedRecipients(user.teamCode, user.id);
+        recipients.forEach((recipient) => {
+          const recipientSocket = io.sockets.sockets.get(recipient.id);
+          if (recipientSocket) {
+            recipientSocket.join(room);
+          }
+        });
+
+        const contextPeerName = [ROLE_MEMBER, ROLE_GUEST].includes(user.role)
+          ? "Admin/Owner"
+          : requesterName;
+
+        const message = buildChatMessage(
+          user.name,
+          messageText,
+          {
+            type: "dm",
+            dmKey: supportDmKey,
+            peerName: contextPeerName,
+            supportScope: "admins"
+          },
+          attachment,
+          user.role || ROLE_MEMBER
+        );
+
+        typingSocketIds.delete(socket.id);
+
+        try {
+          await messagesDb.insert({
+            scope: "dm",
+            messageId: message.id,
+            type: message.type,
+            teamCode: user.teamCode,
+            dmKey: supportDmKey,
+            user: message.user,
+            role: user.role || ROLE_MEMBER,
+            text: message.text,
+            timestamp: message.timestamp,
+            editedAt: null,
+            attachment: message.attachment,
+            simulated: false,
+            createdAt: nowIso()
+          });
+        } catch (_error) {
+          // Keep direct-admin DM flow running if persistence fails.
+        }
+
+        io.to(room).emit("chat:message", message);
+
+        const requesterSockets = Array.from(usersBySocketId.values()).filter(
+          (entry) => entry?.teamCode === user.teamCode
+            && !entry?.simulated
+            && nameKey(entry?.name || "") === nameKey(requesterName)
+        );
+
+        requesterSockets.forEach((entry) => {
+          io.to(entry.id).emit("dm:available", {
+            dmKey: supportDmKey,
+            peerName: "Admin/Owner",
+            supportScope: "admins"
+          });
+        });
+
+        recipients.forEach((recipient) => {
+          io.to(recipient.id).emit("dm:available", {
+            dmKey: supportDmKey,
+            peerName: requesterName,
+            supportScope: "admins"
+          });
+        });
+
+        return;
+      }
+
       const peerName = sanitizeName(payload?.peerName || "");
       const dmKey = String(payload?.dmKey || "");
       const proxyAlias = sanitizeName(user.activeDmProxyAliasName || "");
