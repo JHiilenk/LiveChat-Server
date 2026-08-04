@@ -1256,6 +1256,13 @@ const getJoinTeamCodeForMembersDirectory = () => {
   return normalizeCode(currentTeam, "");
 };
 
+const getSelectedJoinTeamCode = () => {
+  return Array.from(selectedJoinTeamCodes)
+    .map((teamCode) => normalizeCode(teamCode, ""))
+    .find(Boolean)
+    || "";
+};
+
 const getJoinChannelCodeForMembersDirectory = () => {
   const fromSelection = Array.from(selectedJoinChannelCodes)
     .map((channelCode) => normalizeCode(channelCode, ""))
@@ -1273,6 +1280,13 @@ const getJoinChannelCodeForMembersDirectory = () => {
     return fromQuery;
   }
   return normalizeCode(currentChannel, "");
+};
+
+const getSelectedJoinChannelCode = () => {
+  return Array.from(selectedJoinChannelCodes)
+    .map((channelCode) => normalizeCode(channelCode, ""))
+    .find(Boolean)
+    || "";
 };
 
 const buildPortalUrl = (basePath) => {
@@ -1703,7 +1717,7 @@ const emitJoinRequest = () => {
     return;
   }
 
-  const isPrivateMode = !normalizeCode(currentTeam, "") && !normalizeCode(currentChannel, "");
+  const isPrivateMode = !getSelectedJoinTeamCode() && !getSelectedJoinChannelCode();
   socket.emit("join:request", {
     name: currentUser,
     teamCode: currentTeam,
@@ -5157,8 +5171,8 @@ const handleJoin = () => {
   }
 
   currentUser = normalizeDisplayName(name.slice(0, 24));
-  currentTeam = getJoinTeamCodeForMembersDirectory();
-  currentChannel = getJoinChannelCodeForMembersDirectory();
+  currentTeam = getSelectedJoinTeamCode();
+  currentChannel = getSelectedJoinChannelCode();
   currentRole = selectedRole;
   currentAccessPassword = password;
   const privateJoinMode = !currentTeam && !currentChannel;
