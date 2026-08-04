@@ -4116,6 +4116,29 @@ body.embed-mode .join-card::-webkit-scrollbar {
   display: block;
 }
 
+.join-direct-admin-field {
+  border: 1px solid rgba(243, 155, 68, 0.42);
+  border-radius: 0.88rem;
+  background: rgba(25, 14, 5, 0.72);
+  padding: 0.58rem 0.72rem;
+}
+
+.join-direct-admin-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffc456;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.join-direct-admin-label input {
+  inline-size: 1rem;
+  block-size: 1rem;
+  accent-color: #f0a64a;
+}
+
 .join-role-dropdown {
   position: relative;
 }

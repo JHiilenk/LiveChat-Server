@@ -11,6 +11,8 @@ const joinRoleSelect = document.getElementById("joinRoleSelect");
 const joinRoleDropdown = document.getElementById("joinRoleDropdown");
 const joinRoleTrigger = document.getElementById("joinRoleTrigger");
 const joinRoleMenu = document.getElementById("joinRoleMenu");
+const joinDirectAdminField = document.getElementById("joinDirectAdminField");
+const joinDirectAdminCheckbox = document.getElementById("joinDirectAdminCheckbox");
 const joinPasswordField = document.getElementById("joinPasswordField");
 const joinPasswordInput = document.getElementById("joinPasswordInput");
 const joinSubmitButton = joinForm?.querySelector("button[type='submit']");
@@ -268,6 +270,7 @@ let knownTeamCodes = [DEFAULT_TEAM];
 let pendingTeamSwitchCode = "";
 let pendingTeamSwitchView = null;
 let pendingPortalJoinAttempt = false;
+let pendingDirectAdminAutoStartOnJoin = false;
 let currentAuthState = {
   hasOwner: false,
   ownerName: "",
@@ -717,6 +720,19 @@ const applyDirectAdminConfig = (configInput) => {
   currentDirectAdminConfig = normalizeDirectAdminConfig(configInput || currentDirectAdminConfig);
   syncDirectAdminConfigAdminForm(currentDirectAdminConfig);
   updateDirectAdminActionVisibility();
+
+  const selectedRole = normalizeRole(joinRoleSelect?.value || "guest");
+  const canShowJoinOption = !isAdminPortal
+    && currentDirectAdminConfig.enabled
+    && (selectedRole === "guest" || selectedRole === "member");
+
+  if (joinDirectAdminField) {
+    joinDirectAdminField.classList.toggle("hidden", !canShowJoinOption);
+  }
+
+  if (!canShowJoinOption && joinDirectAdminCheckbox) {
+    joinDirectAdminCheckbox.checked = false;
+  }
 };
 
 const populateLoginSelectOptions = (selectElement, options, fallback) => {
@@ -1515,6 +1531,7 @@ const logoutCurrentSession = () => {
   };
 
   pendingSettingsPassword = "";
+  pendingDirectAdminAutoStartOnJoin = false;
   messageCache.clear();
   messageList.replaceChildren();
   typingIndicator.textContent = "";
@@ -1542,6 +1559,9 @@ const logoutCurrentSession = () => {
   }
   if (joinPasswordInput) {
     joinPasswordInput.value = "";
+  }
+  if (joinDirectAdminCheckbox) {
+    joinDirectAdminCheckbox.checked = false;
   }
 
   renderChannels([DEFAULT_CHANNEL]);
@@ -4879,6 +4899,7 @@ const handleJoin = () => {
   }
 
   const password = String(joinPasswordInput?.value || "").trim();
+  const wantsDirectAdminOnJoin = Boolean(joinDirectAdminCheckbox?.checked);
 
   if ((selectedRole === "member" || isPrivilegedRole(selectedRole)) && !password) {
     notify(
@@ -4897,6 +4918,10 @@ const handleJoin = () => {
   currentChannel = normalizeCode(joinChannelInput?.value, DEFAULT_CHANNEL);
   currentRole = selectedRole;
   currentAccessPassword = password;
+  pendingDirectAdminAutoStartOnJoin = wantsDirectAdminOnJoin
+    && !isAdminPortal
+    && currentDirectAdminConfig.enabled
+    && (selectedRole === "guest" || selectedRole === "member");
   currentView = {
     type: "channel",
     channelCode: currentChannel,
@@ -4935,6 +4960,9 @@ if (joinRoleSelect && joinPasswordInput) {
   const updateJoinPasswordField = () => {
     const selectedRole = normalizeRole(joinRoleSelect.value);
     const needsPassword = selectedRole === "member" || isPrivilegedRole(selectedRole);
+    const canShowJoinDirectAdminOption = !isAdminPortal
+      && currentDirectAdminConfig.enabled
+      && (selectedRole === "guest" || selectedRole === "member");
     joinPasswordInput.required = needsPassword;
     joinPasswordInput.placeholder = selectedRole === "member"
       ? "Password member"
@@ -4946,6 +4974,14 @@ if (joinRoleSelect && joinPasswordInput) {
 
     if (!needsPassword) {
       joinPasswordInput.value = "";
+    }
+
+    if (joinDirectAdminField) {
+      joinDirectAdminField.classList.toggle("hidden", !canShowJoinDirectAdminOption);
+    }
+
+    if (!canShowJoinDirectAdminOption && joinDirectAdminCheckbox) {
+      joinDirectAdminCheckbox.checked = false;
     }
   };
 
@@ -5494,6 +5530,7 @@ socket.on("join:error", (payload) => {
   pendingTeamSwitchCode = "";
   pendingTeamSwitchView = null;
   pendingChannelSwitchCode = "";
+  pendingDirectAdminAutoStartOnJoin = false;
   const errorMessage = payload?.message || "Gagal join team/channel.";
   if (broadcastSendInFlight || /broadcast/i.test(String(errorMessage))) {
     clearBroadcastSendPendingState();
@@ -5551,6 +5588,15 @@ socket.on("channel:joined", (payload) => {
   saveMemberLogin();
 
   setChatReadyState(true);
+  const shouldAutoStartDirectAdmin = pendingDirectAdminAutoStartOnJoin
+    && !isAdminPortal
+    && (normalizeRole(currentRole) === "guest" || normalizeRole(currentRole) === "member");
+  pendingDirectAdminAutoStartOnJoin = false;
+  if (shouldAutoStartDirectAdmin) {
+    window.setTimeout(() => {
+      socket.emit("dm:direct-admin:start");
+    }, 120);
+  }
   ensureAutoCrowdUsers();
   focusMessageInputWithoutScroll();
 });
