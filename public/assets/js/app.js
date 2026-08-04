@@ -2981,7 +2981,9 @@ const setConnectionState = (isOnline) => {
 
 const setHeader = () => {
   if (currentView.type === "dm") {
-    roomLabel.textContent = currentTeam ? `DM • TEAM ${currentTeam}` : "DM • PRIVATE";
+    roomLabel.textContent = currentTeam
+      ? `DM • TEAM ${currentTeam}`
+      : (isAdminPortal ? "Live Chat" : "DM • PRIVATE");
     roomTitle.textContent = `@${normalizeDisplayName(currentView.peerName)}`;
     backToChannelButton.classList.remove("hidden");
   } else {
