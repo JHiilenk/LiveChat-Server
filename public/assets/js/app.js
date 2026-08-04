@@ -261,6 +261,7 @@ let currentPresenceUsers = [];
 let knownTeamCodes = [DEFAULT_TEAM];
 let pendingTeamSwitchCode = "";
 let pendingTeamSwitchView = null;
+let pendingPortalJoinAttempt = false;
 let currentAuthState = {
   hasOwner: false,
   ownerName: "",
@@ -4740,6 +4741,13 @@ const handleJoin = () => {
   }
 
   const selectedRole = normalizeRole(joinRoleSelect?.value || "member");
+  if (isAdminPortal && !isPrivilegedRole(selectedRole)) {
+    notify("Portal admin hanya untuk role owner/admin/operator.", "warning", { inlineDuration: 3200 });
+    joinRoleSelect.value = getDefaultJoinRoleValue();
+    joinRoleSelect.dispatchEvent(new Event("change"));
+    return;
+  }
+
   const password = String(joinPasswordInput?.value || "").trim();
 
   if ((selectedRole === "member" || isPrivilegedRole(selectedRole)) && !password) {
@@ -4769,6 +4777,7 @@ const handleJoin = () => {
   setHeader();
   renderDmList();
 
+  pendingPortalJoinAttempt = true;
   saveMemberLogin();
   emitJoinRequest();
 
@@ -5351,6 +5360,10 @@ socket.on("join:error", (payload) => {
 
   if (!hasJoinedServer) {
     joinModal.classList.remove("hidden");
+    pendingPortalJoinAttempt = false;
+  } else if (pendingPortalJoinAttempt) {
+    joinModal.classList.remove("hidden");
+    pendingPortalJoinAttempt = false;
   }
 
   setChatReadyState(hasJoinedServer);
@@ -5359,6 +5372,7 @@ socket.on("join:error", (payload) => {
 });
 
 socket.on("channel:joined", (payload) => {
+  pendingPortalJoinAttempt = false;
   pendingTeamSwitchCode = "";
   pendingTeamSwitchView = null;
   pendingChannelSwitchCode = "";

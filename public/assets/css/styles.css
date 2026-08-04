@@ -1232,7 +1232,7 @@ body.portal-admin .seo-landing {
 }
 
 .admin-settings-toggle::after {
-  content: "â–¾";
+  content: "\25BE";
   font-size: 0.7rem;
   line-height: 1;
   transition: transform 0.14s ease;
@@ -1285,7 +1285,7 @@ body.portal-admin .seo-landing {
 }
 
 .broadcast-checklist-trigger::after {
-  content: "â–¾";
+  content: "\25BE";
   position: absolute;
   right: 0.72rem;
   top: 50%;
@@ -2200,14 +2200,14 @@ body.portal-admin .seo-landing {
 }
 
 .member-role-toggle::after {
-  content: "â–¾";
+  content: "\25BE";
   margin-left: 0.32rem;
   font-size: 0.62rem;
 }
 
 .member-role-toggle.active::after,
 .member-role-toggle[aria-expanded="true"]::after {
-  content: "â–´";
+  content: "\25B4";
 }
 
 .member-role-menu {
