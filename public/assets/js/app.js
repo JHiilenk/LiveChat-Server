@@ -5239,7 +5239,8 @@ const handleJoin = () => {
   pendingDirectAdminAutoStartOnJoin = wantsDirectAdminOnJoin
     && !isAdminPortal
     && currentDirectAdminConfig.enabled
-    && (selectedRole === "guest" || selectedRole === "member");
+    && (selectedRole === "guest" || selectedRole === "member")
+    && privateJoinMode;
   currentView = {
     type: privateJoinMode ? "dm" : "channel",
     channelCode: currentChannel,
