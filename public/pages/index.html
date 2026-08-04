@@ -406,15 +406,19 @@
             </select>
           </div>
           <div class="join-team-channel-grid">
-            <div id="joinTeamField" class="join-select-field">
+            <div id="joinTeamField" class="join-select-field broadcast-checklist">
               <p class="join-field-title">Gabung Team</p>
+              <button id="joinTeamChecklistTrigger" type="button" class="broadcast-checklist-trigger" aria-expanded="false">Pilih Team (Checklist)</button>
+              <div id="joinTeamChecklistMenu" class="broadcast-checklist-menu hidden" role="listbox" aria-label="Pilihan team login"></div>
               <label for="teamInput" class="sr-only">Pilih team</label>
-              <select id="teamInput" aria-label="Pilih team"></select>
+              <select id="teamInput" class="sr-only" aria-label="Pilih team"></select>
             </div>
-            <div id="joinChannelField" class="join-select-field">
+            <div id="joinChannelField" class="join-select-field broadcast-checklist">
               <p class="join-field-title">Gabung Channels</p>
+              <button id="joinChannelChecklistTrigger" type="button" class="broadcast-checklist-trigger" aria-expanded="false">Pilih Channels (Checklist)</button>
+              <div id="joinChannelChecklistMenu" class="broadcast-checklist-menu hidden" role="listbox" aria-label="Pilihan channel login"></div>
               <label for="joinChannelInput" class="sr-only">Pilih channel awal</label>
-              <select id="joinChannelInput" aria-label="Pilih channel awal"></select>
+              <select id="joinChannelInput" class="sr-only" aria-label="Pilih channel awal"></select>
             </div>
           </div>
           <div id="joinPasswordField">

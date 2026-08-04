@@ -7,6 +7,10 @@ const teamInput = document.getElementById("teamInput");
 const joinChannelInput = document.getElementById("joinChannelInput");
 const joinTeamField = document.getElementById("joinTeamField");
 const joinChannelField = document.getElementById("joinChannelField");
+const joinTeamChecklistTrigger = document.getElementById("joinTeamChecklistTrigger");
+const joinTeamChecklistMenu = document.getElementById("joinTeamChecklistMenu");
+const joinChannelChecklistTrigger = document.getElementById("joinChannelChecklistTrigger");
+const joinChannelChecklistMenu = document.getElementById("joinChannelChecklistMenu");
 const joinRoleSelect = document.getElementById("joinRoleSelect");
 const joinRoleDropdown = document.getElementById("joinRoleDropdown");
 const joinRoleTrigger = document.getElementById("joinRoleTrigger");
@@ -251,6 +255,8 @@ let activeEditMessageId = "";
 const messageCache = new Map();
 let currentTeamMembers = [];
 let currentTeamChannels = [DEFAULT_CHANNEL];
+let selectedJoinTeamCodes = new Set([DEFAULT_TEAM]);
+let selectedJoinChannelCodes = new Set([DEFAULT_CHANNEL]);
 let pendingChannelSwitchCode = "";
 let broadcastTargetTeams = [DEFAULT_TEAM];
 const broadcastChannelsByTeam = new Map([[DEFAULT_TEAM, [DEFAULT_CHANNEL]]]);
@@ -807,6 +813,133 @@ const populateLoginSelectOptions = (selectElement, options, fallback) => {
     : normalizedOptions[0];
 };
 
+const createJoinChecklistItem = ({ label, checked, onToggle }) => {
+  const item = document.createElement("label");
+  item.className = "broadcast-checklist-item";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = Boolean(checked);
+  checkbox.addEventListener("change", () => {
+    onToggle(Boolean(checkbox.checked));
+  });
+
+  const text = document.createElement("span");
+  text.textContent = label;
+
+  item.appendChild(checkbox);
+  item.appendChild(text);
+  return item;
+};
+
+const syncJoinSelectMirrors = () => {
+  const selectedTeams = Array.from(selectedJoinTeamCodes)
+    .map((teamCode) => normalizeCode(teamCode, ""))
+    .filter(Boolean);
+  const selectedChannels = Array.from(selectedJoinChannelCodes)
+    .map((channelCode) => normalizeCode(channelCode, ""))
+    .filter(Boolean);
+
+  if (teamInput) {
+    teamInput.value = selectedTeams[0] || "";
+    teamInput.dispatchEvent(new Event("change"));
+  }
+
+  if (joinChannelInput) {
+    joinChannelInput.value = selectedChannels[0] || "";
+    joinChannelInput.dispatchEvent(new Event("change"));
+  }
+};
+
+const updateJoinChecklistTriggerLabels = () => {
+  if (joinTeamChecklistTrigger) {
+    const total = selectedJoinTeamCodes.size;
+    joinTeamChecklistTrigger.textContent = total > 0
+      ? `Team dipilih (${total})`
+      : "Pilih Team (Checklist)";
+  }
+
+  if (joinChannelChecklistTrigger) {
+    const total = selectedJoinChannelCodes.size;
+    joinChannelChecklistTrigger.textContent = total > 0
+      ? `Channels dipilih (${total})`
+      : "Pilih Channels (Checklist)";
+  }
+};
+
+const renderJoinChecklists = (configInput = currentLoginConfig, preferDefaults = false) => {
+  const config = normalizeLoginConfig(configInput || currentLoginConfig);
+  const normalizedTeams = Array.from(
+    new Set(
+      (Array.isArray(config.teamOptions) ? config.teamOptions : [DEFAULT_TEAM])
+        .map((teamCode) => normalizeCode(teamCode, ""))
+        .filter(Boolean)
+    )
+  );
+  const normalizedChannels = Array.from(
+    new Set(
+      (Array.isArray(config.channelOptions) ? config.channelOptions : [DEFAULT_CHANNEL])
+        .map((channelCode) => normalizeCode(channelCode, ""))
+        .filter(Boolean)
+    )
+  );
+
+  if (preferDefaults && selectedJoinTeamCodes.size === 0 && normalizedTeams.length > 0) {
+    selectedJoinTeamCodes = new Set([normalizedTeams[0]]);
+  }
+  if (preferDefaults && selectedJoinChannelCodes.size === 0 && normalizedChannels.length > 0) {
+    selectedJoinChannelCodes = new Set([normalizedChannels[0]]);
+  }
+
+  selectedJoinTeamCodes = new Set(
+    Array.from(selectedJoinTeamCodes).filter((teamCode) => normalizedTeams.includes(teamCode))
+  );
+  selectedJoinChannelCodes = new Set(
+    Array.from(selectedJoinChannelCodes).filter((channelCode) => normalizedChannels.includes(channelCode))
+  );
+
+  if (joinTeamChecklistMenu) {
+    joinTeamChecklistMenu.replaceChildren();
+    normalizedTeams.forEach((teamCode) => {
+      const item = createJoinChecklistItem({
+        label: teamCode,
+        checked: selectedJoinTeamCodes.has(teamCode),
+        onToggle: (checked) => {
+          if (checked) {
+            selectedJoinTeamCodes.add(teamCode);
+          } else {
+            selectedJoinTeamCodes.delete(teamCode);
+          }
+          renderJoinChecklists(currentLoginConfig, false);
+        }
+      });
+      joinTeamChecklistMenu.appendChild(item);
+    });
+  }
+
+  if (joinChannelChecklistMenu) {
+    joinChannelChecklistMenu.replaceChildren();
+    normalizedChannels.forEach((channelCode) => {
+      const item = createJoinChecklistItem({
+        label: `#${channelCode}`,
+        checked: selectedJoinChannelCodes.has(channelCode),
+        onToggle: (checked) => {
+          if (checked) {
+            selectedJoinChannelCodes.add(channelCode);
+          } else {
+            selectedJoinChannelCodes.delete(channelCode);
+          }
+          renderJoinChecklists(currentLoginConfig, false);
+        }
+      });
+      joinChannelChecklistMenu.appendChild(item);
+    });
+  }
+
+  syncJoinSelectMirrors();
+  updateJoinChecklistTriggerLabels();
+};
+
 const setKnownTeamCodes = (teamCodes = []) => {
   const normalized = Array.from(
     new Set(
@@ -999,6 +1132,8 @@ const applyLoginConfigToJoinForm = (configInput) => {
   });
   renderTeams();
 
+  renderJoinChecklists(currentLoginConfig, true);
+
   if (isAdminPortal) {
     if (joinTeamField) {
       joinTeamField.hidden = true;
@@ -1031,6 +1166,14 @@ const applyLoginConfigToJoinForm = (configInput) => {
 
   if (joinChannelInput && !currentLoginConfig.showChannelSelect) {
     joinChannelInput.value = currentLoginConfig.channelOptions[0] || DEFAULT_CHANNEL;
+  }
+
+  if (!currentLoginConfig.showTeamSelect) {
+    selectedJoinTeamCodes = new Set([currentLoginConfig.teamOptions[0] || DEFAULT_TEAM]);
+  }
+
+  if (!currentLoginConfig.showChannelSelect) {
+    selectedJoinChannelCodes = new Set([currentLoginConfig.channelOptions[0] || DEFAULT_CHANNEL]);
   }
 
   applyPortalSelectionsFromQuery();
@@ -1086,6 +1229,13 @@ const fetchDirectAdminConfig = async () => {
 };
 
 const getJoinTeamCodeForMembersDirectory = () => {
+  const fromSelection = Array.from(selectedJoinTeamCodes)
+    .map((teamCode) => normalizeCode(teamCode, ""))
+    .find(Boolean);
+  if (fromSelection) {
+    return fromSelection;
+  }
+
   const fromForm = normalizeCode(teamInput?.value, "");
   if (fromForm) {
     return fromForm;
@@ -1094,10 +1244,17 @@ const getJoinTeamCodeForMembersDirectory = () => {
   if (fromQuery) {
     return fromQuery;
   }
-  return normalizeCode(currentTeam, DEFAULT_TEAM);
+  return normalizeCode(currentTeam, "");
 };
 
 const getJoinChannelCodeForMembersDirectory = () => {
+  const fromSelection = Array.from(selectedJoinChannelCodes)
+    .map((channelCode) => normalizeCode(channelCode, ""))
+    .find(Boolean);
+  if (fromSelection) {
+    return fromSelection;
+  }
+
   const fromForm = normalizeCode(joinChannelInput?.value, "");
   if (fromForm) {
     return fromForm;
@@ -1106,7 +1263,7 @@ const getJoinChannelCodeForMembersDirectory = () => {
   if (fromQuery) {
     return fromQuery;
   }
-  return normalizeCode(currentChannel, DEFAULT_CHANNEL);
+  return normalizeCode(currentChannel, "");
 };
 
 const buildPortalUrl = (basePath) => {
@@ -1128,13 +1285,15 @@ const applyPortalSelectionsFromQuery = () => {
   const queryTeam = normalizeCode(pageQuery.get("team"), "");
   const queryChannel = normalizeCode(pageQuery.get("channel"), "");
 
-  if (teamInput && queryTeam) {
-    teamInput.value = queryTeam;
+  if (queryTeam) {
+    selectedJoinTeamCodes = new Set([queryTeam]);
   }
 
-  if (joinChannelInput && queryChannel) {
-    joinChannelInput.value = queryChannel;
+  if (queryChannel) {
+    selectedJoinChannelCodes = new Set([queryChannel]);
   }
+
+  renderJoinChecklists(currentLoginConfig, false);
 };
 
 const closeRealMembersModal = () => {
@@ -1436,6 +1595,11 @@ const saveMemberLogin = () => {
     return;
   }
 
+  if (!normalizeCode(currentTeam, "") || !normalizeCode(currentChannel, "")) {
+    clearSavedMemberLogin();
+    return;
+  }
+
   const safeName = normalizeDisplayName(currentUser);
   if (!safeName) {
     clearSavedMemberLogin();
@@ -1530,12 +1694,14 @@ const emitJoinRequest = () => {
     return;
   }
 
+  const isPrivateMode = !normalizeCode(currentTeam, "") && !normalizeCode(currentChannel, "");
   socket.emit("join:request", {
     name: currentUser,
     teamCode: currentTeam,
     channelCode: currentChannel,
     role: currentRole,
-    password: currentAccessPassword
+    password: currentAccessPassword,
+    privateMode: isPrivateMode
   });
 };
 
@@ -1561,6 +1727,8 @@ const logoutCurrentSession = () => {
   currentRole = "member";
   currentUserIsRegisteredMember = false;
   currentAccessPassword = "";
+  selectedJoinTeamCodes = new Set([DEFAULT_TEAM]);
+  selectedJoinChannelCodes = new Set([DEFAULT_CHANNEL]);
   currentView = {
     type: "channel",
     channelCode: DEFAULT_CHANNEL,
@@ -2740,10 +2908,12 @@ const updateProfileCard = () => {
   }
   profileRole.textContent = currentUser ? getRoleLabel(currentRole) : "Visitor";
   applyDefaultAvatar(profileAvatar, displayName);
-  profileTeam.textContent = currentTeam;
+  profileTeam.textContent = currentTeam || "Privat";
   profileChannel.textContent = currentView.type === "dm"
     ? `DM @${normalizeDisplayName(currentView.peerName)}`
-    : `#${currentChannel}`;
+    : currentChannel
+      ? `#${currentChannel}`
+      : "Privat";
 
   profileStatus.textContent = statusOnline ? "Online" : "Offline";
   profileStatus.classList.toggle("online", statusOnline);
@@ -2774,12 +2944,12 @@ const setConnectionState = (isOnline) => {
 
 const setHeader = () => {
   if (currentView.type === "dm") {
-    roomLabel.textContent = `DM • TEAM ${currentTeam}`;
+    roomLabel.textContent = currentTeam ? `DM • TEAM ${currentTeam}` : "DM • PRIVATE";
     roomTitle.textContent = `@${normalizeDisplayName(currentView.peerName)}`;
     backToChannelButton.classList.remove("hidden");
   } else {
-    roomLabel.textContent = `TEAM ${currentTeam}`;
-    roomTitle.textContent = `#${currentChannel}`;
+    roomLabel.textContent = currentTeam ? `TEAM ${currentTeam}` : "PRIVATE CHAT";
+    roomTitle.textContent = currentChannel ? `#${currentChannel}` : "DM Privat";
     backToChannelButton.classList.add("hidden");
   }
 
@@ -3748,7 +3918,7 @@ const clearAutoCrowdChatTimers = () => {
 };
 
 const updateChannelFormAccess = () => {
-  const allowed = Boolean(currentUser) && canCreateChannels(normalizeRole(currentRole));
+  const allowed = Boolean(currentUser) && Boolean(currentTeam) && canCreateChannels(normalizeRole(currentRole));
 
   if (channelForm && channelInput) {
     channelForm.classList.toggle("hidden", !allowed);
@@ -4965,20 +5135,21 @@ const handleJoin = () => {
   }
 
   currentUser = normalizeDisplayName(name.slice(0, 24));
-  currentTeam = normalizeCode(teamInput?.value, DEFAULT_TEAM);
-  currentChannel = normalizeCode(joinChannelInput?.value, DEFAULT_CHANNEL);
+  currentTeam = getJoinTeamCodeForMembersDirectory();
+  currentChannel = getJoinChannelCodeForMembersDirectory();
   currentRole = selectedRole;
   currentAccessPassword = password;
+  const privateJoinMode = !currentTeam && !currentChannel;
   pendingDirectAdminAutoStartOnJoin = wantsDirectAdminOnJoin
     && !isAdminPortal
     && currentDirectAdminConfig.enabled
     && (selectedRole === "guest" || selectedRole === "member");
   currentView = {
-    type: "channel",
+    type: privateJoinMode ? "dm" : "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: "",
-    supportScope: ""
+    peerName: privateJoinMode ? "Admin/Owner" : "",
+    supportScope: privateJoinMode ? "admins" : ""
   };
 
   setHeader();

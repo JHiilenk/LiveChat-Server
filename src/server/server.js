@@ -1292,6 +1292,9 @@ io.on("connection", (socket) => {
     const requestedName = sanitizeName(payload?.name || "");
     const teamCode = sanitizeCode(payload?.teamCode || "", DEFAULT_TEAM_CODE);
     const channelCode = sanitizeCode(payload?.channelCode || "", DEFAULT_CHANNEL_CODE);
+    const privateMode = Boolean(payload?.privateMode) || (!String(payload?.teamCode || "").trim() && !String(payload?.channelCode || "").trim());
+    const authTeamCode = privateMode ? DEFAULT_TEAM_CODE : teamCode;
+    const authChannelCode = privateMode ? DEFAULT_CHANNEL_CODE : channelCode;
     const requestedRole = sanitizeRole(payload?.role || ROLE_MEMBER);
     const password = sanitizePassword(payload?.password || "");
     const clientFingerprint = buildClientFingerprint({ socket });
@@ -1303,7 +1306,7 @@ io.on("connection", (socket) => {
     }
 
     const previousUser = usersBySocketId.get(socket.id);
-    if (previousUser && previousUser.teamCode !== teamCode) {
+    if (previousUser && previousUser.teamCode && previousUser.teamCode !== teamCode) {
       socket.leave(teamRoomKey(previousUser.teamCode));
       socket.leave(channelRoomKey(previousUser.teamCode, previousUser.channelCode));
       typingSocketIds.delete(socket.id);
@@ -1311,11 +1314,13 @@ io.on("connection", (socket) => {
       emitPresence(previousUser.teamCode, previousUser.channelCode);
     }
 
-    await ensureTeam(teamCode, requestedName);
-    await ensureChannel(teamCode, DEFAULT_CHANNEL_CODE, requestedName);
+    if (!privateMode) {
+      await ensureTeam(teamCode, requestedName);
+      await ensureChannel(teamCode, DEFAULT_CHANNEL_CODE, requestedName);
+    }
 
     const roleResolution = await resolveJoinRole({
-      teamCode,
+      teamCode: authTeamCode,
       requestedName,
       requestedRole,
       password
@@ -1330,9 +1335,76 @@ io.on("connection", (socket) => {
     if (!isSimulated && realMemberRecord?.registeredMember) {
       realMemberRecord = await upsertRealMemberRecord({
         name: requestedName,
-        teamCode,
-        channelCode
+        teamCode: authTeamCode,
+        channelCode: authChannelCode
       });
+    }
+
+    if (privateMode) {
+      const directAdminConfig = await getPublicDirectAdminConfig();
+      if (!directAdminConfig.enabled) {
+        socket.emit("join:error", { message: "Chat langsung ke admin sedang dinonaktifkan oleh admin." });
+        return;
+      }
+
+      const recipients = getOnlinePrivilegedRecipients(usersBySocketId, "", socket.id);
+      if (recipients.length === 0) {
+        socket.emit("join:error", { message: "Admin/owner belum online. Coba beberapa saat lagi." });
+        return;
+      }
+
+      const dmKey = buildDirectAdminDmKey(requestedName);
+      if (!dmKey) {
+        socket.emit("join:error", { message: "Gagal membuat DM admin. Nama user tidak valid." });
+        return;
+      }
+
+      const room = dmRoomKey("", dmKey);
+      socket.join(room);
+      recipients.forEach((recipient) => {
+        const recipientSocket = io.sockets.sockets.get(recipient.id);
+        if (recipientSocket) {
+          recipientSocket.join(room);
+        }
+      });
+
+      const user = {
+        id: socket.id,
+        name: requestedName,
+        role: roleResolution.role,
+        teamCode: "",
+        channelCode: "",
+        activeMode: "dm",
+        activeDmKey: dmKey,
+        activeDmPeerName: "Admin/Owner",
+        activeDmProxyTargetName: null,
+        activeDmProxyAliasName: null,
+        joinedAt: nowIso(),
+        simulated: isSimulated,
+        registeredMember: Boolean(realMemberRecord?.registeredMember),
+        fingerprintKey: clientFingerprint.fingerprintKey
+      };
+
+      usersBySocketId.set(socket.id, user);
+      socket.data.explicitLogout = false;
+
+      const history = await getDmHistory("", dmKey, "Admin/Owner");
+      socket.emit("dm:ready", {
+        dmKey,
+        peerName: "Admin/Owner",
+        supportScope: "admins",
+        history
+      });
+
+      recipients.forEach((recipient) => {
+        io.to(recipient.id).emit("dm:available", {
+          dmKey,
+          peerName: user.name,
+          supportScope: "admins"
+        });
+      });
+
+      return;
     }
 
     const user = {

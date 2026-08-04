@@ -34,7 +34,7 @@ const createDirectAdminSupport = ({ sanitizeName, roleOwner, roleAdmin, roleMemb
 
   const getOnlinePrivilegedRecipients = (usersBySocketId, teamCode, requesterId = "") => {
     return Array.from(usersBySocketId.values())
-      .filter((entry) => entry?.teamCode === teamCode)
+      .filter((entry) => !teamCode || entry?.teamCode === teamCode)
       .filter((entry) => entry?.id && entry.id !== requesterId)
       .filter((entry) => !entry?.simulated)
       .filter((entry) => isPrivilegedRecipientRole(entry.role));
