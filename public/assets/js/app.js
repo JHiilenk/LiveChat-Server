@@ -91,6 +91,8 @@ const channelList = document.getElementById("channelList");
 const channelForm = document.getElementById("channelForm");
 const channelInput = document.getElementById("channelInput");
 const dmList = document.getElementById("dmList");
+const liveChatRouteCard = document.getElementById("liveChatRouteCard");
+const liveChatRouteList = document.getElementById("liveChatRouteList");
 const backToChannelButton = document.getElementById("backToChannelButton");
 const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
 const sidebarCloseButton = document.getElementById("sidebarCloseButton");
@@ -3686,17 +3688,28 @@ const buildDmPreviewFallbackMessage = ({ dmKey, peerName, meta }) => {
 };
 
 const renderDmList = () => {
-  dmList.replaceChildren();
+  const isLiveChatSupportConversation = (conversation, meta) => {
+    const scope = String(conversation?.supportScope || meta?.supportScope || "").trim().toLowerCase();
+    const dmKey = String(conversation?.dmKey || "").trim().toUpperCase();
+    return scope === "admins" || dmKey.startsWith("ADMINSUPPORT::");
+  };
 
-  if (dmConversations.length === 0) {
-    const empty = document.createElement("li");
-    empty.className = "dm-empty";
-    empty.textContent = "Belum ada DM";
-    dmList.appendChild(empty);
-    return;
-  }
+  const renderConversationCollection = (listElement, conversations, emptyText) => {
+    if (!listElement) {
+      return;
+    }
 
-  dmConversations.forEach((conversation) => {
+    listElement.replaceChildren();
+
+    if (!Array.isArray(conversations) || conversations.length === 0) {
+      const empty = document.createElement("li");
+      empty.className = "dm-empty";
+      empty.textContent = emptyText;
+      listElement.appendChild(empty);
+      return;
+    }
+
+    conversations.forEach((conversation) => {
     const meta = dmConversationMeta.get(conversation.dmKey) || {
       unreadCount: 0,
       previewText: "Belum ada pesan",
@@ -3794,8 +3807,31 @@ const renderDmList = () => {
     });
 
     li.appendChild(button);
-    dmList.appendChild(li);
+      listElement.appendChild(li);
+    });
+  };
+
+  const supportConversations = dmConversations.filter((conversation) => {
+    const meta = dmConversationMeta.get(conversation.dmKey) || null;
+    return isLiveChatSupportConversation(conversation, meta);
   });
+
+  const regularConversations = isAdminPortal
+    ? dmConversations.filter((conversation) => {
+      const meta = dmConversationMeta.get(conversation.dmKey) || null;
+      return !isLiveChatSupportConversation(conversation, meta);
+    })
+    : dmConversations;
+
+  if (liveChatRouteCard) {
+    liveChatRouteCard.classList.toggle("hidden", !isAdminPortal);
+  }
+
+  if (isAdminPortal && liveChatRouteList) {
+    renderConversationCollection(liveChatRouteList, supportConversations, "Belum ada jalur Live Chat");
+  }
+
+  renderConversationCollection(dmList, regularConversations, "Belum ada DM");
 };
 
 const renderChannels = (channels) => {
