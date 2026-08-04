@@ -730,8 +730,8 @@ const applyDirectAdminConfig = (configInput) => {
     joinDirectAdminField.classList.toggle("hidden", !canShowJoinOption);
   }
 
-  if (!canShowJoinOption && joinDirectAdminInput) {
-    joinDirectAdminInput.value = "channel";
+  if (joinDirectAdminInput) {
+    joinDirectAdminInput.value = "admins";
   }
 };
 
@@ -1561,7 +1561,7 @@ const logoutCurrentSession = () => {
     joinPasswordInput.value = "";
   }
   if (joinDirectAdminInput) {
-    joinDirectAdminInput.value = "channel";
+    joinDirectAdminInput.value = "admins";
   }
 
   renderChannels([DEFAULT_CHANNEL]);
@@ -4899,7 +4899,7 @@ const handleJoin = () => {
   }
 
   const password = String(joinPasswordInput?.value || "").trim();
-  const wantsDirectAdminOnJoin = String(joinDirectAdminInput?.value || "channel") === "admins";
+  const wantsDirectAdminOnJoin = String(joinDirectAdminInput?.value || "admins") === "admins";
 
   if ((selectedRole === "member" || isPrivilegedRole(selectedRole)) && !password) {
     notify(
@@ -4980,8 +4980,8 @@ if (joinRoleSelect && joinPasswordInput) {
       joinDirectAdminField.classList.toggle("hidden", !canShowJoinDirectAdminOption);
     }
 
-    if (!canShowJoinDirectAdminOption && joinDirectAdminInput) {
-      joinDirectAdminInput.value = "channel";
+    if (joinDirectAdminInput) {
+      joinDirectAdminInput.value = "admins";
     }
   };
 
