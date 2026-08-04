@@ -609,7 +609,38 @@ const normalizeUploadConfig = (rawConfig) => {
   };
 };
 
+const directAdminUiSupportFactory = window.DirectAdminSupport?.createDirectAdminUiSupport;
+const directAdminUiSupport = typeof directAdminUiSupportFactory === "function"
+  ? directAdminUiSupportFactory({
+    normalizeRole,
+    isAdminPortal,
+    elements: {
+      directAdminEnabledToggle,
+      directAdminDmButton,
+      directAdminDmHint,
+      joinDirectAdminField,
+      joinDirectAdminInput,
+      joinRoleSelect
+    },
+    getState: () => ({
+      currentDirectAdminConfig,
+      currentRole,
+      currentUser,
+      hasJoinedServer
+    }),
+    setState: (nextState) => {
+      if (nextState && Object.prototype.hasOwnProperty.call(nextState, "currentDirectAdminConfig")) {
+        currentDirectAdminConfig = nextState.currentDirectAdminConfig;
+      }
+    }
+  })
+  : null;
+
 const normalizeDirectAdminConfig = (rawConfig) => {
+  if (directAdminUiSupport) {
+    return directAdminUiSupport.normalizeConfig(rawConfig);
+  }
+
   const config = rawConfig && typeof rawConfig === "object" ? rawConfig : {};
   return {
     enabled: config.enabled !== false
@@ -630,6 +661,11 @@ const setLoginToggleButtonState = (button, enabled) => {
 };
 
 const setDirectAdminToggleButtonState = (button, enabled) => {
+  if (directAdminUiSupport) {
+    directAdminUiSupport.setToggleButtonState(button, enabled);
+    return;
+  }
+
   if (!button) {
     return;
   }
@@ -679,6 +715,11 @@ const syncUploadConfigAdminForm = (configInput = currentUploadConfig) => {
 };
 
 const syncDirectAdminConfigAdminForm = (configInput = currentDirectAdminConfig) => {
+  if (directAdminUiSupport) {
+    directAdminUiSupport.syncAdminForm(configInput);
+    return;
+  }
+
   const config = normalizeDirectAdminConfig(configInput);
   setDirectAdminToggleButtonState(directAdminEnabledToggle, config.enabled);
   if (directAdminEnabledToggle) {
@@ -700,6 +741,11 @@ const applyUploadConfig = (configInput) => {
 };
 
 const updateDirectAdminActionVisibility = () => {
+  if (directAdminUiSupport) {
+    directAdminUiSupport.updateActionVisibility();
+    return;
+  }
+
   const normalizedRole = normalizeRole(currentRole);
   const canUseDirectAdmin = !isAdminPortal
     && currentDirectAdminConfig.enabled
@@ -717,6 +763,11 @@ const updateDirectAdminActionVisibility = () => {
 };
 
 const applyDirectAdminConfig = (configInput) => {
+  if (directAdminUiSupport) {
+    directAdminUiSupport.applyConfig(configInput);
+    return;
+  }
+
   currentDirectAdminConfig = normalizeDirectAdminConfig(configInput || currentDirectAdminConfig);
   syncDirectAdminConfigAdminForm(currentDirectAdminConfig);
   updateDirectAdminActionVisibility();

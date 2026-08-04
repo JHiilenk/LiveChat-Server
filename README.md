@@ -65,3 +65,11 @@ Contoh pola aman:
 - Folder `data/` harus disimpan di persistent disk/volume saat deploy.
 - Jangan pakai password default contoh untuk production.
 - Jika satu client butuh branding berbeda, favicon, title, dan manifest bisa diganti di folder `public/` milik project ini tanpa menyentuh folder `PEMULA`.
+
+## Checklist Deploy Cepat
+
+1. Push perubahan terakhir ke branch yang dihubungkan ke Railway.
+2. Tunggu deployment baru selesai sampai status `Active`.
+3. Buka ulang `/app` dan pastikan asset baru termuat dari query version terbaru.
+4. Cek `/admin` untuk memastikan panel admin dan toggle chat langsung ke admin tetap tampil normal.
+5. Jika browser masih cache versi lama, lakukan hard refresh sekali setelah deploy.
