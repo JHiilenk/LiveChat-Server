@@ -1031,16 +1031,16 @@ body.portal-admin .seo-landing {
   body.portal-admin,
   body.portal-login,
   body.portal-registration {
-    overflow-y: auto;
+    overflow-y: hidden;
   }
 
   body.route-app .app-shell,
   body.portal-admin .app-shell,
   body.portal-login .app-shell,
   body.portal-registration .app-shell {
-    height: auto;
-    min-height: calc(100dvh - clamp(1.8rem, 6.8vh, 3.4rem));
-    overflow: visible;
+    height: calc(100dvh - clamp(1.8rem, 6.8vh, 3.4rem));
+    min-height: 0;
+    overflow: hidden;
     align-items: stretch;
   }
 
@@ -1048,7 +1048,9 @@ body.portal-admin .seo-landing {
     display: flex;
     flex-direction: column;
     align-content: stretch;
+    max-height: 100%;
     overflow-y: auto;
+    overscroll-behavior: contain;
     gap: 1rem;
     padding: 1.05rem;
   }
