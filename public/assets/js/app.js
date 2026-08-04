@@ -2985,9 +2985,11 @@ const setConnectionState = (isOnline) => {
 
 const setHeader = () => {
   if (currentView.type === "dm") {
-    roomLabel.textContent = currentTeam
-      ? `DM • TEAM ${currentTeam}`
-      : "Live Chat";
+    const supportScope = String(currentView.supportScope || "").trim().toLowerCase();
+    const isDirectAdminRoute = String(currentView.dmKey || "").toUpperCase().startsWith("ADMINSUPPORT::");
+    roomLabel.textContent = supportScope === "admins" || isDirectAdminRoute
+      ? "Live Chat"
+      : (currentTeam ? `DM • TEAM ${currentTeam}` : "Live Chat");
     roomTitle.textContent = `@${normalizeDisplayName(currentView.peerName)}`;
     backToChannelButton.classList.remove("hidden");
   } else {
@@ -3765,6 +3767,7 @@ const renderDmList = () => {
     button.appendChild(inner);
 
     button.addEventListener("click", () => {
+      const supportScope = String(conversation.supportScope || meta.supportScope || "").trim().toLowerCase();
       const pendingByKey = pendingDetachedDmMessages.get(conversation.dmKey);
       const pendingByPeer = pendingDetachedDmMessagesByPeer.get(normalizeDisplayName(conversation.peerName));
       const pendingMessage = pendingByKey
@@ -3778,6 +3781,7 @@ const renderDmList = () => {
         switchToDmView({
           dmKey: conversation.dmKey,
           peerName: conversation.peerName,
+          supportScope,
           history: [pendingMessage]
         });
       }
