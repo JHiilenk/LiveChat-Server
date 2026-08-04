@@ -2987,7 +2987,7 @@ const setHeader = () => {
   if (currentView.type === "dm") {
     roomLabel.textContent = currentTeam
       ? `DM • TEAM ${currentTeam}`
-      : (isAdminPortal ? "Live Chat" : "DM • PRIVATE");
+      : "Live Chat";
     roomTitle.textContent = `@${normalizeDisplayName(currentView.peerName)}`;
     backToChannelButton.classList.remove("hidden");
   } else {
