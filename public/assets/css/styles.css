@@ -1129,6 +1129,44 @@ body.portal-admin .seo-landing {
   grid-template-rows: auto auto auto auto 1fr;
   gap: 0.9rem;
   min-height: 0;
+  scrollbar-gutter: stable;
+}
+
+.sidebar,
+.user-list,
+.guest-list,
+.channel-list,
+.dm-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(118, 175, 255, 0.62) rgba(7, 19, 37, 0.42);
+}
+
+.sidebar::-webkit-scrollbar,
+.user-list::-webkit-scrollbar,
+.guest-list::-webkit-scrollbar,
+.channel-list::-webkit-scrollbar,
+.dm-list::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.user-list::-webkit-scrollbar-track,
+.guest-list::-webkit-scrollbar-track,
+.channel-list::-webkit-scrollbar-track,
+.dm-list::-webkit-scrollbar-track {
+  background: rgba(7, 19, 37, 0.4);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.user-list::-webkit-scrollbar-thumb,
+.guest-list::-webkit-scrollbar-thumb,
+.channel-list::-webkit-scrollbar-thumb,
+.dm-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid rgba(7, 19, 37, 0.3);
+  background: linear-gradient(180deg, rgba(123, 181, 255, 0.95) 0%, rgba(253, 165, 82, 0.88) 100%);
 }
 
 .brand-block {
@@ -1709,19 +1747,21 @@ body.portal-admin .seo-landing {
 .user-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0.28rem 0.2rem 0;
   display: grid;
   gap: 0.45rem;
+  scrollbar-gutter: stable both-edges;
 }
 
 .dm-list {
   list-style: none;
   margin: 0.55rem 0 0;
-  padding: 0;
+  padding: 0 0.28rem 0.2rem 0;
   display: grid;
   gap: 0.4rem;
   max-height: 160px;
   overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
 }
 
 .dm-card .dm-list {
@@ -1822,6 +1862,9 @@ body.portal-admin .seo-landing {
   margin-top: 0.15rem;
   max-height: 210px;
   overflow-y: auto;
+  padding-right: 0.28rem;
+  padding-bottom: 0.2rem;
+  scrollbar-gutter: stable both-edges;
 }
 
 .channel-item {
