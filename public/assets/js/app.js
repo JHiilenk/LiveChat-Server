@@ -1067,6 +1067,15 @@ const renderTeams = () => {
     return;
   }
 
+  if (!currentTeam && currentView.type === "dm") {
+    teamList.replaceChildren();
+    const item = document.createElement("li");
+    item.className = "channel-empty-state";
+    item.textContent = "Mode privat tanpa team.";
+    teamList.appendChild(item);
+    return;
+  }
+
   const teamCodes = Array.from(
     new Set(
       (Array.isArray(knownTeamCodes) ? knownTeamCodes : [DEFAULT_TEAM])
@@ -3752,6 +3761,19 @@ const renderDmList = () => {
 };
 
 const renderChannels = (channels) => {
+  if (!channelList) {
+    return;
+  }
+
+  if (!currentTeam && currentView.type === "dm") {
+    channelList.replaceChildren();
+    const item = document.createElement("li");
+    item.className = "channel-empty-state";
+    item.textContent = "Mode privat tanpa channels.";
+    channelList.appendChild(item);
+    return;
+  }
+
   setKnownTeamChannels(currentTeam, channels);
   currentTeamChannels = Array.from(
     new Set(
