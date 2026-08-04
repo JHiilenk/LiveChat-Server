@@ -1475,6 +1475,7 @@ const logoutCurrentSession = () => {
   closeMobileSidebar();
 
   joinModal.classList.remove("hidden");
+  joinModal.hidden = false;
   try {
     nameInput.focus({ preventScroll: true });
   } catch {
@@ -4784,6 +4785,7 @@ const handleJoin = () => {
   setChatReadyState(false);
 
   joinModal.classList.add("hidden");
+  joinModal.hidden = true;
 };
 
 const handleJoinTrigger = (event) => {
@@ -5360,9 +5362,11 @@ socket.on("join:error", (payload) => {
 
   if (!hasJoinedServer) {
     joinModal.classList.remove("hidden");
+    joinModal.hidden = false;
     pendingPortalJoinAttempt = false;
   } else if (pendingPortalJoinAttempt) {
     joinModal.classList.remove("hidden");
+    joinModal.hidden = false;
     pendingPortalJoinAttempt = false;
   }
 
@@ -5402,6 +5406,7 @@ socket.on("channel:joined", (payload) => {
   }
 
   joinModal.classList.add("hidden");
+  joinModal.hidden = true;
   saveMemberLogin();
 
   setChatReadyState(true);
@@ -5808,6 +5813,7 @@ window.setTimeout(keepSidebarAtTopBriefly, 150);
 const hasRestoredMemberLogin = restoreSavedMemberLogin();
 if (hasRestoredMemberLogin) {
   joinModal.classList.add("hidden");
+  joinModal.hidden = true;
   setHeader();
   renderDmList();
   notify("Menyambungkan ulang sesi member...", "info", { inlineDuration: 2600, toast: false });
@@ -5817,9 +5823,11 @@ if (hasRestoredMemberLogin) {
 } else if (isRegistrationPortal) {
   if (joinModal) {
     joinModal.classList.add("hidden");
+    joinModal.hidden = true;
   }
   openRealMembersModal();
 } else {
+  joinModal.hidden = false;
   nameInput.focus();
 }
 
