@@ -407,11 +407,12 @@
               <option value="member">Member</option>
             </select>
           </div>
-          <div id="joinDirectAdminField" class="join-direct-admin-field">
-            <label for="joinDirectAdminCheckbox" class="join-direct-admin-label">
-              <input id="joinDirectAdminCheckbox" type="checkbox" />
-              <span>Masuk langsung ke DM Admin/Owner</span>
-            </label>
+          <div id="joinDirectAdminField" class="join-select-field">
+            <label for="joinDirectAdminInput" class="sr-only">Arah masuk awal</label>
+            <select id="joinDirectAdminInput" aria-label="Arah masuk awal">
+              <option value="channel" selected>Masuk ke channel dulu</option>
+              <option value="admins">Langsung ke DM Admin/Owner</option>
+            </select>
           </div>
           <div id="joinPasswordField">
             <label for="joinPasswordInput" class="sr-only">Password</label>

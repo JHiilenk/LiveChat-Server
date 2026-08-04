@@ -12,7 +12,7 @@ const joinRoleDropdown = document.getElementById("joinRoleDropdown");
 const joinRoleTrigger = document.getElementById("joinRoleTrigger");
 const joinRoleMenu = document.getElementById("joinRoleMenu");
 const joinDirectAdminField = document.getElementById("joinDirectAdminField");
-const joinDirectAdminCheckbox = document.getElementById("joinDirectAdminCheckbox");
+const joinDirectAdminInput = document.getElementById("joinDirectAdminInput");
 const joinPasswordField = document.getElementById("joinPasswordField");
 const joinPasswordInput = document.getElementById("joinPasswordInput");
 const joinSubmitButton = joinForm?.querySelector("button[type='submit']");
@@ -730,8 +730,8 @@ const applyDirectAdminConfig = (configInput) => {
     joinDirectAdminField.classList.toggle("hidden", !canShowJoinOption);
   }
 
-  if (!canShowJoinOption && joinDirectAdminCheckbox) {
-    joinDirectAdminCheckbox.checked = false;
+  if (!canShowJoinOption && joinDirectAdminInput) {
+    joinDirectAdminInput.value = "channel";
   }
 };
 
@@ -1560,8 +1560,8 @@ const logoutCurrentSession = () => {
   if (joinPasswordInput) {
     joinPasswordInput.value = "";
   }
-  if (joinDirectAdminCheckbox) {
-    joinDirectAdminCheckbox.checked = false;
+  if (joinDirectAdminInput) {
+    joinDirectAdminInput.value = "channel";
   }
 
   renderChannels([DEFAULT_CHANNEL]);
@@ -4899,7 +4899,7 @@ const handleJoin = () => {
   }
 
   const password = String(joinPasswordInput?.value || "").trim();
-  const wantsDirectAdminOnJoin = Boolean(joinDirectAdminCheckbox?.checked);
+  const wantsDirectAdminOnJoin = String(joinDirectAdminInput?.value || "channel") === "admins";
 
   if ((selectedRole === "member" || isPrivilegedRole(selectedRole)) && !password) {
     notify(
@@ -4980,8 +4980,8 @@ if (joinRoleSelect && joinPasswordInput) {
       joinDirectAdminField.classList.toggle("hidden", !canShowJoinDirectAdminOption);
     }
 
-    if (!canShowJoinDirectAdminOption && joinDirectAdminCheckbox) {
-      joinDirectAdminCheckbox.checked = false;
+    if (!canShowJoinDirectAdminOption && joinDirectAdminInput) {
+      joinDirectAdminInput.value = "channel";
     }
   };
 
