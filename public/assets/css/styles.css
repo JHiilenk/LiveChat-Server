@@ -503,8 +503,8 @@ body.embed-mode .chat-form {
 }
 
 .app-shell {
-  width: min(1320px, calc(100% - 1.5rem));
-  margin: clamp(1rem, 3.6vh, 2rem) auto;
+  width: min(1320px, calc(100% - 2rem));
+  margin: clamp(0.8rem, 3vh, 1.6rem) auto;
   min-height: calc(100dvh - clamp(2rem, 7.2vh, 4rem));
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
@@ -1038,9 +1038,9 @@ body.portal-admin .seo-landing {
   body.portal-admin .app-shell,
   body.portal-login .app-shell,
   body.portal-registration .app-shell {
-    height: calc(100dvh - clamp(2rem, 7.2vh, 4rem));
+    height: calc(100dvh - clamp(1.8rem, 6.8vh, 3.4rem));
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     align-items: stretch;
   }
 
