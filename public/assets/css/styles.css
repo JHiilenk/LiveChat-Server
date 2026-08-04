@@ -1031,15 +1031,15 @@ body.portal-admin .seo-landing {
   body.portal-admin,
   body.portal-login,
   body.portal-registration {
-    overflow-y: hidden;
+    overflow-y: auto;
   }
 
   body.route-app .app-shell,
   body.portal-admin .app-shell,
   body.portal-login .app-shell,
   body.portal-registration .app-shell {
-    height: calc(100dvh - clamp(1.8rem, 6.8vh, 3.4rem));
-    min-height: 0;
+    height: auto;
+    min-height: calc(100dvh - clamp(1.8rem, 6.8vh, 3.4rem));
     overflow: visible;
     align-items: stretch;
   }
