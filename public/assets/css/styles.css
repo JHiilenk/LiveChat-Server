@@ -4116,6 +4116,21 @@ body.embed-mode .join-card::-webkit-scrollbar {
   display: block;
 }
 
+.join-team-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.join-field-title {
+  margin: 0 0 0.28rem;
+  color: #ffbd53;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .join-role-dropdown {
   position: relative;
 }

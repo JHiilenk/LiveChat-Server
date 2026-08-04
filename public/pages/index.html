@@ -405,13 +405,17 @@
               <option value="member">Member</option>
             </select>
           </div>
-          <div id="joinTeamField" class="join-select-field">
-            <label for="teamInput" class="sr-only">Pilih team</label>
-            <select id="teamInput" aria-label="Pilih team"></select>
-          </div>
-          <div id="joinChannelField" class="join-select-field">
-            <label for="joinChannelInput" class="sr-only">Pilih channel awal</label>
-            <select id="joinChannelInput" aria-label="Pilih channel awal"></select>
+          <div class="join-team-channel-grid">
+            <div id="joinTeamField" class="join-select-field">
+              <p class="join-field-title">Gabung Team</p>
+              <label for="teamInput" class="sr-only">Pilih team</label>
+              <select id="teamInput" aria-label="Pilih team"></select>
+            </div>
+            <div id="joinChannelField" class="join-select-field">
+              <p class="join-field-title">Gabung Channels</p>
+              <label for="joinChannelInput" class="sr-only">Pilih channel awal</label>
+              <select id="joinChannelInput" aria-label="Pilih channel awal"></select>
+            </div>
           </div>
           <div id="joinPasswordField">
             <label for="joinPasswordInput" class="sr-only">Password</label>
