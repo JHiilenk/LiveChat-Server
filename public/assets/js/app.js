@@ -255,8 +255,8 @@ let activeEditMessageId = "";
 const messageCache = new Map();
 let currentTeamMembers = [];
 let currentTeamChannels = [DEFAULT_CHANNEL];
-let selectedJoinTeamCodes = new Set([DEFAULT_TEAM]);
-let selectedJoinChannelCodes = new Set([DEFAULT_CHANNEL]);
+let selectedJoinTeamCodes = new Set();
+let selectedJoinChannelCodes = new Set();
 let pendingChannelSwitchCode = "";
 let broadcastTargetTeams = [DEFAULT_TEAM];
 const broadcastChannelsByTeam = new Map([[DEFAULT_TEAM, [DEFAULT_CHANNEL]]]);
@@ -1141,7 +1141,7 @@ const applyLoginConfigToJoinForm = (configInput) => {
   });
   renderTeams();
 
-  renderJoinChecklists(currentLoginConfig, true);
+  renderJoinChecklists(currentLoginConfig, false);
 
   if (isAdminPortal) {
     if (joinTeamField) {
