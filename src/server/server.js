@@ -1376,7 +1376,7 @@ io.on("connection", (socket) => {
         channelCode: "",
         activeMode: "dm",
         activeDmKey: dmKey,
-        activeDmPeerName: "Admin/Owner",
+        activeDmPeerName: "Customer Service",
         activeDmProxyTargetName: null,
         activeDmProxyAliasName: null,
         joinedAt: nowIso(),
@@ -1388,10 +1388,10 @@ io.on("connection", (socket) => {
       usersBySocketId.set(socket.id, user);
       socket.data.explicitLogout = false;
 
-      const history = await getDmHistory("", dmKey, "Admin/Owner");
+      const history = await getDmHistory("", dmKey, "Customer Service");
       socket.emit("dm:ready", {
         dmKey,
-        peerName: "Admin/Owner",
+        peerName: "Customer Service",
         supportScope: "admins",
         history
       });

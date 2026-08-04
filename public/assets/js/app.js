@@ -2989,10 +2989,13 @@ const setHeader = () => {
   if (currentView.type === "dm") {
     const supportScope = String(currentView.supportScope || "").trim().toLowerCase();
     const isDirectAdminRoute = String(currentView.dmKey || "").toUpperCase().startsWith("ADMINSUPPORT::");
+    const isSupportRoute = supportScope === "admins" || isDirectAdminRoute;
     roomLabel.textContent = supportScope === "admins" || isDirectAdminRoute
       ? "Live Chat"
       : (currentTeam ? `DM • TEAM ${currentTeam}` : "Live Chat");
-    roomTitle.textContent = `@${normalizeDisplayName(currentView.peerName)}`;
+    roomTitle.textContent = isSupportRoute
+      ? "Customer Service"
+      : `@${normalizeDisplayName(currentView.peerName)}`;
     backToChannelButton.classList.remove("hidden");
   } else {
     roomLabel.textContent = currentTeam ? `TEAM ${currentTeam}` : "PRIVATE CHAT";
@@ -3732,7 +3735,9 @@ const renderDmList = () => {
 
     const nameText = document.createElement("span");
     nameText.className = "dm-item-name";
-    nameText.textContent = `@${conversation.peerName}`;
+    nameText.textContent = isLiveChatSupportConversation(conversation, meta)
+      ? "Customer Service"
+      : `@${conversation.peerName}`;
 
     if (meta.isBroadcast) {
       const broadcastBadge = document.createElement("span");
@@ -5245,7 +5250,7 @@ const handleJoin = () => {
     type: privateJoinMode ? "dm" : "channel",
     channelCode: currentChannel,
     dmKey: "",
-    peerName: privateJoinMode ? "Admin/Owner" : "",
+    peerName: privateJoinMode ? "Customer Service" : "",
     supportScope: privateJoinMode ? "admins" : ""
   };
 

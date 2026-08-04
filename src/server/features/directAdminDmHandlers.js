@@ -79,7 +79,7 @@ const createDirectAdminDmHandlers = ({
 
     user.activeMode = "dm";
     user.activeDmKey = requestedDmKey;
-    user.activeDmPeerName = isRequestingRole(user.role) ? "Admin/Owner" : requesterName;
+    user.activeDmPeerName = isRequestingRole(user.role) ? "Customer Service" : requesterName;
     user.activeDmProxyTargetName = null;
     user.activeDmProxyAliasName = null;
     usersBySocketId.set(socket.id, user);
@@ -87,12 +87,12 @@ const createDirectAdminDmHandlers = ({
     const history = await getDmHistory(
       user.teamCode,
       requestedDmKey,
-      isRequestingRole(user.role) ? "Admin/Owner" : requesterName
+      isRequestingRole(user.role) ? "Customer Service" : requesterName
     );
 
     socket.emit("dm:ready", {
       dmKey: requestedDmKey,
-      peerName: isRequestingRole(user.role) ? "Admin/Owner" : requesterName,
+      peerName: isRequestingRole(user.role) ? "Customer Service" : requesterName,
       supportScope: "admins",
       history
     });
@@ -150,7 +150,7 @@ const createDirectAdminDmHandlers = ({
     });
 
     const contextPeerName = isRequestingRole(user.role)
-      ? "Admin/Owner"
+      ? "Customer Service"
       : requesterName;
 
     const message = buildChatMessage(
@@ -199,7 +199,7 @@ const createDirectAdminDmHandlers = ({
     requesterSockets.forEach((entry) => {
       io.to(entry.id).emit("dm:available", {
         dmKey: supportDmKey,
-        peerName: "Admin/Owner",
+        peerName: "Customer Service",
         supportScope: "admins"
       });
     });

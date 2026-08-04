@@ -74,15 +74,15 @@ const registerDirectAdminSocketHandlers = ({
 
     user.activeMode = "dm";
     user.activeDmKey = dmKey;
-    user.activeDmPeerName = "Admin/Owner";
+    user.activeDmPeerName = "Customer Service";
     user.activeDmProxyTargetName = null;
     user.activeDmProxyAliasName = null;
     usersBySocketId.set(socket.id, user);
 
-    const history = await getDmHistory(user.teamCode, dmKey, "Admin/Owner");
+    const history = await getDmHistory(user.teamCode, dmKey, "Customer Service");
     socket.emit("dm:ready", {
       dmKey,
-      peerName: "Admin/Owner",
+      peerName: "Customer Service",
       supportScope: "admins",
       history
     });
