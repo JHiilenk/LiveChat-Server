@@ -1158,6 +1158,9 @@ const applyLoginConfigToJoinForm = (configInput) => {
     if (joinChannelInput) {
       joinChannelInput.value = currentLoginConfig.channelOptions[0] || DEFAULT_CHANNEL;
     }
+
+    selectedJoinTeamCodes = new Set([currentLoginConfig.teamOptions[0] || DEFAULT_TEAM]);
+    selectedJoinChannelCodes = new Set([currentLoginConfig.channelOptions[0] || DEFAULT_CHANNEL]);
   } else {
     if (joinTeamField) {
       joinTeamField.hidden = !currentLoginConfig.showTeamSelect;
@@ -1717,7 +1720,8 @@ const emitJoinRequest = () => {
     return;
   }
 
-  const isPrivateMode = !getSelectedJoinTeamCode() && !getSelectedJoinChannelCode();
+  const canUsePrivateMode = normalizeRole(currentRole) === "guest" || normalizeRole(currentRole) === "member";
+  const isPrivateMode = canUsePrivateMode && !getSelectedJoinTeamCode() && !getSelectedJoinChannelCode();
   socket.emit("join:request", {
     name: currentUser,
     teamCode: currentTeam,
@@ -5191,7 +5195,7 @@ const handleJoin = () => {
   currentChannel = getSelectedJoinChannelCode();
   currentRole = selectedRole;
   currentAccessPassword = password;
-  const privateJoinMode = !currentTeam && !currentChannel;
+  const privateJoinMode = (selectedRole === "guest" || selectedRole === "member") && !currentTeam && !currentChannel;
   pendingDirectAdminAutoStartOnJoin = wantsDirectAdminOnJoin
     && !isAdminPortal
     && currentDirectAdminConfig.enabled
