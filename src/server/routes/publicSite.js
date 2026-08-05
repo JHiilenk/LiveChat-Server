@@ -13,6 +13,36 @@ const registerPublicSiteRoutes = ({
   const pageDirectory = path.join(publicDirectory, "pages");
   const assetDirectory = path.join(publicDirectory, "assets");
 
+  const PRIVATE_WIDGET_ONLY = String(process.env.PRIVATE_WIDGET_ONLY || "").toLowerCase() === "true" || String(process.env.PRIVATE_WIDGET_ONLY || "").trim() === "1";
+
+  // When PRIVATE_WIDGET_ONLY is enabled, only allow a small set of public
+  // endpoints that are required for the widget/embed to function. All
+  // other public routes will return 403 to prevent browsing the site.
+  if (PRIVATE_WIDGET_ONLY) {
+    app.use((req, res, next) => {
+      const p = String(req.path || "").toLowerCase();
+      // Allow widget scripts, embed page, socket.io path, and static assets
+      // that the widget may request (if any). Block everything else.
+      const allowed = (
+        p === "/widget.js" ||
+        p === "/livechat-widget.js" ||
+        p.startsWith("/embed") ||
+        p.startsWith("/socket.io") ||
+        p.startsWith("/uploads/") ||
+        p.startsWith("/favicon") ||
+        p.endsWith(".svg") ||
+        p.endsWith(".png") ||
+        p.endsWith(".webmanifest")
+      );
+
+      if (allowed) {
+        return next();
+      }
+
+      res.status(403).type("text/plain").send("Forbidden");
+    });
+  }
+
   const indexTemplatePath = path.join(pageDirectory, "index.html");
   const indexTemplate = fs.readFileSync(indexTemplatePath, "utf8");
 
@@ -93,6 +123,13 @@ const registerPublicSiteRoutes = ({
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
     res.sendFile(path.join(assetDirectory, "js", "widget.js"));
+  });
+
+  app.get("/livechat-widget.js", (_req, res) => {
+    res.type("application/javascript");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+    res.sendFile(path.join(assetDirectory, "js", "livechat-widget.js"));
   });
 
   app.get("/embed", (_req, res) => {
