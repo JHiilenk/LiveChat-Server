@@ -6819,6 +6819,10 @@ if (dmList) {
 }
 
 if (liveChatRouteList) {
+  liveChatRouteList.addEventListener("click", () => {
+    closeMobileSidebar();
+  });
+
   liveChatRouteList.addEventListener("scroll", () => {
     updateLiveChatRouteScrollIndicators();
   }, { passive: true });
