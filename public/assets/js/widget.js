@@ -3,6 +3,8 @@
   const rootUrl = currentScript?.dataset?.chatUrl || `${window.location.origin}/embed`;
   const title = currentScript?.dataset?.title || "LiveTeams Chat";
   const subtitle = currentScript?.dataset?.subtitle || "Klik untuk buka popup chat";
+  const apkUrl = String(currentScript?.dataset?.apkUrl || "").trim();
+  const apkCardHiddenClass = apkUrl ? "" : " hidden";
 
   const host = document.createElement("div");
   host.className = "widget-root";
@@ -21,11 +23,21 @@
       .widget-launcher-label { display: grid; line-height: 1.05; text-align: left; position: relative; z-index: 1; }
       .widget-launcher-label strong { font-size: 0.93rem; letter-spacing: 0.01em; font-weight: 800; }
       .widget-launcher-label span { font-size: 0.68rem; color: rgba(230, 241, 255, 0.88); font-weight: 700; }
-      .widget-panel { position: fixed; right: 1rem; bottom: 5.1rem; width: min(420px, calc(100vw - 1.5rem)); height: min(640px, calc(100dvh - 6.4rem)); max-height: calc(100dvh - 6.4rem); border-radius: 22px; overflow: hidden; background: #081a34; border: 1px solid rgba(106, 162, 255, 0.28); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42); display: flex; flex-direction: column; }
+      .widget-panel { position: fixed; right: 1rem; bottom: 5.1rem; width: min(420px, calc(100vw - 1.5rem)); height: min(680px, calc(100dvh - 5.8rem)); max-height: calc(100dvh - 5.8rem); border-radius: 22px; overflow: hidden; background: #081a34; border: 1px solid rgba(106, 162, 255, 0.28); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42); display: flex; flex-direction: column; }
       .widget-panel.hidden { display: none; }
       .widget-root.widget-open .widget-launcher { opacity: 0; pointer-events: none; }
       .widget-panel.maximized { position: fixed; inset: 0; width: auto; height: auto; border-radius: 0; }
       .widget-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem 0.9rem; background: linear-gradient(180deg, rgba(12, 34, 70, 0.98) 0%, rgba(8, 23, 46, 0.98) 100%); border-bottom: 1px solid rgba(106, 162, 255, 0.22); }
+      .widget-apk-card { position: relative; display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; background: linear-gradient(180deg, rgba(7, 23, 47, 0.98), rgba(10, 36, 76, 0.94)); border-bottom: 1px solid rgba(86, 150, 255, 0.24); }
+      .widget-apk-card.hidden { display: none; }
+      .widget-apk-card-title { display: flex; align-items: center; gap: 0.65rem; }
+      .widget-apk-card-title strong { font-size: 0.95rem; letter-spacing: 0.03em; color: #fff; }
+      .widget-apk-card-subtitle { font-size: 0.79rem; color: rgba(229, 242, 255, 0.8); line-height: 1.35; }
+      .widget-apk-card-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+      .widget-apk-button { min-width: 120px; border: 1px solid rgba(94, 173, 255, 0.44); border-radius: 999px; padding: 0.72rem 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; background: linear-gradient(120deg, #58a5ff 0%, #2c6ddb 100%); color: #fff; text-decoration: none; font-weight: 700; transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease; }
+      .widget-apk-button:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(29, 88, 215, 0.22); }
+      .widget-apk-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.22rem 0.55rem; border-radius: 999px; background: rgba(52, 128, 255, 0.12); border: 1px solid rgba(94, 173, 255, 0.22); color: #b7d7ff; font-size: 0.72rem; }
+      .widget-apk-card-note { color: rgba(226, 236, 255, 0.75); font-size: 0.74rem; line-height: 1.45; }
       .widget-panel-title { display: grid; gap: 0.1rem; }
       .widget-panel-title strong { font-size: 0.95rem; letter-spacing: 0.02em; color: #eff7e1; }
       .widget-panel-title span { font-size: 0.72rem; color: #a5bbdb; }
@@ -64,8 +76,18 @@
           <span>Online now</span>
         </span>
       </button>
-      <div class="widget-panel hidden" role="dialog" aria-label="${title}">
-        <div class="widget-panel-header">
+      <div class="widget-panel hidden" role="dialog" aria-label="${title}">        <div class="widget-apk-card${apkCardHiddenClass}">
+          <div class="widget-apk-card-title">
+            <strong>Unduh Aplikasi Android</strong>
+            <span class="widget-apk-pill">Lebih cepat & offline ready</span>
+          </div>
+          <p class="widget-apk-card-subtitle">Pasang LiveTeams di ponsel untuk akses chat cepat tanpa buka browser berulang.</p>
+          <div class="widget-apk-card-actions">
+            <a class="widget-apk-button" href="${apkUrl}" target="_blank" rel="noopener noreferrer" aria-label="Download APK LiveTeams">Download APK</a>
+            <button class="widget-apk-button widget-apk-later" type="button">Nanti Saja</button>
+          </div>
+          <p class="widget-apk-card-note">Aplikasi mandiri ini memberikan pengalaman chat yang lebih lancar dan mudah dibuka kembali.</p>
+        </div>        <div class="widget-panel-header">
           <div class="widget-panel-title">
             <strong>${title}</strong>
             <span>${subtitle}</span>
@@ -88,6 +110,7 @@
   const closeButton = shadow.querySelector(".widget-panel-close");
   const minimizeButton = shadow.querySelector(".widget-panel-minimize");
   const maximizeButton = shadow.querySelector(".widget-panel-maximize");
+  const apkLaterButton = shadow.querySelector(".widget-apk-later");
   let detachFrameVisibilitySync = null;
 
   const isDesktopViewport = () => window.matchMedia("(min-width: 640px)").matches;
@@ -190,6 +213,15 @@
   });
 
   closeButton.addEventListener("click", closePanel);
+
+  if (apkLaterButton) {
+    apkLaterButton.addEventListener("click", () => {
+      const apkCard = shadow.querySelector(".widget-apk-card");
+      if (apkCard) {
+        apkCard.classList.add("hidden");
+      }
+    });
+  }
 
   if (minimizeButton) {
     minimizeButton.addEventListener("click", () => {

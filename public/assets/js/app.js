@@ -476,10 +476,52 @@ const AUTO_CROWD_THREAD_ENDINGS = [
   "Setuju, yang penting obrolannya tetap ringan dan jelas."
 ];
 
-const isEmbedMode = new URLSearchParams(window.location.search).has("embed");
+const pageQuery = new URLSearchParams(window.location.search);
+const isEmbedMode = pageQuery.has("embed");
+const isLiveChatEmbed = pageQuery.has("livechat");
 if (isEmbedMode) {
   document.body.classList.add("embed-mode");
 }
+
+const getLiveChatDefaultName = () => {
+  const rawName = String(pageQuery.get("name") || "").trim();
+  if (rawName) {
+    return normalizeDisplayName(rawName.slice(0, 24));
+  }
+
+  const timestamp = Date.now().toString().slice(-4);
+  return `Guest-${timestamp}`;
+};
+
+const liveChatAutoJoin = async () => {
+  if (!isLiveChatEmbed) {
+    return;
+  }
+
+  const liveName = getLiveChatDefaultName();
+  const liveTeam = normalizeCode(pageQuery.get("team"), DEFAULT_TEAM);
+  const liveChannel = normalizeCode(pageQuery.get("channel"), DEFAULT_CHANNEL);
+  const liveRole = "guest";
+
+  currentUser = liveName;
+  currentTeam = liveTeam;
+  currentChannel = liveChannel;
+  currentRole = liveRole;
+  currentAccessPassword = "";
+  currentView = {
+    type: "channel",
+    channelCode: currentChannel,
+    dmKey: "",
+    peerName: "",
+    supportScope: ""
+  };
+
+  setHeader();
+  renderDmList();
+  pendingPortalJoinAttempt = true;
+  emitJoinRequest();
+  setChatReadyState(false);
+};
 
 const CURATED_GIFS = [
   { title: "Happy Cat", tags: ["happy", "cat", "cute"], url: "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" },
@@ -6556,6 +6598,10 @@ chatForm.addEventListener("submit", (event) => {
   messageInput.value = "";
   stopTyping();
 });
+
+if (isLiveChatEmbed) {
+  liveChatAutoJoin();
+}
 
 if (fileToggle && fileInput) {
   fileToggle.addEventListener("click", () => {
