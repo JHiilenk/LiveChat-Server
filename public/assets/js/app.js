@@ -58,6 +58,7 @@ const gifSearchButton = document.getElementById("gifSearchButton");
 const gifResultGrid = document.getElementById("gifResultGrid");
 const messageList = document.getElementById("messageList");
 const chatBodyShell = document.querySelector(".chat-body-shell");
+const memberPresenceCard = document.getElementById("memberPresenceCard");
 const memberSearchInput = document.getElementById("memberSearchInput");
 const userList = document.getElementById("userList");
 const privilegedList = document.getElementById("privilegedList");
@@ -318,6 +319,7 @@ let dmHistoryClearCutoffProfileKey = "";
 const hiddenDmRoutesByKey = new Set();
 let hiddenDmRoutesProfileKey = "";
 let currentPresenceUsers = [];
+let globalPresenceUsers = [];
 let knownTeamCodes = [DEFAULT_TEAM];
 let pendingTeamSwitchCode = "";
 let pendingTeamSwitchView = null;
@@ -3273,23 +3275,16 @@ const emitBulkDeleteSelectedConversations = () => {
 };
 
 const getBroadcastSelectableChannels = () => {
-  const selectedTeams = Array.from(selectedBroadcastTeamCodes)
-    .map((teamCode) => normalizeCode(teamCode, ""))
-    .filter(Boolean);
-  const fallbackTeam = normalizeCode(currentTeam, DEFAULT_TEAM);
-  const teamsToUse = selectedTeams.length > 0 ? selectedTeams : [fallbackTeam];
-
+  const currentTeamCode = normalizeCode(currentTeam, DEFAULT_TEAM);
   const channelSet = new Set();
-  teamsToUse.forEach((teamCode) => {
-    const allChannels = broadcastChannelsByTeam.get(teamCode) || [DEFAULT_CHANNEL];
-    const activeChannels = broadcastActiveChannelsByTeam.get(teamCode) || [];
-    const source = (activeChannels.length > 0 ? activeChannels : allChannels)
-      .map((channelCode) => normalizeCode(channelCode, ""))
-      .filter(Boolean);
+  const allChannels = broadcastChannelsByTeam.get(currentTeamCode) || [DEFAULT_CHANNEL];
+  const activeChannels = broadcastActiveChannelsByTeam.get(currentTeamCode) || [];
+  const source = (activeChannels.length > 0 ? activeChannels : allChannels)
+    .map((channelCode) => normalizeCode(channelCode, ""))
+    .filter(Boolean);
 
-    source.forEach((channelCode) => {
-      channelSet.add(channelCode);
-    });
+  source.forEach((channelCode) => {
+    channelSet.add(channelCode);
   });
 
   if (channelSet.size === 0) {
@@ -4805,6 +4800,11 @@ const renderDmList = () => {
         updateLiveChatRouteScrollIndicators();
       });
     }
+    if (listElement === dmList) {
+      requestAnimationFrame(() => {
+        listElement.scrollTop = 0;
+      });
+    }
   };
 
   const supportConversations = dmConversations.filter((conversation) => {
@@ -4929,11 +4929,15 @@ const buildMemberDirectory = () => {
       return;
     }
 
-    const id = String(member.id || fallback.id || "").trim();
+    const normalizedRole = normalizeRole(member.role || fallback.role || "member");
+    const normalizedTeam = normalizeCode(member.teamCode || fallback.teamCode || "", DEFAULT_TEAM);
     const name = normalizeDisplayName(member.name || fallback.name || "");
-    if (!id || !name) {
+    if (!name) {
       return;
     }
+
+    const rawId = String(member.id || fallback.id || "").trim();
+    const id = rawId || `presence-${normalizedRole}-${normalizedTeam}-${name.toLowerCase().replace(/\s+/g, "-")}`;
 
     if (Boolean(member.simulated || fallback.simulated)) {
       return;
@@ -4943,7 +4947,7 @@ const buildMemberDirectory = () => {
     membersById.set(id, {
       id,
       name,
-      role: normalizeRole(member.role || fallback.role || existing?.role || "member"),
+      role: normalizeRole(member.role || fallback.role || existing?.role || normalizedRole || "member"),
       simulated: false,
       registeredMember: Boolean(member.registeredMember || fallback.registeredMember || existing?.registeredMember),
       online: Boolean(member.online || fallback.online || existing?.online)
@@ -4966,15 +4970,33 @@ const buildMemberDirectory = () => {
     });
   });
 
-  if (!isAdminPortal && !currentTeam && currentView.type === "dm" && normalizeRole(currentRole) === "guest") {
-    const selfGuestId = String(socket?.id || "").trim()
-      || `self-guest-${normalizeDisplayName(currentUser).toLowerCase().replace(/\s+/g, "-")}`;
+  if (globalPresenceUsers.length > 0) {
+    globalPresenceUsers
+      .filter((member) => {
+        const role = normalizeRole(member?.role || "member");
+        return role === "member" || role === "guest";
+      })
+      .forEach((member) => {
+        upsertMember(member, {
+          online: true,
+          simulated: Boolean(member?.simulated),
+          registeredMember: Boolean(member?.registeredMember),
+          teamCode: member?.teamCode
+        });
+      });
+  }
+
+  const currentNormalizedRole = normalizeRole(currentRole);
+  if (!isAdminPortal && !currentTeam && currentView.type === "dm"
+    && (currentNormalizedRole === "guest" || currentNormalizedRole === "member")) {
+    const selfAudienceId = String(socket?.id || "").trim()
+      || `self-${currentNormalizedRole}-${normalizeDisplayName(currentUser).toLowerCase().replace(/\s+/g, "-")}`;
     upsertMember({
-      id: selfGuestId,
+      id: selfAudienceId,
       name: currentUser,
-      role: "guest",
+      role: currentNormalizedRole,
       simulated: false,
-      registeredMember: false,
+      registeredMember: currentNormalizedRole === "member",
       online: true
     });
   }
@@ -5006,6 +5028,15 @@ const buildMemberDirectory = () => {
 
   return Array.from(membersById.values())
     .sort((a, b) => a.name.localeCompare(b.name, "id"));
+};
+
+const updateAudienceSidebarVisibility = () => {
+  if (!memberPresenceCard) {
+    return;
+  }
+
+  const shouldHideMemberCard = !isAdminPortal && normalizeRole(currentRole) === "guest";
+  memberPresenceCard.classList.toggle("hidden", shouldHideMemberCard);
 };
 
 const clearDemoBots = ({ silent = false } = {}) => {
@@ -5709,6 +5740,8 @@ const renderUsers = (users) => {
   const nextGuestOnline = hasReceivedGlobalStatsFromServer
     ? Math.max(guestStats.online, currentGlobalStats.guestOnline)
     : guestStats.online;
+
+  updateAudienceSidebarVisibility();
 
   updateAdminRealtimeStats({
     onlineUsers: nextOnlineTotal,
@@ -7389,6 +7422,13 @@ socket.on("stats:global", (payload) => {
   });
 });
 
+socket.on("presence:global", (payload) => {
+  globalPresenceUsers = Array.isArray(payload?.users)
+    ? payload.users
+    : [];
+  renderUsers(currentPresenceUsers);
+});
+
 socket.on("login:config:updated", (payload) => {
   applyLoginConfigToJoinForm(payload?.config || null);
   notify("Pengaturan login member diperbarui.", "success", { inlineDuration: 2600 });
@@ -7882,6 +7922,7 @@ if (broadcastMessageForm) {
 
     socket.emit("broadcast:send", {
       targetMode: "members",
+      targetTeamCode: normalizeCode(currentTeam, DEFAULT_TEAM),
       targetTeamCodes,
       targetChannelCodes,
       targetRoles,
@@ -8122,6 +8163,18 @@ socket.on("broadcast:sent", (payload) => {
     const channelBroadcastTargets = Array.isArray(payload?.channelBroadcastTargets)
       ? payload.channelBroadcastTargets.length
       : 0;
+    const deliveredMemberRecipients = Array.isArray(payload?.deliveredMemberRecipients)
+      ? payload.deliveredMemberRecipients.length
+      : 0;
+    const deliveredGuestRecipients = Array.isArray(payload?.deliveredGuestRecipients)
+      ? payload.deliveredGuestRecipients.length
+      : 0;
+    const queuedMemberRecipients = Array.isArray(payload?.queuedMemberRecipients)
+      ? payload.queuedMemberRecipients.length
+      : 0;
+    const selectedRoles = Array.isArray(payload?.targetRoles)
+      ? payload.targetRoles.map((role) => String(role || "").trim().toLowerCase()).filter(Boolean)
+      : [];
 
     const parts = [];
     if (teamBroadcastTeams > 0) {
@@ -8130,14 +8183,23 @@ socket.on("broadcast:sent", (payload) => {
     if (channelBroadcastTargets > 0) {
       parts.push(`Channel ${channelBroadcastTargets}`);
     }
-    if (deliveredRecipients > 0) {
+    if (deliveredMemberRecipients > 0) {
+      parts.push(`Member ${deliveredMemberRecipients}`);
+    }
+    if (deliveredGuestRecipients > 0) {
+      parts.push(`Guest ${deliveredGuestRecipients}`);
+    }
+    if (deliveredRecipients > 0 && deliveredMemberRecipients === 0 && deliveredGuestRecipients === 0) {
       parts.push(`DM ${deliveredRecipients}`);
     }
 
     if (queuedRecipients > 0) {
       const routeText = parts.length > 0 ? `${parts.join(" • ")} • ` : "";
+      const queuedLabel = queuedMemberRecipients > 0
+        ? `Antrian ${queuedMemberRecipients} member offline.`
+        : `Antrian ${queuedRecipients} penerima offline.`;
       setBroadcastSendSummary(
-        `${routeText}Antrian ${queuedRecipients} member offline.`,
+        `${routeText}${queuedLabel}`,
         "queued",
         "Jalur independen: team/channel global + DM privat sesuai checklist."
       );
@@ -8151,7 +8213,20 @@ socket.on("broadcast:sent", (payload) => {
 
     const summaryText = parts.length > 0
       ? `${parts.join(" • ")} terkirim.`
-      : "Tidak ada target yang cocok dengan checklist.";
+      : (() => {
+        const hasGuest = selectedRoles.includes("guest");
+        const hasMember = selectedRoles.includes("member");
+        if (hasGuest && hasMember) {
+          return "Tidak ada member/guest online yang cocok dengan checklist.";
+        }
+        if (hasGuest) {
+          return "Tidak ada guest online yang cocok dengan checklist.";
+        }
+        if (hasMember) {
+          return "Tidak ada member online yang cocok dengan checklist.";
+        }
+        return "Tidak ada target yang cocok dengan checklist.";
+      })();
     const state = parts.length > 0 ? "success" : "warning";
     setBroadcastSendSummary(summaryText, state, "Jalur independen aktif sesuai checklist.");
     notify(`Broadcast independen: ${summaryText}`, parts.length > 0 ? "success" : "warning", { inlineDuration: 3200 });

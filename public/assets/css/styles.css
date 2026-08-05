@@ -1842,32 +1842,30 @@ body.portal-admin .seo-landing {
   gap: 0.4rem;
   max-height: 160px;
   overflow-y: auto;
-  scrollbar-gutter: stable both-edges;
-}
-
-.dm-card .dm-list {
-  margin-top: 0.25rem;
-  max-height: 205px;
-}
-
-#liveChatRouteList {
-  max-height: min(36vh, 220px);
-  overflow: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding-right: 0;
+   overflow-x: hidden;
+   scrollbar-gutter: stable both-edges;
+   min-width: 0;
+ }
+ 
+ .dm-card .dm-list {
+   margin-top: 0.25rem;
+   max-height: 205px;
+   overflow-x: hidden;
   scrollbar-gutter: stable;
 }
 
-#liveChatRouteList .dm-item-top {
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-#liveChatRouteList .dm-item-name,
-#liveChatRouteList .dm-item-preview {
-  white-space: normal;
-  overflow: visible;
+#liveChatRouteList .dm-item-top,
+#dmList .dm-item-top {
+   flex-wrap: wrap;
+   align-items: flex-start;
+ }
+ 
+ #liveChatRouteList .dm-item-name,
+ #dmList .dm-item-name,
+ #liveChatRouteList .dm-item-preview,
+ #dmList .dm-item-preview {
+   white-space: normal;
+   overflow: hidden;
   text-overflow: clip;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -2881,11 +2879,7 @@ body.portal-admin.admin-settings-mode .admin-global-chart-wrap {
   align-items: center;
   justify-content: space-between;
   gap: 0.45rem;
-}
-
-.dm-item-name {
-  font-weight: 700;
-  color: #ffc85a;
+   flex-wrap: wrap;
   display: inline-flex;
   align-items: center;
   gap: 0.36rem;

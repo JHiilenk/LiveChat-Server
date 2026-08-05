@@ -58,7 +58,7 @@ const createBroadcastUtils = ({
           dmKey,
           peerName: senderName,
           isBroadcast: true,
-          broadcastScope: "members"
+          broadcastScope: "guest"
         },
         null,
         senderRole,
@@ -95,6 +95,75 @@ const createBroadcastUtils = ({
       io.to(recipient.id).emit("broadcast:received", {
         scope: "members",
         teamCode,
+        senderName,
+        senderRole,
+        text
+      });
+
+      deliveredRecipients.push(recipient.name);
+    }
+
+    return Array.from(new Set(deliveredRecipients.map((name) => sanitizeName(name || "")).filter(Boolean)));
+  };
+
+  const emitBroadcastGuestsMessage = async ({
+    senderName,
+    senderRole,
+    text,
+    durationSeconds
+  }) => {
+    const recipients = Array.from(usersBySocketId.values()).filter(
+      (entry) => sanitizeRole(entry?.role || roleMember) === roleGuest && !entry?.simulated
+    );
+
+    const deliveredRecipients = [];
+    for (const recipient of recipients) {
+      const dmKey = buildDmKey(senderName, recipient.name);
+      const message = buildChatMessage(
+        senderName,
+        text,
+        {
+          type: "dm",
+          dmKey,
+          peerName: senderName,
+          isBroadcast: true,
+          broadcastScope: "members"
+        },
+        null,
+        senderRole,
+        false
+      );
+
+      try {
+        await messagesDb.insert({
+          scope: "dm",
+          messageId: message.id,
+          type: message.type,
+          teamCode: sanitizeCode(recipient.teamCode || "", ""),
+          dmKey,
+          targetUserId: recipient.id,
+          targetUserName: recipient.name,
+          user: message.user,
+          role: message.role,
+          text: message.text,
+          timestamp: message.timestamp,
+          editedAt: null,
+          attachment: null,
+          simulated: false,
+          createdAt: nowIso()
+        });
+      } catch (_error) {
+        // Keep guest broadcast flow running if persistence fails.
+      }
+
+      io.to(recipient.id).emit("chat:message", message);
+      io.to(recipient.id).emit("dm:available", {
+        dmKey,
+        peerName: senderName
+      });
+      io.to(recipient.id).emit("broadcast:received", {
+        scope: "guest",
+        teamCode: sanitizeCode(recipient.teamCode || "", ""),
         senderName,
         senderRole,
         text
@@ -275,6 +344,7 @@ const createBroadcastUtils = ({
 
   return {
     emitBroadcastMembersMessage,
+    emitBroadcastGuestsMessage,
     queueMemberBroadcastForOfflineMembers,
     deliverOfflineMemberBroadcastInbox
   };

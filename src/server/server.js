@@ -938,6 +938,7 @@ const ensureAuthDocByTeamCode = async (teamCode) => {
 
 const {
   emitBroadcastMembersMessage,
+  emitBroadcastGuestsMessage,
   queueMemberBroadcastForOfflineMembers,
   deliverOfflineMemberBroadcastInbox
 } = createBroadcastUtils({
@@ -1265,8 +1266,34 @@ const getGlobalStatsPayload = () => {
   };
 };
 
+const getGlobalPresencePayload = () => {
+  return {
+    users: Array.from(usersBySocketId.values())
+      .filter((entry) => !entry?.simulated)
+      .map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        role: sanitizeRole(entry?.role || ROLE_MEMBER),
+        teamCode: sanitizeCode(entry?.teamCode || "", DEFAULT_TEAM_CODE),
+        channelCode: sanitizeCode(entry?.channelCode || "", DEFAULT_CHANNEL_CODE),
+        online: true,
+        registeredMember: Boolean(entry?.registeredMember)
+      }))
+  };
+};
+
+const emitGlobalPresenceToConnectedUsers = () => {
+  const payload = getGlobalPresencePayload();
+  Array.from(usersBySocketId.values())
+    .filter((entry) => !entry?.simulated)
+    .forEach((entry) => {
+      io.to(entry.id).emit("presence:global", payload);
+    });
+};
+
 const emitGlobalStats = () => {
   io.emit("stats:global", getGlobalStatsPayload());
+  emitGlobalPresenceToConnectedUsers();
 };
 
 const joinChannelForSocket = async ({ socket, user, channelCode, announce, joinAnnouncementText = "" }) => {
@@ -1350,6 +1377,7 @@ io.on("connection", (socket) => {
 
   socket.on("stats:global:request", () => {
     socket.emit("stats:global", getGlobalStatsPayload());
+    socket.emit("presence:global", getGlobalPresencePayload());
   });
 
   socket.on("session:logout", () => {
@@ -1682,7 +1710,7 @@ io.on("connection", (socket) => {
     if (targetMode === "members") {
       const targetTeamCodes = Array.from(
         new Set(
-          (Array.isArray(payload?.targetTeamCodes) ? payload.targetTeamCodes : [targetTeamCode])
+          (Array.isArray(payload?.targetTeamCodes) ? payload.targetTeamCodes : [])
             .map((teamCode) => sanitizeCode(teamCode || "", ""))
             .filter(Boolean)
         )
@@ -1709,15 +1737,24 @@ io.on("connection", (socket) => {
         return;
       }
 
-      const effectiveTeamCodes = targetTeamCodes.length > 0
-        ? targetTeamCodes
-        : [targetTeamCode];
-
       const deliveredChannelKeys = new Set();
       const teamBroadcastTeams = [];
       const channelBroadcastTargets = [];
       const deliveredRecipients = [];
+      const deliveredMemberRecipients = [];
+      const deliveredGuestRecipients = [];
       const queuedRecipients = [];
+      const queuedMemberRecipients = [];
+      const connectedRecipientTeamCodes = Array.from(
+        new Set(
+          Array.from(usersBySocketId.values())
+            .map((entry) => sanitizeCode(entry?.teamCode || "", ""))
+            .filter(Boolean)
+        )
+      );
+      const recipientTeamCodes = targetTeamCodes.length > 0
+        ? targetTeamCodes
+        : (connectedRecipientTeamCodes.length > 0 ? connectedRecipientTeamCodes : [targetTeamCode]);
 
       // Team checklist: kirim global ke seluruh channel pada team terpilih.
       for (const teamCode of targetTeamCodes) {
@@ -1749,11 +1786,11 @@ io.on("connection", (socket) => {
         teamBroadcastTeams.push(teamCode);
       }
 
-      // Channel checklist: kirim global hanya ke channel terpilih.
-      for (const teamCode of effectiveTeamCodes) {
-        await ensureTeam(teamCode, user.name);
+      // Channel checklist: kirim global hanya ke channel terpilih pada team aktif.
+      if (targetChannelCodes.length > 0) {
+        await ensureTeam(targetTeamCode, user.name);
         const channelsInTeam = new Set(
-          (await getTeamChannels(teamCode))
+          (await getTeamChannels(targetTeamCode))
             .map((channelCode) => sanitizeCode(channelCode || "", ""))
             .filter(Boolean)
         );
@@ -1763,13 +1800,13 @@ io.on("connection", (socket) => {
             continue;
           }
 
-          const routeKey = `${teamCode}::${channelCode}`;
+          const routeKey = `${targetTeamCode}::${channelCode}`;
           if (deliveredChannelKeys.has(routeKey)) {
             continue;
           }
 
           await emitBroadcastChannelMessage({
-            teamCode,
+            teamCode: targetTeamCode,
             channelCode,
             senderName: user.name,
             senderRole: user.role,
@@ -1778,51 +1815,76 @@ io.on("connection", (socket) => {
           });
 
           deliveredChannelKeys.add(routeKey);
-          channelBroadcastTargets.push(`${teamCode}::${channelCode}`);
+          channelBroadcastTargets.push(routeKey);
         }
       }
 
       // Member/Guest checklist: kirim DM privat sesuai role terpilih.
       if (targetRoles.length > 0) {
-        for (const teamCode of effectiveTeamCodes) {
-          await ensureTeam(teamCode, user.name);
+        for (const recipientTeamCode of recipientTeamCodes) {
+          await ensureTeam(recipientTeamCode, user.name);
 
-          const delivered = await emitBroadcastMembersMessage({
-            teamCode,
-            senderName: user.name,
-            senderRole: user.role,
-            text: messageText,
-            durationSeconds,
-            targetRoles,
-            targetChannelCodes: []
-          });
-          delivered.forEach((name) => deliveredRecipients.push(name));
+          if (targetRoles.includes(ROLE_MEMBER)) {
+            const deliveredMembers = await emitBroadcastMembersMessage({
+              teamCode: recipientTeamCode,
+              senderName: user.name,
+              senderRole: user.role,
+              text: messageText,
+              durationSeconds,
+              targetRoles: [ROLE_MEMBER],
+              targetChannelCodes: []
+            });
+            deliveredMembers.forEach((name) => {
+              deliveredRecipients.push(name);
+              deliveredMemberRecipients.push(name);
+            });
 
-          const queued = await queueMemberBroadcastForOfflineMembers({
-            teamCode,
-            senderName: user.name,
-            senderRole: user.role,
-            text: messageText,
-            durationSeconds,
-            targetRoles,
-            targetChannelCodes: []
-          });
-          queued.forEach((name) => queuedRecipients.push(name));
+            const queuedMembers = await queueMemberBroadcastForOfflineMembers({
+              teamCode: recipientTeamCode,
+              senderName: user.name,
+              senderRole: user.role,
+              text: messageText,
+              durationSeconds,
+              targetRoles: [ROLE_MEMBER],
+              targetChannelCodes: []
+            });
+            queuedMembers.forEach((name) => {
+              queuedRecipients.push(name);
+              queuedMemberRecipients.push(name);
+            });
+          }
+
+          if (targetRoles.includes(ROLE_GUEST)) {
+            const deliveredGuests = await emitBroadcastGuestsMessage({
+              senderName: user.name,
+              senderRole: user.role,
+              text: messageText,
+              durationSeconds
+            });
+            deliveredGuests.forEach((name) => {
+              deliveredRecipients.push(name);
+              deliveredGuestRecipients.push(name);
+            });
+          }
         }
       }
 
       socket.emit("broadcast:sent", {
         scope: "independent",
-        targetTeamCode: effectiveTeamCodes[0] || targetTeamCode,
-        targetTeamCodes: effectiveTeamCodes,
+        targetTeamCode,
+        targetTeamCodes,
         targetChannelCodes,
         targetRoles,
+        recipientTeamCodes,
         durationSeconds,
         teamBroadcastTeams: Array.from(new Set(teamBroadcastTeams)),
         channelBroadcastTargets: Array.from(new Set(channelBroadcastTargets)),
         deliveredChannels: Array.from(deliveredChannelKeys),
         deliveredRecipients: Array.from(new Set(deliveredRecipients)),
-        queuedRecipients: Array.from(new Set(queuedRecipients))
+        deliveredMemberRecipients: Array.from(new Set(deliveredMemberRecipients)),
+        deliveredGuestRecipients: Array.from(new Set(deliveredGuestRecipients)),
+        queuedRecipients: Array.from(new Set(queuedRecipients)),
+        queuedMemberRecipients: Array.from(new Set(queuedMemberRecipients))
       });
       return;
     }
