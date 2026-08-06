@@ -14,10 +14,8 @@ const registerPublicSiteRoutes = ({
   const assetDirectory = path.join(publicDirectory, "assets");
 
   const homeTemplatePath = path.join(pageDirectory, "home.html");
-  const landingTemplatePath = path.join(pageDirectory, "landing.html");
   const appTemplatePath = path.join(pageDirectory, "app.html");
   const homeTemplate = fs.readFileSync(homeTemplatePath, "utf8");
-  const landingTemplate = fs.readFileSync(landingTemplatePath, "utf8");
   const appTemplate = fs.readFileSync(appTemplatePath, "utf8");
 
   const buildSeoJsonLd = ({ title, description, canonicalUrl, schemas = [] }) => JSON.stringify({
