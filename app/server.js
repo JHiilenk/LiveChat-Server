@@ -144,7 +144,7 @@ app.use(cors({ origin: allowedHttpOrigins }));
 app.use(compression());
 app.use(express.json({ limit: "100kb" }));
 app.use(morgan("tiny"));
-const projectRoot = path.resolve(__dirname, "..", "..");
+const projectRoot = path.resolve(__dirname, "..");
 registerPublicSiteRoutes({
   app,
   projectRoot,
