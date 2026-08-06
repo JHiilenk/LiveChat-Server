@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Client Console | __APP_NAME__</title>
+    <meta name="description" content="Client console untuk tenant livechat: widget, channel default, auth, dan status layanan." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/panel-hq.css" />
+    <script defer src="/panel-hq.js"></script>
+  </head>
+  <body data-panel-role="client">
+    <main class="hq-shell">
+      <header class="hq-topbar">
+        <div class="hq-brand">
+          <div class="hq-logo">CC</div>
+          <div>
+            <h1>Client Console</h1>
+            <p>Panel operasional tenant livechat</p>
+          </div>
+        </div>
+        <div class="hq-links">
+          <a href="/">Public Web</a>
+          <a href="/panel/master">Master HQ</a>
+          <a href="/embed">Embed Surface</a>
+        </div>
+      </header>
+
+      <section class="hq-grid">
+        <article class="hq-card hq-card-hero">
+          <span class="hq-chip">Tenant Control</span>
+          <h2>Panel client berbeda dari panel group lama.</h2>
+          <p>Client Console fokus untuk tenant: status backend, identitas channel default, dan snippet embed siap tempel.</p>
+          <form class="hq-form" data-client-login-form>
+            <label>Tenant Code
+              <input type="text" name="tenantCode" placeholder="JIELIVE" required />
+            </label>
+            <label>Username Owner/Admin/Operator
+              <input type="text" name="userName" placeholder="admin" required />
+            </label>
+            <label>Password
+              <input type="password" name="password" placeholder="••••••••" required />
+            </label>
+            <button type="submit">Masuk Client Console</button>
+          </form>
+          <p class="hq-note" data-client-login-status>Belum login.</p>
+        </article>
+
+        <article class="hq-card">
+          <h3>Tenant Summary</h3>
+          <div class="hq-summary">
+            <p><strong>Kode:</strong> <span data-client-tenant-code>-</span></p>
+            <p><strong>Nama:</strong> <span data-client-tenant-name>-</span></p>
+            <p><strong>Plan:</strong> <span data-client-tenant-plan>-</span></p>
+            <p><strong>Status:</strong> <span data-client-tenant-status>-</span></p>
+            <p><strong>Team default:</strong> <span data-client-tenant-team>-</span></p>
+            <p><strong>Channel default:</strong> <span data-client-tenant-channel>-</span></p>
+          </div>
+        </article>
+
+        <article class="hq-card hq-card-wide">
+          <div class="hq-row-head">
+            <h3>Snippet Embed Client</h3>
+            <button type="button" data-client-copy-snippet>Copy Snippet</button>
+          </div>
+          <pre class="hq-code" data-client-snippet>// Login client dulu untuk mendapatkan snippet embed</pre>
+        </article>
+
+        <article class="hq-card">
+          <h3>Backend & Auth</h3>
+          <ul class="hq-list">
+            <li>Backend: <span data-client-backend-url>-</span></li>
+            <li>Backend state: <span data-client-backend-state>-</span></li>
+            <li>Owner: <span data-client-owner-name>-</span></li>
+            <li>Admin names: <span data-client-admin-names>-</span></li>
+            <li>Operator names: <span data-client-operator-names>-</span></li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

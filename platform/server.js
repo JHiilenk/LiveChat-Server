@@ -25,6 +25,9 @@ const DEFAULT_CHANNEL_CODE = process.env.DEFAULT_CHANNEL_CODE || "MAIN";
 const API_PREFIX = process.env.API_PREFIX || "/api";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const AUTH_SCHEMA_VERSION = 2;
+const LOGIN_WINDOW_MS = Number(process.env.LOGIN_WINDOW_MS || 10 * 60 * 1000);
+const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS || 6);
+const LOGIN_LOCK_MS = Number(process.env.LOGIN_LOCK_MS || 15 * 60 * 1000);
 const DEFAULT_OWNER_USERNAME = process.env.DEFAULT_OWNER_USERNAME || "owner";
 const DEFAULT_ADMIN_USERNAME = process.env.DEFAULT_ADMIN_USERNAME || "admin";
 const DEFAULT_OWNER_PASSWORD = process.env.DEFAULT_OWNER_PASSWORD || "change-owner-password";
@@ -63,7 +66,9 @@ const readTemplate = (fileName) => fs.readFileSync(path.join(publicDirectory, fi
 const templates = {
   web: readTemplate("web.html"),
   admin: readTemplate("admin.html"),
-  embed: readTemplate("embed.html")
+  embed: readTemplate("embed.html"),
+  master: readTemplate("master.html"),
+  client: readTemplate("client.html")
 };
 
 fs.mkdirSync(dataDirectory, { recursive: true });
@@ -71,6 +76,7 @@ fs.mkdirSync(dataDirectory, { recursive: true });
 const tenantsDb = Datastore.create({ filename: path.join(dataDirectory, "tenants.db"), autoload: true });
 const authDb = Datastore.create({ filename: path.join(dataDirectory, "tenant-auth.db"), autoload: true });
 const sessionsDb = Datastore.create({ filename: path.join(dataDirectory, "platform-sessions.db"), autoload: true });
+const loginAttemptStore = new Map();
 
 const sanitizeName = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 48);
 const sanitizeCode = (value, fallback) => {
@@ -79,6 +85,8 @@ const sanitizeCode = (value, fallback) => {
 };
 const nameKey = (value) => sanitizeName(value).toLowerCase().replace(/[^a-z0-9]+/g, "");
 const nowIso = () => new Date().toISOString();
+const MASTER_PANEL_EMAIL = sanitizeName(process.env.MASTER_PANEL_EMAIL || "master@jielive.local");
+const MASTER_PANEL_PASSWORD = String(process.env.MASTER_PANEL_PASSWORD || "master-change-this");
 const hashPassword = (password) => {
   const salt = crypto.randomBytes(16).toString("hex");
   const digest = crypto.scryptSync(String(password || ""), salt, 32).toString("hex");
@@ -100,6 +108,82 @@ const verifyPassword = (password, hashedValue) => {
   }
 
   return crypto.timingSafeEqual(expectedBuffer, computedBuffer);
+};
+
+const getRequestIp = (req) => {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").trim();
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+
+  return String(req.ip || req.socket?.remoteAddress || "unknown");
+};
+
+const buildLoginAttemptKey = ({ scope, tenantCode, userName, ipAddress }) => {
+  const safeScope = sanitizeName(scope || "client").toLowerCase() || "client";
+  const safeTenant = sanitizeCode(tenantCode || "GLOBAL", "GLOBAL");
+  const safeUser = nameKey(userName || "anonymous") || "anonymous";
+  const safeIp = sanitizeName(ipAddress || "unknown").toLowerCase() || "unknown";
+  return `${safeScope}:${safeTenant}:${safeUser}:${safeIp}`;
+};
+
+const checkLoginLock = (attemptKey) => {
+  const attempt = loginAttemptStore.get(attemptKey);
+  if (!attempt) {
+    return { locked: false, retryAfterSec: 0 };
+  }
+
+  const now = Date.now();
+  const lockedUntilMs = Number(attempt.lockedUntilMs || 0);
+  if (lockedUntilMs > now) {
+    return { locked: true, retryAfterSec: Math.ceil((lockedUntilMs - now) / 1000) };
+  }
+
+  if (now - Number(attempt.firstFailedAtMs || now) > LOGIN_WINDOW_MS) {
+    loginAttemptStore.delete(attemptKey);
+    return { locked: false, retryAfterSec: 0 };
+  }
+
+  return { locked: false, retryAfterSec: 0 };
+};
+
+const registerFailedAttempt = (attemptKey) => {
+  const now = Date.now();
+  const current = loginAttemptStore.get(attemptKey);
+
+  if (!current || now - Number(current.firstFailedAtMs || now) > LOGIN_WINDOW_MS) {
+    const lockedUntilMs = LOGIN_MAX_ATTEMPTS <= 1 ? now + LOGIN_LOCK_MS : 0;
+    loginAttemptStore.set(attemptKey, {
+      firstFailedAtMs: now,
+      failureCount: 1,
+      lockedUntilMs
+    });
+
+    return {
+      locked: lockedUntilMs > now,
+      retryAfterSec: lockedUntilMs > now ? Math.ceil((lockedUntilMs - now) / 1000) : 0
+    };
+  }
+
+  const nextFailureCount = Number(current.failureCount || 0) + 1;
+  const shouldLock = nextFailureCount >= LOGIN_MAX_ATTEMPTS;
+  const lockedUntilMs = shouldLock ? now + LOGIN_LOCK_MS : Number(current.lockedUntilMs || 0);
+  loginAttemptStore.set(attemptKey, {
+    firstFailedAtMs: Number(current.firstFailedAtMs || now),
+    failureCount: nextFailureCount,
+    lockedUntilMs
+  });
+
+  return {
+    locked: shouldLock,
+    retryAfterSec: shouldLock ? Math.ceil(LOGIN_LOCK_MS / 1000) : 0
+  };
+};
+
+const clearFailedAttempts = (attemptKey) => {
+  if (loginAttemptStore.has(attemptKey)) {
+    loginAttemptStore.delete(attemptKey);
+  }
 };
 
 const buildDefaultTenantRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
@@ -439,6 +523,27 @@ const createSession = async ({ tenantCode, userName, role }) => {
   return { token, createdAt, expiresAt };
 };
 
+const createScopedSession = async ({ tenantCode, userName, role, scope }) => {
+  const safeScope = sanitizeName(scope || "client") || "client";
+  const safeTenantCode = sanitizeCode(tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+  const safeUserName = sanitizeName(userName || "") || "system";
+
+  await sessionsDb.remove({
+    tenantCode: safeTenantCode,
+    userName: safeUserName,
+    scope: safeScope
+  }, { multi: true });
+
+  const session = await createSession({ tenantCode, userName, role });
+  await sessionsDb.update(
+    { token: session.token },
+    { $set: { scope: safeScope } },
+    { upsert: false }
+  );
+
+  return { ...session, scope: safeScope };
+};
+
 const requireAdminSession = async (req, res, next) => {
   try {
     const session = await getSessionFromRequest(req);
@@ -451,6 +556,27 @@ const requireAdminSession = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memeriksa sesi admin: ${error.message}` });
+  }
+};
+
+const requireScopedSession = (expectedScopes = []) => async (req, res, next) => {
+  try {
+    const session = await getSessionFromRequest(req);
+    if (!session) {
+      res.status(401).json({ ok: false, message: "Sesi tidak valid." });
+      return;
+    }
+
+    const scope = sanitizeName(session.scope || "client") || "client";
+    if (Array.isArray(expectedScopes) && expectedScopes.length > 0 && !expectedScopes.includes(scope)) {
+      res.status(403).json({ ok: false, message: "Akses tidak diizinkan untuk sesi ini." });
+      return;
+    }
+
+    req.platformSession = { ...session, scope };
+    next();
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal memeriksa sesi: ${error.message}` });
   }
 };
 
@@ -479,6 +605,37 @@ const apiSurface = {
   defaultTeamCode: DEFAULT_TEAM_CODE,
   defaultChannelCode: DEFAULT_CHANNEL_CODE,
   surfaces: ["web", "admin", "embed", "api"]
+};
+
+const buildMasterOverview = async () => {
+  const tenants = await getTenantSummaryList();
+  const authDocs = await authDb.find({}).exec();
+  const sessions = await sessionsDb.find({}).exec();
+  const activeSessions = sessions.filter((entry) => entry?.expiresAt && new Date(entry.expiresAt).getTime() > Date.now());
+
+  return {
+    ok: true,
+    runtime: getRuntimeDeploymentState(),
+    stats: {
+      tenantCount: tenants.length,
+      activeTenantCount: tenants.filter((entry) => entry.status.toLowerCase() === "active").length,
+      authProfiles: authDocs.length,
+      activeSessions: activeSessions.length,
+      clientSessions: activeSessions.filter((entry) => sanitizeName(entry.scope || "client") === "client").length,
+      masterSessions: activeSessions.filter((entry) => sanitizeName(entry.scope || "client") === "master").length
+    },
+    tenants: tenants.map((tenant) => ({
+      tenantCode: tenant.tenantCode,
+      tenantName: tenant.tenantName,
+      plan: tenant.plan,
+      status: tenant.status,
+      backendBaseUrl: tenant.backendBaseUrl,
+      publicBaseUrl: tenant.publicBaseUrl,
+      defaultTeamCode: tenant.defaultTeamCode,
+      defaultChannelCode: tenant.defaultChannelCode,
+      updatedAt: tenant.updatedAt
+    }))
+  };
 };
 
 const resolveSurfaceFromHost = (hostname = "") => {
@@ -564,6 +721,123 @@ app.get("/api/v1/tenants", async (_req, res) => {
   }
 });
 
+app.post("/api/v1/master/login", async (req, res) => {
+  try {
+    const email = sanitizeName(req.body?.email || "");
+    const password = String(req.body?.password || "");
+    const ipAddress = getRequestIp(req);
+    const attemptKey = buildLoginAttemptKey({ scope: "master", tenantCode: "MASTER", userName: email || "master", ipAddress });
+
+    const lockCheck = checkLoginLock(attemptKey);
+    if (lockCheck.locked) {
+      res.status(429).json({ ok: false, message: `Login master dikunci sementara. Coba lagi dalam ${lockCheck.retryAfterSec} detik.` });
+      return;
+    }
+
+    if (!email || !password) {
+      res.status(400).json({ ok: false, message: "Email dan password master wajib diisi." });
+      return;
+    }
+
+    if (email.toLowerCase() !== MASTER_PANEL_EMAIL.toLowerCase() || password !== MASTER_PANEL_PASSWORD) {
+      registerFailedAttempt(attemptKey);
+      res.status(401).json({ ok: false, message: "Login master gagal." });
+      return;
+    }
+
+    clearFailedAttempts(attemptKey);
+
+    const session = await createScopedSession({
+      tenantCode: "MASTER",
+      userName: MASTER_PANEL_EMAIL,
+      role: "master",
+      scope: "master"
+    });
+
+    res.json({ ok: true, session, profile: { email: MASTER_PANEL_EMAIL, role: "master" } });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Login master gagal: ${error.message}` });
+  }
+});
+
+app.get("/api/v1/master/overview", requireScopedSession(["master"]), async (_req, res) => {
+  try {
+    res.json(await buildMasterOverview());
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal memuat master overview: ${error.message}` });
+  }
+});
+
+app.post("/api/v1/client/login", async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.body?.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const userName = sanitizeName(req.body?.userName || "");
+    const password = String(req.body?.password || "");
+    const ipAddress = getRequestIp(req);
+    const attemptKey = buildLoginAttemptKey({ scope: "client", tenantCode, userName, ipAddress });
+
+    const lockCheck = checkLoginLock(attemptKey);
+    if (lockCheck.locked) {
+      res.status(429).json({ ok: false, message: `Login client dikunci sementara. Coba lagi dalam ${lockCheck.retryAfterSec} detik.` });
+      return;
+    }
+
+    if (!tenantCode || !userName || !password) {
+      res.status(400).json({ ok: false, message: "Tenant, username, dan password wajib diisi." });
+      return;
+    }
+
+    const authDoc = await getAuthRecord(tenantCode);
+    const userKey = nameKey(userName);
+    let role = "denied";
+
+    if (authDoc.ownerKey === userKey && verifyPassword(password, authDoc.ownerPasswordHash)) {
+      role = "owner";
+    } else if (authDoc.admins.some((entry) => entry.key === userKey) && verifyPassword(password, authDoc.adminPasswordHash)) {
+      role = "admin";
+    } else if (authDoc.operators.some((entry) => entry.key === userKey) && verifyPassword(password, authDoc.adminPasswordHash)) {
+      role = "operator";
+    }
+
+    if (role === "denied") {
+      registerFailedAttempt(attemptKey);
+      res.status(401).json({ ok: false, message: "Login client gagal." });
+      return;
+    }
+
+    clearFailedAttempts(attemptKey);
+
+    const session = await createScopedSession({ tenantCode, userName, role, scope: "client" });
+    res.json({ ok: true, session, role, tenantCode });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Login client gagal: ${error.message}` });
+  }
+});
+
+app.get("/api/v1/client/overview", requireScopedSession(["client", "master"]), async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.query?.tenantCode || req.platformSession.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const bootstrap = await getTenantBootstrap(tenantCode);
+    const auth = await getAuthRecord(tenantCode);
+    const widgetChatUrl = `${bootstrap.tenant.backendBaseUrl}/embed?livechat=1&tenantCode=${encodeURIComponent(bootstrap.tenant.tenantCode)}`;
+    const widgetScriptUrl = `${bootstrap.tenant.backendBaseUrl}/widget.js`;
+
+    res.json({
+      ok: true,
+      tenant: bootstrap.tenant,
+      auth: buildTeamAuthState(auth),
+      backend: bootstrap.backend,
+      widget: {
+        chatUrl: widgetChatUrl,
+        scriptUrl: widgetScriptUrl,
+        snippet: `<script src="${widgetScriptUrl}" data-chat-url="${widgetChatUrl}" data-title="${bootstrap.tenant.tenantName}" data-subtitle="${bootstrap.tenant.defaultTeamCode} • ${bootstrap.tenant.defaultChannelCode}"></script>`
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal memuat client overview: ${error.message}` });
+  }
+});
+
 app.get("/api/v1/tenants/:tenantCode", async (req, res) => {
   try {
     const tenant = await getTenantRecord(req.params.tenantCode);
@@ -594,6 +868,14 @@ app.post("/api/v1/admin/login", async (req, res) => {
     const tenantCode = sanitizeCode(req.body?.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
     const userName = sanitizeName(req.body?.userName || "");
     const password = String(req.body?.password || "");
+    const ipAddress = getRequestIp(req);
+    const attemptKey = buildLoginAttemptKey({ scope: "admin", tenantCode, userName, ipAddress });
+
+    const lockCheck = checkLoginLock(attemptKey);
+    if (lockCheck.locked) {
+      res.status(429).json({ ok: false, message: `Login admin dikunci sementara. Coba lagi dalam ${lockCheck.retryAfterSec} detik.` });
+      return;
+    }
 
     if (!userName || !password) {
       res.status(400).json({ ok: false, message: "Nama pengguna dan password wajib diisi." });
@@ -615,11 +897,14 @@ app.post("/api/v1/admin/login", async (req, res) => {
     }
 
     if (role === "denied") {
+      registerFailedAttempt(attemptKey);
       res.status(401).json({ ok: false, message: "Login admin gagal." });
       return;
     }
 
-    const session = await createSession({ tenantCode, userName, role });
+    clearFailedAttempts(attemptKey);
+
+    const session = await createScopedSession({ tenantCode, userName, role, scope: "client" });
     res.json({ ok: true, session, role, auth: buildTeamAuthState(authDoc) });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Login admin gagal: ${error.message}` });
@@ -762,7 +1047,7 @@ app.get("/api/v1/status", (req, res) => {
     service: APP_NAME,
     surface: resolveSurfaceFromHost(req.hostname),
     host: req.hostname,
-    routes: ["/", "/admin", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/deploy-check"],
+    routes: ["/", "/admin", "/panel/master", "/panel/client", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview"],
     defaultTenantCode: DEFAULT_TENANT_CODE,
     defaultTeamCode: DEFAULT_TEAM_CODE,
     defaultChannelCode: DEFAULT_CHANNEL_CODE,
@@ -802,6 +1087,14 @@ app.get("/admin", (_req, res) => {
   res.type("html").send(renderTemplate(templates.admin));
 });
 
+app.get("/panel/master", (_req, res) => {
+  res.type("html").send(renderTemplate(templates.master));
+});
+
+app.get("/panel/client", (_req, res) => {
+  res.type("html").send(renderTemplate(templates.client));
+});
+
 app.get("/embed", (_req, res) => {
   res.type("html").send(renderTemplate(templates.embed));
 });
@@ -821,6 +1114,14 @@ app.use((req, res) => {
   }));
 });
 
-app.listen(PORT, () => {
-  console.log(`${APP_NAME} ready on port ${PORT}`);
+const startServer = async () => {
+  await ensureSeedData();
+  app.listen(PORT, () => {
+    console.log(`${APP_NAME} ready on port ${PORT}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error(`Failed to start ${APP_NAME}:`, error);
+  process.exit(1);
 });

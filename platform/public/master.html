@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Master HQ | __APP_NAME__</title>
+    <meta name="description" content="Master HQ panel untuk penyedia layanan livechat multi-client." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/panel-hq.css" />
+    <script defer src="/panel-hq.js"></script>
+  </head>
+  <body data-panel-role="master">
+    <main class="hq-shell">
+      <header class="hq-topbar">
+        <div class="hq-brand">
+          <div class="hq-logo">MH</div>
+          <div>
+            <h1>Master HQ</h1>
+            <p>Pusat kontrol provider livechat</p>
+          </div>
+        </div>
+        <div class="hq-links">
+          <a href="/">Public Web</a>
+          <a href="/panel/client">Client Console</a>
+          <a href="/embed">Embed Surface</a>
+        </div>
+      </header>
+
+      <section class="hq-grid">
+        <article class="hq-card hq-card-hero">
+          <span class="hq-chip">Provider Control</span>
+          <h2>Kontrol penuh semua panel client dari satu dashboard.</h2>
+          <p>Master HQ dipisahkan dari panel group lama. Di sini kamu bisa lihat tenant, backend status, sesi aktif, serta kesiapan deploy per client.</p>
+          <form class="hq-form" data-master-login-form>
+            <label>Email Master
+              <input type="email" name="email" placeholder="master@jielive.local" required />
+            </label>
+            <label>Password Master
+              <input type="password" name="password" placeholder="••••••••" required />
+            </label>
+            <button type="submit">Masuk Master HQ</button>
+          </form>
+          <p class="hq-note" data-master-login-status>Belum login.</p>
+        </article>
+
+        <article class="hq-card">
+          <h3>Global Stats</h3>
+          <div class="hq-stats">
+            <div><strong data-master-tenant-count>0</strong><span>Tenant</span></div>
+            <div><strong data-master-active-tenant-count>0</strong><span>Tenant Aktif</span></div>
+            <div><strong data-master-client-sessions>0</strong><span>Sesi Client</span></div>
+            <div><strong data-master-backend-state>unknown</strong><span>Backend State</span></div>
+          </div>
+        </article>
+
+        <article class="hq-card hq-card-wide">
+          <div class="hq-row-head">
+            <h3>Daftar Client Tenant</h3>
+            <button type="button" data-master-refresh>Refresh</button>
+          </div>
+          <div class="hq-table-wrap">
+            <table class="hq-table">
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Nama</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Backend</th>
+                </tr>
+              </thead>
+              <tbody data-master-tenant-rows>
+                <tr><td colspan="5">Login master untuk melihat tenant.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="hq-card">
+          <h3>Deploy Warnings</h3>
+          <ul class="hq-list" data-master-warnings>
+            <li>Belum ada data warning.</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

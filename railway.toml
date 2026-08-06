@@ -1,0 +1,7 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node platform/server.js"
+healthcheckPath = "/healthz"
+restartPolicyType = "ON_FAILURE"
