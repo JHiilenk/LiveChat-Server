@@ -210,7 +210,7 @@
     setExpanded(!panel.classList.contains("expanded"));
   };
 
-  const forceEmbedFrameExpanded = () => {
+  const syncEmbedFrameExpandedState = (expanded) => {
     try {
       const frameWindow = frameNode?.contentWindow;
       const frameDocument = frameWindow?.document;
@@ -218,12 +218,18 @@
         return;
       }
 
-      frameDocument.body.dataset.expanded = "true";
+      frameDocument.body.dataset.expanded = expanded ? "true" : "false";
       const shell = frameDocument.querySelector(".embed-shell");
       if (shell) {
-        shell.style.width = "100%";
-        shell.style.maxWidth = "none";
-        shell.style.margin = "0";
+        if (expanded) {
+          shell.style.width = "100%";
+          shell.style.maxWidth = "none";
+          shell.style.margin = "0";
+        } else {
+          shell.style.width = "";
+          shell.style.maxWidth = "";
+          shell.style.margin = "";
+        }
       }
     } catch {
       // Ignore cross-origin frames or not-yet-ready iframe documents.
@@ -261,9 +267,10 @@
     }
 
     if (event.data.type === "liveteams:widget-maximize") {
-      setExpanded(true);
+      const nextExpanded = !panel.classList.contains("expanded");
+      setExpanded(nextExpanded);
       openPanel();
-      forceEmbedFrameExpanded();
+      syncEmbedFrameExpandedState(nextExpanded);
     }
   });
 
