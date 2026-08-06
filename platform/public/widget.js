@@ -96,6 +96,9 @@
         grid-template-rows: auto 1fr;
       }
       .panel.expanded {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
         width: min(960px, calc(100vw - 24px));
         height: min(900px, calc(100dvh - 24px));
         border-radius: 18px;
@@ -151,6 +154,12 @@
           width: auto;
           bottom: calc(12px + env(safe-area-inset-bottom));
           height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+        }
+        .panel.expanded {
+          left: 10px;
+          right: 10px;
+          transform: none;
+          width: auto;
         }
       }
     </style>
