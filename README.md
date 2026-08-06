@@ -28,14 +28,14 @@ npm start
 
 Buka:
 
-- `http://localhost:3000`
+- `http://localhost:4000`
 
 ## Environment Variable
 
 Salin `.env.example` menjadi `.env` lalu isi sesuai deployment client.
 
 ```env
-PORT=3000
+PORT=4000
 APP_ORIGIN=https://chat.client-a.com
 SOCKET_CORS_ORIGIN=https://chat.client-a.com
 PUBLIC_BASE_URL=https://chat.client-a.com

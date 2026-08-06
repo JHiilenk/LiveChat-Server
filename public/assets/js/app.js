@@ -476,8 +476,9 @@ const AUTO_CROWD_THREAD_ENDINGS = [
   "Setuju, yang penting obrolannya tetap ringan dan jelas."
 ];
 
-const isEmbedMode = pageQuery.has("embed");
-const isLiveChatEmbed = pageQuery.has("livechat");
+const isEmbedPath = window.location.pathname.toLowerCase().startsWith("/embed");
+const isEmbedMode = pageQuery.has("embed") || isEmbedPath;
+const isLiveChatEmbed = pageQuery.has("livechat") || isEmbedPath;
 if (isEmbedMode) {
   document.body.classList.add("embed-mode");
 }
@@ -497,22 +498,27 @@ const liveChatAutoJoin = async () => {
     return;
   }
 
+  if (joinModal) {
+    joinModal.classList.add("hidden");
+    joinModal.hidden = true;
+  }
+
   const liveName = getLiveChatDefaultName();
-  const liveTeam = normalizeCode(pageQuery.get("team"), DEFAULT_TEAM);
-  const liveChannel = normalizeCode(pageQuery.get("channel"), DEFAULT_CHANNEL);
   const liveRole = "guest";
 
   currentUser = liveName;
-  currentTeam = liveTeam;
-  currentChannel = liveChannel;
+  currentTeam = "";
+  currentChannel = "";
   currentRole = liveRole;
   currentAccessPassword = "";
+  selectedJoinTeamCodes = new Set();
+  selectedJoinChannelCodes = new Set();
   currentView = {
-    type: "channel",
-    channelCode: currentChannel,
+    type: "dm",
+    channelCode: "",
     dmKey: "",
     peerName: "",
-    supportScope: ""
+    supportScope: "admins"
   };
 
   setHeader();
@@ -520,6 +526,55 @@ const liveChatAutoJoin = async () => {
   pendingPortalJoinAttempt = true;
   emitJoinRequest();
   setChatReadyState(false);
+};
+
+const renderLiveChatWelcomeCard = () => {
+  if (!isLiveChatEmbed || !messageList || messageList.querySelector(".embed-welcome-card")) {
+    return;
+  }
+
+  const welcomeCard = document.createElement("li");
+  welcomeCard.className = "message-item embed-welcome-card";
+  welcomeCard.innerHTML = `
+    <article class="embed-welcome-panel" aria-label="Welcome to LiveChat">
+      <div class="embed-support-chip" aria-label="Customer Services Customer Care">
+        <span class="embed-support-avatar" aria-hidden="true">✦</span>
+        <span class="embed-support-copy">
+          <strong>Customer Services</strong>
+          <span>Customer Care</span>
+        </span>
+      </div>
+      <p class="embed-welcome-title">Selamat datang di JIELive.</p>
+      <p class="embed-welcome-copy">Tim kami siap membantu Anda lebih cepat. Ceritakan kebutuhan, kendala, atau pertanyaan Anda, lalu kami bantu dengan solusi yang paling tepat.</p>
+      <div class="embed-welcome-actions">
+        <button type="button" class="embed-welcome-action embed-welcome-focus">Mulai Konsultasi</button>
+        <button type="button" class="embed-welcome-action embed-welcome-admin">Kirim Pesan</button>
+      </div>
+    </article>
+  `;
+
+  messageList.prepend(welcomeCard);
+
+  welcomeCard.querySelector(".embed-welcome-focus")?.addEventListener("click", () => {
+    focusMessageInputWithoutScroll();
+  });
+
+  welcomeCard.querySelector(".embed-welcome-admin")?.addEventListener("click", () => {
+    focusMessageInputWithoutScroll();
+  });
+};
+
+const ensureLiveChatStartsAtTop = () => {
+  if (!isLiveChatEmbed || !messageList) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    messageList.scrollTop = 0;
+    requestAnimationFrame(() => {
+      messageList.scrollTop = 0;
+    });
+  });
 };
 
 const CURATED_GIFS = [
@@ -1746,7 +1801,7 @@ const configurePortalCopy = () => {
   document.body.classList.toggle("portal-registration", isRegistrationPortal);
 
   if (isAdminPortal) {
-    document.title = "Admin Panel Login | LiveTeams";
+    document.title = "Admin Panel Login | JIELive";
     if (joinModalEyebrow) {
       joinModalEyebrow.textContent = "Login Admin Panel";
     }
@@ -1768,7 +1823,7 @@ const configurePortalCopy = () => {
   }
 
   if (isMemberLoginPortal) {
-    document.title = "Login Member | LiveTeams";
+    document.title = "Login Member | JIELive";
     if (joinModalEyebrow) {
       joinModalEyebrow.textContent = "Login Member";
     }
@@ -1796,7 +1851,7 @@ const configurePortalCopy = () => {
   }
 
   if (isRegistrationPortal) {
-    document.title = "Daftar Member | LiveTeams";
+    document.title = "Daftar Member | JIELive";
     if (realMembersModalEyebrow) {
       realMembersModalEyebrow.textContent = "Portal Pendaftaran";
     }
@@ -2826,7 +2881,7 @@ const getPreviewDocumentFromMessageText = (text) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LiveTeams Preview</title>
+  <title>JIELive Preview</title>
   ${styleTag}
 </head>
 <body>
@@ -2915,7 +2970,7 @@ const getAvatarVariant = (name) => {
   const source = normalizeDisplayName(name) || "Guest";
   const lowerSource = source.toLowerCase();
 
-  if (lowerSource.includes("liveteams ai") || /\bai\b/.test(lowerSource)) {
+  if (lowerSource.includes("jielive ai") || lowerSource.includes("liveteams ai") || /\bai\b/.test(lowerSource)) {
     return "ai";
   }
 
@@ -3826,16 +3881,26 @@ const setHeader = () => {
     const supportScope = String(currentView.supportScope || "").trim().toLowerCase();
     const isDirectAdminRoute = String(currentView.dmKey || "").toUpperCase().startsWith("ADMINSUPPORT::");
     const isSupportRoute = supportScope === "admins" || isDirectAdminRoute;
-    roomLabel.textContent = supportScope === "admins" || isDirectAdminRoute
-      ? "Live Chat"
-      : (currentTeam ? `DM • TEAM ${currentTeam}` : "Live Chat");
-    roomTitle.textContent = isSupportRoute
-      ? "Customer Service"
-      : `@${normalizeDisplayName(currentView.peerName)}`;
+    if (isLiveChatEmbed) {
+      roomLabel.textContent = "LIVE CHAT";
+      roomTitle.textContent = "Customer Services";
+    } else {
+      roomLabel.textContent = supportScope === "admins" || isDirectAdminRoute
+        ? "Live Chat"
+        : (currentTeam ? `DM • TEAM ${currentTeam}` : "Live Chat");
+      roomTitle.textContent = isSupportRoute
+        ? "Customer Service"
+        : `@${normalizeDisplayName(currentView.peerName)}`;
+    }
     backToChannelButton.classList.remove("hidden");
   } else {
-    roomLabel.textContent = currentTeam ? `TEAM ${currentTeam}` : "PRIVATE CHAT";
-    roomTitle.textContent = currentChannel ? `#${currentChannel}` : "DM Privat";
+    if (isLiveChatEmbed) {
+      roomLabel.textContent = "LIVE CHAT";
+      roomTitle.textContent = "Customer Services";
+    } else {
+      roomLabel.textContent = currentTeam ? `TEAM ${currentTeam}` : "PRIVATE CHAT";
+      roomTitle.textContent = currentChannel ? `#${currentChannel}` : "DM Privat";
+    }
     backToChannelButton.classList.add("hidden");
   }
 
@@ -7262,6 +7327,9 @@ socket.on("dm:ready", (payload) => {
   setChatReadyState(true);
   switchToDmView(payload);
 
+  renderLiveChatWelcomeCard();
+  ensureLiveChatStartsAtTop();
+
   const dmKey = String(payload?.dmKey || "").trim();
   const peerName = normalizeDisplayName(payload?.peerName || "");
   const historyList = Array.isArray(payload?.history) ? payload.history : [];
@@ -7288,6 +7356,9 @@ socket.on("dm:ready", (payload) => {
   }
 
   if (!pendingAutoOpenBroadcastDm || pendingAutoOpenBroadcastDm.dmKey !== dmKey) {
+    if (isLiveChatEmbed) {
+      return;
+    }
     focusMessageInputWithoutScroll();
     return;
   }
@@ -7295,11 +7366,18 @@ socket.on("dm:ready", (payload) => {
   const pendingMessage = pendingAutoOpenBroadcastDm.message;
   pendingAutoOpenBroadcastDm = null;
   if (!pendingMessage?.id || getCachedMessageById(pendingMessage.id)) {
+    if (isLiveChatEmbed) {
+      return;
+    }
     focusMessageInputWithoutScroll();
     return;
   }
 
   pushMessage(pendingMessage);
+  if (isLiveChatEmbed) {
+    ensureLiveChatStartsAtTop();
+    return;
+  }
   focusMessageInputWithoutScroll();
 });
 

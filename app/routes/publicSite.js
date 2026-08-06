@@ -6,7 +6,7 @@ const registerPublicSiteRoutes = ({
   app,
   projectRoot,
   publicBaseUrl,
-  appName = "LiveTeams",
+  appName = "JIELive",
   appDescription = "Server live chat realtime untuk kolaborasi tim modern."
 }) => {
   const publicDirectory = path.join(projectRoot, "public");
@@ -14,8 +14,10 @@ const registerPublicSiteRoutes = ({
   const assetDirectory = path.join(publicDirectory, "assets");
 
   const homeTemplatePath = path.join(pageDirectory, "home.html");
+  const landingTemplatePath = path.join(pageDirectory, "landing.html");
   const appTemplatePath = path.join(pageDirectory, "app.html");
   const homeTemplate = fs.readFileSync(homeTemplatePath, "utf8");
+  const landingTemplate = fs.readFileSync(landingTemplatePath, "utf8");
   const appTemplate = fs.readFileSync(appTemplatePath, "utf8");
 
   const buildSeoJsonLd = ({ title, description, canonicalUrl, schemas = [] }) => JSON.stringify({
@@ -80,6 +82,10 @@ const registerPublicSiteRoutes = ({
     }
   }));
 
+  app.get("/favicon.ico", (_req, res) => {
+    res.redirect(301, "/favicon.svg");
+  });
+
   app.get("/app.js", (_req, res) => {
     res.type("application/javascript");
     res.sendFile(path.join(assetDirectory, "js", "app.js"));
@@ -116,8 +122,8 @@ const registerPublicSiteRoutes = ({
 
   app.get(["/", "/index.html"], (_req, res) => {
     renderSeoPage(res, {
-      title: `${appName} | Live Chat Server`,
-      description: appDescription,
+      title: `${appName} Live Chat | Realtime Community Chat Indonesia`,
+      description: `${appName} adalah aplikasi live chat realtime untuk komunitas, team, channel, DM, dan kolaborasi online yang cepat, ringan, dan siap dipakai.`,
       canonicalUrl: `${publicBaseUrl}/`,
       bodyClass: "route-home",
       schemas: [

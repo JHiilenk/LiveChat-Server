@@ -1,6 +1,6 @@
 {
-  "name": "LiveTeams Live Chat",
-  "short_name": "LiveTeams",
+  "name": "JIELive Live Chat",
+  "short_name": "JIELive",
   "description": "Live chat realtime untuk komunitas, team, dan kolaborasi online.",
   "start_url": "/app",
   "display": "standalone",

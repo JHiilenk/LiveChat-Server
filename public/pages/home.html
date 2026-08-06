@@ -3,109 +3,344 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LiveTeams ・ Live Chat Realtime untuk Komunitas & Tim</title>
-    <meta name="description" content="LiveTeams — Live chat realtime untuk komunitas, team, support, dan channel diskusi. Login member, guest access, widget embed, dan panel admin lengkap." />
-    <meta name="keywords" content="LiveTeams, live chat, komunitas, team chat, realtime, widget, admin panel" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>__SEO_TITLE__</title>
+    <meta name="description" content="__SEO_DESCRIPTION__" />
+    <meta name="keywords" content="live chat, chat komunitas, realtime chat, chat team, jielive, live chat indonesia" />
+    <meta name="author" content="JIELive" />
+    <meta name="application-name" content="JIELive" />
+    <meta name="robots" content="__SEO_ROBOTS__" />
+    <meta name="theme-color" content="#08180e" />
+    <link rel="canonical" href="__SEO_CANONICAL__" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JIELive" />
+    <meta property="og:title" content="__SEO_OG_TITLE__" />
+    <meta property="og:description" content="__SEO_OG_DESCRIPTION__" />
+    <meta property="og:url" content="__SEO_CANONICAL__" />
+    <meta property="og:image" content="__SEO_OG_IMAGE__" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="__SEO_OG_TITLE__" />
+    <meta name="twitter:description" content="__SEO_OG_DESCRIPTION__" />
+    <meta name="twitter:image" content="__SEO_OG_IMAGE__" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=jl-20260806" />
+    <link rel="shortcut icon" href="/favicon.svg?v=jl-20260806" />
+    <link rel="apple-touch-icon" href="/favicon.svg?v=jl-20260806" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/assets/css/home.css" />
+    <script type="application/ld+json">__SEO_JSON_LD__</script>
   </head>
-  <body class="route-home">
-    <main class="home-shell">
-      <header class="site-header">
-        <a class="brand" href="/">LiveTeams</a>
-        <nav class="main-nav">
-          <a href="/app">Buka App</a>
-          <a href="/login">Masuk</a>
-          <a href="/daftar">Daftar</a>
-          <a href="/admin">Admin</a>
-        </nav>
-        <button class="menu-btn">Buka menu</button>
-      </header>
+  <body class="__SEO_BODY_CLASS__ route-public-home route-landing-page">
+    <div class="background-decor" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="grid-overlay"></span>
+    </div>
 
-      <section class="hero">
-        <div class="hero-inner">
-          <div class="hero-copy">
-            <p class="eyebrow">Realtime Community Chat</p>
-            <h1>Live chat modern untuk komunitas, team, dan customer support</h1>
-            <p>LiveTeams membantu kamu membuat pengalaman live chat cepat, ringan, dan siap online dengan login member, guest access, channel, DM, upload file, widget embed, dan panel admin yang mudah dikelola.</p>
-            <div class="hero-cta">
-              <a class="btn-primary" href="/login">Masuk Login Member</a>
-              <a class="btn-ghost" href="/daftar">Daftar Member Baru</a>
-              <button class="btn-outline" onclick="location.href='/embed'">Coba Widget Demo</button>
-            </div>
+    <header class="landing-nav">
+      <div class="landing-nav-inner">
+        <a class="landing-brand" href="/">
+          <img class="landing-brand-mark" src="/favicon.svg" alt="Logo JL JIELive" />
+          <span class="landing-brand-text">JIELive</span>
+        </a>
+        <button id="landingMenuToggle" class="landing-menu-toggle" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="landingNavPanel">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div id="landingNavPanel" class="landing-nav-panel">
+          <nav class="landing-nav-links" aria-label="Navigasi utama JIELive">
+            <a href="#fitur">Fitur</a>
+            <a href="#harga">Harga</a>
+            <a href="#demo">Demo</a>
+            <a href="/login">Login</a>
+          </nav>
+          <div class="landing-nav-actions">
+            <a class="landing-nav-ghost" href="/daftar">Daftar</a>
+            <a class="landing-nav-primary" href="/app">Buka App</a>
           </div>
-          <div class="hero-preview">
-            <div class="preview-status">
-              <div class="status-item"><strong>Status</strong><span>Online</span></div>
-              <div class="status-item"><strong>Team</strong><span>LIVE TEAM</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="landing-shell">
+      <section class="landing-hero" aria-labelledby="landingHeroTitle">
+        <div class="landing-hero-copy">
+          <p class="eyebrow">Realtime Community Chat</p>
+          <h1 id="landingHeroTitle">Live chat modern untuk komunitas, team, customer support, dan channel diskusi</h1>
+          <p class="landing-hero-text">JIELive membantu kamu membuat pengalaman live chat yang cepat, ringan, dan siap online dengan login member, guest access, channel, DM, upload file, widget embed, dan panel admin yang mudah dikelola.</p>
+          <div class="seo-cta-row">
+            <a class="seo-cta-primary" href="/login">Masuk Login Member</a>
+            <a class="seo-cta-secondary" href="/daftar">Daftar Member Baru</a>
+            <button id="landingWidgetDemoButton" class="seo-cta-secondary landing-widget-cta" type="button">Coba Widget Demo</button>
+          </div>
+          <div class="seo-proof-row" aria-label="Ringkasan fitur JIELive">
+            <span class="seo-proof-pill">Realtime Team Chat</span>
+            <span class="seo-proof-pill">Login Member dan Guest</span>
+            <span class="seo-proof-pill">DM, Channel, Upload File</span>
+            <span class="seo-proof-pill">Admin Panel dan Widget</span>
+          </div>
+          <div class="landing-stats-row" aria-label="Ringkasan nilai JIELive">
+            <article class="landing-stat-card">
+              <strong>Guest + Member</strong>
+              <span>Alur akses fleksibel untuk publik dan akun terdaftar.</span>
+            </article>
+            <article class="landing-stat-card">
+              <strong>Team + Channel</strong>
+              <span>Struktur diskusi rapi untuk komunitas, support, dan kolaborasi.</span>
+            </article>
+            <article class="landing-stat-card">
+              <strong>Widget + Admin</strong>
+              <span>Siap embed ke website dengan kontrol penuh dari panel admin.</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="landing-preview-card" aria-label="Preview dashboard JIELive">
+          <div class="landing-preview-stack">
+            <article class="landing-preview-panel compact">
+              <p class="landing-preview-label">STATUS</p>
+              <p class="landing-preview-value online">Online</p>
+            </article>
+            <article class="landing-preview-panel compact">
+              <p class="landing-preview-label">TEAM</p>
+              <p class="landing-preview-value">JEESPACE</p>
+            </article>
+            <div class="landing-preview-signal" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-            <div class="preview-panel">
-              <div class="avatar-row">J&nbsp;M&nbsp;A</div>
-              <div class="panel-card">
-                <h4>Jeetalk Admin</h4>
-                <p>Semua percakapan team, channel, dan member bisa dikelola dalam satu dashboard.</p>
-              </div>
-            </div>
+            <article class="landing-preview-panel detail">
+              <p class="landing-preview-title">JIELIVE ADMIN</p>
+              <p class="landing-preview-copy">Semua percakapan team, channel, dan member sekarang bisa dikelola dalam satu dashboard live chat.</p>
+            </article>
+            <article class="landing-preview-panel detail alt">
+              <p class="landing-preview-title">MEMBER BARU</p>
+              <p class="landing-preview-copy">Login member, daftar akun baru, widget embed, dan notifikasi admin sekarang jalan dalam satu sistem.</p>
+            </article>
           </div>
         </div>
       </section>
 
-      <section id="features" class="features">
-        <div class="container">
-          <h2>Jeetalk untuk Live Chat Realtime, Komunitas, Team, dan Channel</h2>
-          <p>Pesan, file, GIF, audio, dan video dikirim langsung dengan pengalaman live chat yang ringan. Pisahkan percakapan per team dan channel, serta dukung login member dan guest.</p>
-          <div class="feature-list">
-            <article>
+      <section id="fitur" class="seo-landing" aria-labelledby="seoLandingTitle">
+        <div class="seo-landing-card">
+          <p class="eyebrow">Live Chat Platform</p>
+          <h2 id="seoLandingTitle">JIELive untuk Live Chat Realtime, Komunitas, Team, dan Channel</h2>
+          <p class="seo-landing-copy">JIELive adalah aplikasi live chat realtime untuk komunitas, grup, team kerja, channel diskusi, dan direct message. Cocok untuk obrolan cepat, koordinasi online, customer engagement, dan komunikasi digital yang ringan serta responsif di desktop maupun mobile.</p>
+          <div class="seo-feature-grid">
+            <article class="seo-feature-item">
               <h3>Chat Realtime Cepat</h3>
-              <p>Pengiriman pesan instan dengan pengalaman ringan dan responsif.</p>
+              <p>Pesan, file, GIF, audio, dan video dikirim langsung dengan pengalaman live chat yang ringan.</p>
             </article>
-            <article>
+            <article class="seo-feature-item">
               <h3>Team dan Channel</h3>
-              <p>Struktur diskusi rapi untuk komunitas, support, dan kolaborasi.</p>
+              <p>Pisahkan percakapan per team dan channel agar diskusi komunitas lebih rapi dan mudah dipantau.</p>
             </article>
-            <article>
-              <h3>Login Member & Guest</h3>
-              <p>Dukungan portal member dan guest access untuk berbagai skenario.</p>
+            <article class="seo-feature-item">
+              <h3>Login Member dan Guest</h3>
+              <p>Dukung akun member terdaftar dan akses guest agar alur masuk chat lebih fleksibel untuk banyak kebutuhan.</p>
             </article>
-            <article>
+            <article class="seo-feature-item">
               <h3>Panel Admin Lengkap</h3>
-              <p>Kelola role, batas upload, notifikasi, dan moderasi dari dashboard.</p>
+              <p>Kelola role, pengaturan login, simulasi chat, batas upload, team baru, dan notifikasi aplikasi dari panel admin.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="seo-faq-card">
+          <p class="eyebrow">FAQ</p>
+          <h2>Pertanyaan Umum JIELive</h2>
+          <div class="seo-faq-list">
+            <article class="seo-faq-item">
+              <h3>Apa itu JIELive?</h3>
+              <p>JIELive adalah aplikasi live chat realtime untuk komunitas, team, channel diskusi, dan pesan privat dalam satu dashboard.</p>
+            </article>
+            <article class="seo-faq-item">
+              <h3>Apakah JIELive bisa dipakai untuk login member?</h3>
+              <p>Bisa. JIELive mendukung portal login member terdaftar, portal pendaftaran member baru, serta akses guest untuk masuk langsung.</p>
+            </article>
+            <article class="seo-faq-item">
+              <h3>Apakah JIELive mendukung upload file?</h3>
+              <p>Bisa. Admin dapat mengatur batas upload gambar, video, audio, dan file lain langsung dari panel admin.</p>
+            </article>
+            <article class="seo-faq-item">
+              <h3>Apakah JIELive bisa di-embed ke website?</h3>
+              <p>Bisa. JIELive menyediakan widget embed live chat yang bisa dipasang ke situs untuk desktop maupun mobile.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="embed-demo">
-        <div class="container">
-          <h2>Pasang widget LiveTeams ke website</h2>
-          <p>Snippet sederhana untuk memasang widget floating modern yang responsive.</p>
-          <pre class="embed-code">&lt;script src="https://jeetalk.onrender.com/widget.js" data-chat-url="https://jeetalk.onrender.com/embed"&gt;&lt;/script&gt;</pre>
-          <p>Ganti URL dengan instance kamu saat deploy ke server sendiri.</p>
+      <section class="landing-social-proof" aria-labelledby="landingTestimonialsTitle">
+        <div class="landing-section-head">
+          <p class="eyebrow">Trusted Flow</p>
+          <h2 id="landingTestimonialsTitle">Testimoni singkat dari cara JIELive dipakai sehari-hari</h2>
+        </div>
+        <div class="landing-testimonial-grid">
+          <article class="landing-testimonial-card">
+            <p class="landing-quote">“Channel team bikin diskusi internal kami jauh lebih rapi. Member login dan guest access-nya juga enak untuk event komunitas.”</p>
+            <p class="landing-testimonial-name">Nadia, Community Lead</p>
+          </article>
+          <article class="landing-testimonial-card featured">
+            <p class="landing-quote">“Panel admin, batas upload, notifikasi, dan widget embed membuat JIELive terasa seperti produk live chat yang siap dipakai langsung.”</p>
+            <p class="landing-testimonial-name">Rafi, Product Operator</p>
+          </article>
+          <article class="landing-testimonial-card">
+            <p class="landing-quote">“Untuk support internal dan koordinasi event, alur DM, channel, dan team baru di JIELive sangat membantu dan ringan dipakai di mobile.”</p>
+            <p class="landing-testimonial-name">Salma, Event Admin</p>
+          </article>
         </div>
       </section>
 
-      <section class="testimonials">
-        <div class="container">
-          <h2>Testimoni singkat</h2>
-          <div class="test-row">
-            <blockquote>“Channel team bikin diskusi internal kami jauh lebih rapi. Member login dan guest access-nya juga enak untuk event komunitas.” — Nadia, Community Lead</blockquote>
-            <blockquote>“Panel admin, batas upload, notifikasi, dan widget embed membuat LiveTeams terasa seperti produk live chat yang siap dipakai langsung.” — Rafi, Product Operator</blockquote>
-          </div>
+      <section id="harga" class="landing-pricing" aria-labelledby="landingPricingTitle">
+        <div class="landing-section-head">
+          <p class="eyebrow">Pricing Style</p>
+          <h2 id="landingPricingTitle">Pilih flow penggunaan yang paling cocok untuk project kamu</h2>
+        </div>
+        <div class="landing-pricing-grid">
+          <article class="landing-pricing-card">
+            <p class="landing-pricing-kicker">Starter</p>
+            <h3>Komunitas Ringan</h3>
+            <p class="landing-pricing-price">Gratis setup</p>
+            <ul class="landing-pricing-list">
+              <li>Guest login langsung</li>
+              <li>Channel publik dan DM</li>
+              <li>Widget live chat embed</li>
+            </ul>
+            <a class="seo-cta-secondary landing-plan-cta" href="/app">Lihat App</a>
+          </article>
+          <article class="landing-pricing-card featured">
+            <p class="landing-pricing-kicker">Recommended</p>
+            <h3>Member Portal</h3>
+            <p class="landing-pricing-price">Flow paling lengkap</p>
+            <ul class="landing-pricing-list">
+              <li>Login member dan daftar akun</li>
+              <li>Password member + badge gold</li>
+              <li>Admin panel dan batas upload</li>
+            </ul>
+            <a class="seo-cta-primary landing-plan-cta" href="/login">Masuk Sekarang</a>
+          </article>
+          <article class="landing-pricing-card">
+            <p class="landing-pricing-kicker">Embedded</p>
+            <h3>Website Widget</h3>
+            <p class="landing-pricing-price">Demo siap pasang</p>
+            <ul class="landing-pricing-list">
+              <li>Widget floating modern</li>
+              <li>Desktop dan mobile responsive</li>
+              <li>Minimize, maximize, fullscreen</li>
+            </ul>
+            <button id="landingWidgetDemoButtonSecondary" class="seo-cta-secondary landing-plan-cta" type="button">Coba Widget</button>
+          </article>
         </div>
       </section>
 
-      <footer class="site-footer">
-        <div class="container">
-          <div class="footer-left">
-            <p>&copy; 2026 LiveTeams. Realtime community chat platform built for modern teams.</p>
-          </div>
-          <div class="footer-links">
-            <a href="#features">Fitur</a>
-            <a href="/app">Buka App</a>
-            <a href="/admin">Admin Panel</a>
-          </div>
+      <section id="demo" class="landing-demo" aria-labelledby="landingDemoTitle">
+        <div class="landing-section-head">
+          <p class="eyebrow">Embed Demo</p>
+          <h2 id="landingDemoTitle">Pasang widget JIELive ke website dengan snippet sederhana</h2>
         </div>
-      </footer>
+        <div class="landing-demo-grid">
+          <article class="landing-demo-card">
+            <p class="landing-demo-label">Widget script</p>
+            <pre class="landing-code-block"><code>&lt;script src="/widget.js" data-chat-url="/embed?livechat=1"&gt;&lt;/script&gt;</code></pre>
+            <p class="landing-demo-copy">Snippet ini memunculkan widget live chat modern yang bisa dibuka sebagai popup dan fullscreen sesuai perangkat pengguna.</p>
+          </article>
+          <article class="landing-demo-card">
+            <p class="landing-demo-label">Use cases</p>
+            <ul class="landing-demo-list">
+              <li>Website komunitas dan forum privat</li>
+              <li>Landing page event atau webinar</li>
+              <li>Customer chat internal dan support kecil</li>
+              <li>Portal team dengan channel diskusi realtime</li>
+            </ul>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <footer class="landing-footer" aria-labelledby="landingFooterTitle">
+      <div class="landing-footer-shell">
+        <section class="landing-mega-footer" aria-label="Navigasi dan ringkasan JIELive">
+          <div class="landing-footer-featured">
+            <p class="eyebrow">Build Better Conversations</p>
+            <h2 id="landingFooterTitle">JIELive bantu komunitas, team, dan support tetap realtime tanpa ribet.</h2>
+            <p class="landing-footer-lead">Mulai dari guest chat sederhana sampai member portal terstruktur dengan channel, DM, upload file, dan widget embed dalam satu platform.</p>
+            <div class="landing-footer-cta-row">
+              <a class="seo-cta-primary" href="/daftar">Mulai Gratis</a>
+              <a class="seo-cta-secondary" href="/login">Masuk Member</a>
+            </div>
+            <div class="landing-footer-badges" aria-label="Highlight performa JIELive">
+              <span class="landing-footer-badge">Realtime socket messaging</span>
+              <span class="landing-footer-badge">Role-based admin control</span>
+              <span class="landing-footer-badge">Desktop + Mobile ready</span>
+            </div>
+          </div>
+
+          <div class="landing-footer-links-grid">
+            <section class="landing-footer-col" aria-label="Produk JIELive">
+              <h3>Produk</h3>
+              <a href="/app">Live Chat App</a>
+              <a href="/login">Member Login</a>
+              <a href="/daftar">Daftar Member</a>
+              <a href="/embed">Embed View</a>
+            </section>
+
+            <section class="landing-footer-col" aria-label="Solusi JIELive">
+              <h3>Solusi</h3>
+              <a href="#fitur">Komunitas Online</a>
+              <a href="#harga">Team Collaboration</a>
+              <a href="#demo">Website Widget</a>
+              <a href="/admin">Admin Operations</a>
+            </section>
+
+            <section class="landing-footer-col" aria-label="Resources JIELive">
+              <h3>Resources</h3>
+              <a href="/sitemap.xml">Sitemap</a>
+              <a href="/robots.txt">Robots</a>
+              <a href="/site.webmanifest">Web Manifest</a>
+              <a href="https://github.com/JHiilenk/LiveTeams" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+            </section>
+
+            <section class="landing-footer-col" aria-label="Company JIELive">
+              <h3>Company</h3>
+              <a href="/">Tentang JIELive</a>
+              <a href="#fitur">Kenapa JIELive</a>
+              <a href="#harga">Pricing Flow</a>
+              <a href="mailto:hello@jielive.app">hello@jielive.app</a>
+            </section>
+          </div>
+        </section>
+
+        <div class="landing-footer-bottom">
+          <p>&copy; 2026 JIELive. Realtime community chat platform built for modern teams.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/assets/js/group-widget.js" data-title="Join Group" data-subtitle="Login atau daftar" data-login-url="/login" data-register-url="/daftar"></script>
+    <script src="/widget.js" data-chat-url="/embed?livechat=1" data-title="Live Chat" data-subtitle="Online now"></script>
+    <script>
+      function openLiveChatWidget() {
+        window.dispatchEvent(new CustomEvent('liveteams:open-widget'));
+      }
+
+      document.getElementById('landingWidgetDemoButton')?.addEventListener('click', function () {
+        openLiveChatWidget();
+      });
+      document.getElementById('landingWidgetDemoButtonSecondary')?.addEventListener('click', function () {
+        openLiveChatWidget();
+      });
+      document.getElementById('landingMenuToggle')?.addEventListener('click', function () {
+        var panel = document.getElementById('landingNavPanel');
+        var expanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !expanded);
+        panel.classList.toggle('open');
+      });
+      // Widget launcher is provided by /widget.js, so no extra floating buttons are needed here.
+    </script>
   </body>
 </html>

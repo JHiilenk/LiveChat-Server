@@ -28,10 +28,10 @@ require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
 
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 4000;
 const APP_ORIGIN = process.env.APP_ORIGIN || "*";
 const SOCKET_CORS_ORIGIN = process.env.SOCKET_CORS_ORIGIN || APP_ORIGIN;
-const APP_NAME = String(process.env.APP_NAME || "LiveTeams").trim() || "LiveTeams";
+const APP_NAME = String(process.env.APP_NAME || "JIELive").trim() || "JIELive";
 const APP_DESCRIPTION = String(process.env.APP_DESCRIPTION || `${APP_NAME} adalah server live chat realtime untuk kolaborasi tim modern.`).trim() || `${APP_NAME} adalah server live chat realtime untuk kolaborasi tim modern.`;
 
 const normalizeDefaultCode = (value, fallback) => {
@@ -53,7 +53,7 @@ const RATE_LIMIT_MAX_MESSAGES = 7;
 const MESSAGE_HISTORY_LIMIT = 80;
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 const BLOCKED_EXTENSIONS = new Set([".exe", ".msi", ".bat", ".cmd", ".ps1", ".scr", ".dll", ".com"]);
-const AI_BOT_NAME = "LiveTeams AI";
+const AI_BOT_NAME = "JIELive AI";
 const AI_REPLY_COOLDOWN_MS = 1400;
 const MIN_PRIVILEGED_PASSWORD_LENGTH = 4;
 const MESSAGE_RETENTION_MS = 3 * 24 * 60 * 60 * 1000;

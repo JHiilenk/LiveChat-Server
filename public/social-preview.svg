@@ -17,8 +17,8 @@
   <rect x="156" y="156" width="172" height="172" rx="40" fill="url(#accent)"/>
   <path d="M203 199h77v20h-30v79h-23v-79h-24v-20Z" fill="#0A1830"/>
   <path d="M285 199h21v60c0 26-14 39-41 39h-13v-20h11c15 0 22-7 22-20v-59Z" fill="#0A1830"/>
-  <text x="380" y="238" fill="#EAF2FF" font-family="'Space Grotesk', sans-serif" font-size="74" font-weight="700">LiveTeams Live Chat</text>
+  <text x="380" y="238" fill="#EAF2FF" font-family="'Space Grotesk', sans-serif" font-size="74" font-weight="700">JIELive Live Chat</text>
   <text x="380" y="310" fill="#AFC4E6" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="500">Realtime chat komunitas, team, channel, dan DM yang cepat, ringan, dan siap online.</text>
   <rect x="380" y="362" width="316" height="66" rx="33" fill="url(#accent)"/>
-  <text x="423" y="405" fill="#0D1B32" font-family="'Space Grotesk', sans-serif" font-size="30" font-weight="700">https://livechat-teams.up.railway.app</text>
+  <text x="423" y="405" fill="#0D1B32" font-family="'Space Grotesk', sans-serif" font-size="30" font-weight="700">https://jielive.onrender.com</text>
 </svg>
