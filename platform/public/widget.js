@@ -240,7 +240,8 @@
     }
 
     if (event.data.type === "liveteams:widget-maximize") {
-      toggleExpanded();
+      setExpanded(true);
+      openPanel();
     }
   });
 
