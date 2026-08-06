@@ -597,6 +597,20 @@ const renderTemplate = (template, extraValues = {}) => {
   }, template);
 };
 
+const getRequestPublicBaseUrl = (req) => {
+  const forwardedProto = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
+  const forwardedHost = String(req.headers["x-forwarded-host"] || "").split(",")[0].trim();
+  const host = String(req.headers.host || "").trim();
+  const protocol = forwardedProto || (req.protocol || "https");
+  const targetHost = forwardedHost || host;
+
+  if (!targetHost) {
+    return PUBLIC_BASE_URL;
+  }
+
+  return `${protocol}://${targetHost}`.replace(/\/$/, "");
+};
+
 const apiSurface = {
   appName: APP_NAME,
   appTagline: APP_TAGLINE,
@@ -819,8 +833,9 @@ app.get("/api/v1/client/overview", requireScopedSession(["client", "master"]), a
     const tenantCode = sanitizeCode(req.query?.tenantCode || req.platformSession.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
     const bootstrap = await getTenantBootstrap(tenantCode);
     const auth = await getAuthRecord(tenantCode);
-    const widgetChatUrl = `${bootstrap.tenant.backendBaseUrl}/embed?livechat=1&tenantCode=${encodeURIComponent(bootstrap.tenant.tenantCode)}`;
-    const widgetScriptUrl = `${bootstrap.tenant.backendBaseUrl}/widget.js`;
+    const publicBaseUrl = getRequestPublicBaseUrl(req);
+    const widgetChatUrl = `${publicBaseUrl}/embed?livechat=1&tenantCode=${encodeURIComponent(bootstrap.tenant.tenantCode)}`;
+    const widgetScriptUrl = `${publicBaseUrl}/widget.js`;
 
     res.json({
       ok: true,
@@ -915,8 +930,9 @@ app.get("/api/v1/widget-config", async (req, res) => {
   try {
     const tenantCode = sanitizeCode(req.query?.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
     const bootstrap = await getTenantBootstrap(tenantCode);
-    const widgetChatUrl = `${bootstrap.tenant.backendBaseUrl}/embed?livechat=1&tenantCode=${encodeURIComponent(bootstrap.tenant.tenantCode)}`;
-    const widgetScriptUrl = `${bootstrap.tenant.backendBaseUrl}/widget.js`;
+    const publicBaseUrl = getRequestPublicBaseUrl(req);
+    const widgetChatUrl = `${publicBaseUrl}/embed?livechat=1&tenantCode=${encodeURIComponent(bootstrap.tenant.tenantCode)}`;
+    const widgetScriptUrl = `${publicBaseUrl}/widget.js`;
 
     res.json({
       ok: true,
