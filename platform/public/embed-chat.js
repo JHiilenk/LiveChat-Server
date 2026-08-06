@@ -145,11 +145,14 @@
     button.addEventListener("click", () => {
       const action = button.getAttribute("data-chat-action") || "";
       if (action === "maximize") {
-        const isExpanded = document.body.dataset.expanded === "true";
-        document.body.dataset.expanded = isExpanded ? "false" : "true";
+        document.body.dataset.expanded = "true";
       }
 
-      if (action === "maximize" && (!window.parent || window.parent === window)) {
+      if (action === "minimize") {
+        document.body.dataset.expanded = "false";
+      }
+
+      if ((action === "maximize" || action === "minimize") && (!window.parent || window.parent === window)) {
         return;
       }
 

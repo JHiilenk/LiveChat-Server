@@ -264,15 +264,20 @@
       return;
     }
 
-    if (event.data.type === "liveteams:widget-close" || event.data.type === "liveteams:widget-minimize") {
+    if (event.data.type === "liveteams:widget-close") {
       closePanel();
     }
 
     if (event.data.type === "liveteams:widget-maximize") {
-      const nextExpanded = !panel.classList.contains("expanded");
-      setExpanded(nextExpanded);
+      setExpanded(true);
       openPanel();
-      syncEmbedFrameExpandedState(nextExpanded);
+      syncEmbedFrameExpandedState(true);
+    }
+
+    if (event.data.type === "liveteams:widget-minimize") {
+      setExpanded(false);
+      openPanel();
+      syncEmbedFrameExpandedState(false);
     }
   });
 
