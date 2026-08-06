@@ -30,8 +30,8 @@ const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS || 6);
 const LOGIN_LOCK_MS = Number(process.env.LOGIN_LOCK_MS || 15 * 60 * 1000);
 const DEFAULT_OWNER_USERNAME = process.env.DEFAULT_OWNER_USERNAME || "owner";
 const DEFAULT_ADMIN_USERNAME = process.env.DEFAULT_ADMIN_USERNAME || "admin";
-const DEFAULT_OWNER_PASSWORD = process.env.DEFAULT_OWNER_PASSWORD || "change-owner-password";
-const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || "change-admin-password";
+const DEFAULT_OWNER_PASSWORD = process.env.DEFAULT_OWNER_PASSWORD || "admin123";
+const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || "admin123";
 
 const runtimeWarnings = [];
 
@@ -86,7 +86,7 @@ const sanitizeCode = (value, fallback) => {
 const nameKey = (value) => sanitizeName(value).toLowerCase().replace(/[^a-z0-9]+/g, "");
 const nowIso = () => new Date().toISOString();
 const MASTER_PANEL_EMAIL = sanitizeName(process.env.MASTER_PANEL_EMAIL || "master@jielive.local");
-const MASTER_PANEL_PASSWORD = String(process.env.MASTER_PANEL_PASSWORD || "master-change-this");
+const MASTER_PANEL_PASSWORD = String(process.env.MASTER_PANEL_PASSWORD || "admin123");
 const hashPassword = (password) => {
   const salt = crypto.randomBytes(16).toString("hex");
   const digest = crypto.scryptSync(String(password || ""), salt, 32).toString("hex");
