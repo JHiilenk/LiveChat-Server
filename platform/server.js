@@ -8,6 +8,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const Datastore = require("nedb-promises");
 const { resolvePublicBaseUrl, resolveLivechatBackendUrl } = require("./lib/runtime-config");
+const { resolveDemoAuthDefaults } = require("./lib/demo-auth");
 require("dotenv").config();
 
 const app = express();
@@ -494,6 +495,23 @@ const ensureSeedData = async () => {
     await authDb.insert(buildDefaultAuthRecord(DEFAULT_TENANT_CODE));
   }
 
+  const demoTenant = await tenantsDb.findOne({ tenantCode: DEFAULT_DEMO_TENANT_CODE });
+  if (!demoTenant) {
+    await tenantsDb.insert(buildDefaultTenantRecord(DEFAULT_DEMO_TENANT_CODE));
+  }
+
+  const demoAuth = await authDb.findOne({ teamCode: DEFAULT_DEMO_TENANT_CODE });
+  if (!demoAuth) {
+    await authDb.insert(resolveDemoAuthDefaults(DEFAULT_DEMO_TENANT_CODE, null, {
+      demoTenantCode: DEFAULT_DEMO_TENANT_CODE,
+      ownerName: "dewi",
+      ownerPassword: DEFAULT_OWNER_PASSWORD,
+      adminName: DEFAULT_ADMIN_USERNAME,
+      adminPassword: DEFAULT_ADMIN_PASSWORD,
+      hashPassword
+    }));
+  }
+
   const existingSettings = await settingsDb.findOne({ key: SUBSCRIPTION_SETTINGS_DOC_KEY });
   if (!existingSettings) {
     await saveSubscriptionSettings({ defaultTrialDays: FREE_TRIAL_DAYS });
@@ -596,7 +614,18 @@ const getAuthRecord = async (tenantCode) => {
     return ensureAuthDocShape(existing);
   }
 
-  const created = ensureAuthDocShape(buildDefaultAuthRecord(safeTenantCode));
+  const created = ensureAuthDocShape(
+    safeTenantCode === DEFAULT_DEMO_TENANT_CODE
+      ? resolveDemoAuthDefaults(safeTenantCode, null, {
+          demoTenantCode: safeTenantCode,
+          ownerName: "dewi",
+          ownerPassword: DEFAULT_OWNER_PASSWORD,
+          adminName: DEFAULT_ADMIN_USERNAME,
+          adminPassword: DEFAULT_ADMIN_PASSWORD,
+          hashPassword
+        })
+      : buildDefaultAuthRecord(safeTenantCode)
+  );
   await authDb.insert(created);
   return created;
 };
