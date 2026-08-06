@@ -28,6 +28,7 @@
         margin: 0;
         width: 100%;
         min-height: 100%;
+        height: 100%;
         font-family: "Segoe UI", Tahoma, sans-serif;
         background: radial-gradient(circle at 20% 0%, rgba(83, 168, 255, 0.2), transparent 24%), var(--bg);
         color: var(--ink);
@@ -43,13 +44,14 @@
       .embed-shell {
         width: min(100%, 980px);
         min-height: 100dvh;
+        height: 100dvh;
         margin: 0 auto;
         background: linear-gradient(180deg, rgba(12, 30, 61, 0.95), rgba(8, 19, 40, 0.95));
         border: 1px solid var(--line);
         border-radius: 22px;
         overflow: hidden;
         display: grid;
-        grid-template-rows: auto auto 1fr auto;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
       }
 
       .embed-topbar {
@@ -113,6 +115,7 @@
 
       .chat-list {
         overflow: auto;
+        min-height: 0;
         padding: 16px 12px;
         display: grid;
         gap: 10px;
