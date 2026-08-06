@@ -196,6 +196,8 @@
 
   const closePanel = () => {
     panel.classList.add("hidden");
+    setExpanded(false);
+    syncEmbedFrameExpandedState(false);
   };
 
   const setExpanded = (expanded) => {
