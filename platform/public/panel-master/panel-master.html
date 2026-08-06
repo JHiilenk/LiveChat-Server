@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>__PANEL_TITLE__ | __APP_NAME__</title>
+    <meta name="description" content="__PANEL_SUBTITLE__" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/panel-master/panel-master.css" />
+    <script defer src="/panel-master/panel-master.js"></script>
+  </head>
+  <body data-panel-role="__PANEL_ROLE__" data-panel-alias="__PANEL_ALIAS__">
+    <main class="hq-shell">
+      <header class="hq-topbar">
+        <div class="hq-brand">
+          <div class="hq-logo">__PANEL_ALIAS__</div>
+          <div>
+            <h1>__PANEL_TITLE__</h1>
+            <p>__PANEL_SUBTITLE__</p>
+          </div>
+        </div>
+        <div class="hq-links">
+          <a href="/">Public Web</a>
+          <a href="/register">Register</a>
+          <a href="/panel/client">Client Panel</a>
+          <a href="/panel/client1">Client 1</a>
+          <a href="/panel/client2">Client 2</a>
+          <a href="/embed">Embed Surface</a>
+        </div>
+      </header>
+
+      <section class="panel-public-copy">
+        <div class="panel-public-copy-inner">
+          <span class="hq-chip">Panel Master Internal</span>
+          <h2>__PANEL_TITLE__</h2>
+          <p>__PANEL_HINT__</p>
+        </div>
+      </section>
+
+      __PANEL_BODY__
+    </main>
+  </body>
+</html>

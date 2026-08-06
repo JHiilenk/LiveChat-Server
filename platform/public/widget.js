@@ -13,10 +13,16 @@
     return host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "[::1]";
   };
 
-  const buildDefaultChatUrl = (tenantCode = "JIELIVE") => {
+  const buildDefaultChatUrl = (tenantCode = "JIELIVE", widgetId = "", widgetNumber = "1") => {
     const url = new URL("/embed", scriptOrigin);
     url.searchParams.set("livechat", "1");
     url.searchParams.set("tenantCode", tenantCode);
+    if (widgetId) {
+      url.searchParams.set("widgetId", widgetId);
+    }
+    if (widgetNumber) {
+      url.searchParams.set("widgetNumber", widgetNumber);
+    }
     return url.toString();
   };
 
@@ -33,7 +39,9 @@
 
       if (candidateHostIsLocal && !scriptHostIsLocal) {
         const tenantCode = String(candidate.searchParams.get("tenantCode") || "JIELIVE").trim().toUpperCase() || "JIELIVE";
-        return buildDefaultChatUrl(tenantCode);
+        const widgetId = String(currentScript?.dataset?.widgetId || candidate.searchParams.get("widgetId") || "").trim().toUpperCase();
+        const widgetNumber = String(currentScript?.dataset?.widgetNumber || candidate.searchParams.get("widgetNumber") || "1").trim() || "1";
+        return buildDefaultChatUrl(tenantCode, widgetId, widgetNumber);
       }
 
       return candidate.toString();
@@ -42,7 +50,11 @@
     }
   };
 
-  const chatUrl = normalizeChatUrl(currentScript?.dataset?.chatUrl);
+  const chatUrl = normalizeChatUrl(currentScript?.dataset?.chatUrl || buildDefaultChatUrl(
+    String(currentScript?.dataset?.tenantCode || "JIELIVE").trim().toUpperCase() || "JIELIVE",
+    String(currentScript?.dataset?.widgetId || "").trim().toUpperCase(),
+    String(currentScript?.dataset?.widgetNumber || "1").trim() || "1"
+  ));
   const title = String(currentScript?.dataset?.title || "JIELive Live Chat");
   const subtitle = String(currentScript?.dataset?.subtitle || "Tim support siap membantu");
 

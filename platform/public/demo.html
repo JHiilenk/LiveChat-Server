@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>__DEMO_CLIENT_NAME__ | Demo Client Fashion</title>
+    <meta name="description" content="Demo landing client untuk jualan baju distro murah Tangerang dengan widget live chat aktif." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg: #f5efe7;
+        --paper: rgba(255, 255, 255, 0.78);
+        --paper-strong: rgba(255, 255, 255, 0.9);
+        --ink: #1c140f;
+        --muted: #6e584a;
+        --line: rgba(28, 20, 15, 0.12);
+        --accent: #d14f2b;
+        --accent-soft: #f5b15f;
+        --accent-dark: #27150f;
+        --ok: #1e7b58;
+        --shadow: 0 24px 60px rgba(61, 34, 18, 0.16);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "Sora", "Trebuchet MS", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(209, 79, 43, 0.18), transparent 32%),
+          radial-gradient(circle at right center, rgba(245, 177, 95, 0.22), transparent 26%),
+          linear-gradient(180deg, #f7f0e7, var(--bg));
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 22px 0 56px;
+      }
+
+      .topbar,
+      .card,
+      .hero-panel,
+      .offer-panel,
+      .contact-panel {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        backdrop-filter: blur(12px);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar {
+        border-radius: 28px;
+        padding: 16px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+        color: #fff6ef;
+        font-weight: 800;
+      }
+
+      .brand-copy strong,
+      .brand-copy span {
+        display: block;
+      }
+
+      .brand-copy span {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .nav a,
+      .button,
+      .ghost-button {
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 11px 16px;
+        font-weight: 700;
+        border: 1px solid var(--line);
+      }
+
+      .nav a,
+      .ghost-button {
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.66);
+      }
+
+      .button {
+        color: #fff8f2;
+        background: linear-gradient(135deg, var(--accent), #8b2517);
+      }
+
+      .hero {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+        gap: 16px;
+      }
+
+      .hero-panel,
+      .offer-panel,
+      .contact-panel,
+      .card {
+        border-radius: 30px;
+        padding: 24px;
+      }
+
+      .pill {
+        display: inline-flex;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(209, 79, 43, 0.12);
+        color: #8a341c;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      h1 {
+        margin: 14px 0 12px;
+        font-size: clamp(2.6rem, 5.6vw, 5rem);
+        line-height: 0.95;
+        max-width: 10ch;
+      }
+
+      .hero-panel p,
+      .offer-panel p,
+      .contact-panel p,
+      .card p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .hero-actions,
+      .meta-row,
+      .offer-grid,
+      .feature-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .hero-actions { margin-top: 20px; }
+
+      .meta-row { margin-top: 22px; }
+
+      .meta-chip {
+        padding: 11px 14px;
+        border-radius: 18px;
+        background: var(--paper-strong);
+        border: 1px solid var(--line);
+        min-width: 150px;
+      }
+
+      .meta-chip strong,
+      .price-box strong,
+      .card strong {
+        display: block;
+        font-size: 1.08rem;
+      }
+
+      .visual-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .lookbook {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .lookbook-card {
+        min-height: 180px;
+        border-radius: 24px;
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+        color: #fff6ef;
+        background: linear-gradient(140deg, rgba(39, 21, 15, 0.95), rgba(209, 79, 43, 0.88));
+      }
+
+      .lookbook-card.alt {
+        background: linear-gradient(140deg, rgba(50, 39, 32, 0.95), rgba(245, 177, 95, 0.88));
+        color: var(--accent-dark);
+      }
+
+      .lookbook-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -40px -40px auto;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .section-grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 16px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .badge {
+        display: inline-flex;
+        margin-bottom: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #7f2f19;
+        background: rgba(209, 79, 43, 0.12);
+        border-radius: 999px;
+        padding: 8px 11px;
+      }
+
+      .offer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .price-box {
+        border-radius: 24px;
+        background: var(--paper-strong);
+        border: 1px solid var(--line);
+        padding: 18px;
+      }
+
+      .price-box .price {
+        font-size: 2rem;
+        color: var(--accent);
+        font-weight: 800;
+        margin: 10px 0 6px;
+      }
+
+      .contact-panel {
+        background: linear-gradient(160deg, rgba(28, 20, 15, 0.94), rgba(80, 35, 19, 0.96));
+        color: #fff4ea;
+      }
+
+      .contact-panel p,
+      .contact-panel li { color: rgba(255, 244, 234, 0.78); }
+
+      .contact-list {
+        margin: 18px 0 0;
+        padding-left: 18px;
+        line-height: 1.8;
+      }
+
+      .footer {
+        margin-top: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 940px) {
+        .hero,
+        .section-grid,
+        .feature-grid,
+        .offer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .lookbook {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100%, calc(100% - 16px));
+          padding-top: 12px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        h1 {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">DT</div>
+          <div class="brand-copy">
+            <strong>__DEMO_BRAND_NAME__</strong>
+            <span>Demo landing client fashion streetwear harga ramah</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="/">Web</a>
+          <a href="/register">Register</a>
+          <a href="/panel/client">Client Panel</a>
+          <a href="/embed">Widget</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <article class="hero-panel">
+          <span class="pill">Demo Client Landing</span>
+          <h1>__DEMO_HEADLINE__</h1>
+          <p>__DEMO_INTRO__</p>
+          <div class="hero-actions">
+            <a class="button" href="#katalog">Lihat Katalog</a>
+            <a class="ghost-button" href="#chat-demo">Coba Live Chat</a>
+          </div>
+          <div class="meta-row">
+            <div class="meta-chip">
+              <strong>COD Tangerang</strong>
+              <span>Area Cikokol, Karawaci, dan Cipondoh</span>
+            </div>
+            <div class="meta-chip">
+              <strong>Harga grosir</strong>
+              <span>Mulai 3 pcs untuk reseller</span>
+            </div>
+            <div class="meta-chip">
+              <strong>Live chat aktif</strong>
+              <span>Balas cepat untuk tanya ukuran</span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="visual-stack">
+          <div class="lookbook">
+            <article class="lookbook-card">
+              <strong>Kaos combed premium</strong>
+              <p>Warna netral, sablon clean, cocok untuk distro lokal dan komunitas kampus.</p>
+            </article>
+            <article class="lookbook-card alt">
+              <strong>Hoodie best seller</strong>
+              <p>Potongan boxy fit dengan pilihan warna hitam, cream, dan army.</p>
+            </article>
+          </div>
+          <section class="offer-panel" id="chat-demo">
+            <span class="badge">Live support</span>
+            <h2 style="margin: 0 0 10px;">Tim admin siap bantu via widget</h2>
+            <p>__DEMO_SUPPORT_COPY__</p>
+            <div class="meta-row">
+              <div class="meta-chip">
+                <strong>Respons cepat</strong>
+                <span>Demo sinkron ke panel client</span>
+              </div>
+              <div class="meta-chip">
+                <strong>Tenant</strong>
+                <span>__DEMO_TENANT_CODE__</span>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="section-grid" id="katalog">
+        <section class="offer-panel">
+          <span class="badge">Katalog demo</span>
+          <h2 style="margin: 0 0 12px;">Pilihan paket paling sering ditanya buyer</h2>
+          <div class="offer-grid">
+            <article class="price-box">
+              <strong>__DEMO_PRICE_1_TITLE__</strong>
+              <div class="price">Rp79k</div>
+              <p>__DEMO_PRICE_1_COPY__</p>
+            </article>
+            <article class="price-box">
+              <strong>__DEMO_PRICE_2_TITLE__</strong>
+              <div class="price">Rp210k</div>
+              <p>__DEMO_PRICE_2_COPY__</p>
+            </article>
+            <article class="price-box">
+              <strong>__DEMO_PRICE_3_TITLE__</strong>
+              <div class="price">Rp135k</div>
+              <p>__DEMO_PRICE_3_COPY__</p>
+            </article>
+            <article class="price-box">
+              <strong>__DEMO_PRICE_4_TITLE__</strong>
+              <div class="price">Custom</div>
+              <p>__DEMO_PRICE_4_COPY__</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="contact-panel">
+          <span class="badge" style="background: rgba(255,255,255,0.12); color: #fff4ea;">Kenapa demo ini penting</span>
+          <h2 style="margin: 0 0 12px;">Landing client + widget + panel jadi satu alur</h2>
+          <p>__DEMO_CONTACT_COPY__</p>
+          <ul class="contact-list">
+            <li>Pertanyaan stok dan size masuk ke inbox tenant yang sama.</li>
+            <li>Jika langganan tenant kedaluwarsa, widget tetap tampil tetapi pengiriman pesan akan diblokir oleh sistem.</li>
+            <li>Perpanjangan akses dilakukan dari panel master tanpa ubah landing client.</li>
+          </ul>
+        </section>
+      </section>
+
+      <section class="feature-grid" style="margin-top: 16px;">
+        <article class="card">
+          <span class="badge">Produk</span>
+          <strong>Streetwear lokal</strong>
+          <p>Visual dan copy disusun untuk kebutuhan toko distro murah dengan fokus obrolan cepat ke admin.</p>
+        </article>
+        <article class="card">
+          <span class="badge">Widget</span>
+          <strong>Chat siap demo</strong>
+          <p>Calon pembeli bisa langsung mulai percakapan dari halaman ini tanpa setup tambahan.</p>
+        </article>
+        <article class="card">
+          <span class="badge">Operasional</span>
+          <strong>Sinkron ke panel</strong>
+          <p>Status langganan, inbox, dan identitas widget tetap dikontrol dari sistem tenant di panel.</p>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <small>Demo client landing • __DEMO_BRAND_NAME__</small>
+        <small>Widget tenant: __DEMO_TENANT_CODE__</small>
+      </footer>
+    </main>
+
+    <script
+      src="/widget.js?v=demo-client-fashion"
+      data-chat-url="__DEMO_WIDGET_CHAT_URL__"
+      data-title="__DEMO_WIDGET_TITLE__"
+      data-subtitle="__DEMO_WIDGET_SUBTITLE__"
+      defer
+    ></script>
+  </body>
+</html>

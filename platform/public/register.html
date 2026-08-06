@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Register Client | __APP_NAME__</title>
+    <meta name="description" content="Landing pendaftaran client untuk __APP_NAME__. Buat tenant baru, dapatkan widget otomatis, dan langsung masuk ke panel client." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .register-shell {
+        position: relative;
+        width: min(var(--max-width), calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 48px;
+      }
+
+      .register-hero {
+        margin-top: 22px;
+        border-radius: var(--radius-xl);
+        padding: 34px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(330px, 0.95fr);
+        gap: 24px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(14, 26, 47, 0.96), rgba(10, 20, 36, 0.88));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .register-hero h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 5vw, 4.8rem);
+        line-height: 1.02;
+        max-width: 12ch;
+      }
+
+      .register-hero p,
+      .register-card p,
+      .register-summary,
+      .register-status {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .register-card,
+      .register-note,
+      .register-summary-card,
+      .register-steps {
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(11, 22, 39, 0.96), rgba(9, 18, 32, 0.9));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+        border-radius: var(--radius-lg);
+      }
+
+      .register-card {
+        padding: 22px;
+      }
+
+      .register-form {
+        display: grid;
+        gap: 14px;
+        margin-top: 16px;
+      }
+
+      .register-form label {
+        display: grid;
+        gap: 8px;
+        font-weight: 600;
+      }
+
+      .register-form input {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border-radius: 14px;
+        padding: 14px 15px;
+        outline: none;
+      }
+
+      .register-form input:focus {
+        border-color: rgba(105, 167, 255, 0.7);
+        box-shadow: 0 0 0 3px rgba(105, 167, 255, 0.14);
+      }
+
+      .register-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .register-actions .button,
+      .register-actions .ghost-button {
+        border-radius: 999px;
+      }
+
+      .register-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .register-summary-card,
+      .register-note,
+      .register-steps {
+        padding: 20px;
+      }
+
+      .register-summary-card code,
+      .register-note code {
+        color: #d7e6ff;
+      }
+
+      .register-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .register-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-size: 0.92rem;
+      }
+
+      .register-preview {
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .register-steps ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .register-steps li + li {
+        margin-top: 10px;
+      }
+
+      .register-footer {
+        margin-top: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 920px) {
+        .register-hero {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .register-shell {
+          width: min(var(--max-width), calc(100% - 20px));
+        }
+
+        .register-hero {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body data-surface="register" data-api-prefix="__API_PREFIX__">
+    <main class="register-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">RG</div>
+          <div class="brand-copy">
+            <strong data-app-name>__APP_NAME__</strong>
+            <span>Registrasi client langsung connect</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="/">Web</a>
+          <a href="/admin">Admin</a>
+          <a href="/panel/client">Client Panel</a>
+        </nav>
+      </header>
+
+      <section class="register-hero">
+        <div>
+          <div class="pill">__APP_TAGLINE__</div>
+          <h1>Daftarkan client baru dan langsung masuk ke panel.</h1>
+          <p>Landing ini membuat tenant baru, username client, widget identity otomatis, lalu mengirim kamu langsung ke Client Panel dengan sesi siap pakai.</p>
+          <div class="register-pills">
+            <span class="register-pill">Tenant code otomatis</span>
+            <span class="register-pill">ID sistem otomatis</span>
+            <span class="register-pill">Widget langsung aktif</span>
+          </div>
+
+          <div class="register-note" style="margin-top: 18px;">
+            <strong>Alur cepat</strong>
+            <p style="margin: 10px 0 0;">Isi nama client, username client, dan password. Sistem akan membuat tenant unik, menyimpan auth, dan menyiapkan link widget dan panel client secara otomatis.</p>
+          </div>
+
+          <div class="register-steps" style="margin-top: 18px;">
+            <strong>Yang disiapkan sistem</strong>
+            <ul>
+              <li>Tenant code unik.</li>
+              <li>Username client sebagai identitas login.</li>
+              <li>Widget ID dan number unik untuk jalur inbox.</li>
+              <li>Sesi login client agar bisa langsung connect ke panel.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="register-grid">
+          <section class="register-card">
+            <span class="tag">Client Registration</span>
+            <h2 style="margin: 12px 0 0;">Buat akun client baru</h2>
+            <p style="margin-top: 10px;">Form ini sudah disesuaikan dengan sistem multi-client. Client cukup isi username dan password, lalu data otomatis tersambung ke panel master dan widget.</p>
+
+            <form class="register-form" data-register-form>
+              <label>Nama Client
+                <input type="text" name="tenantName" placeholder="Client A" required />
+              </label>
+              <label>Username Client
+                <input type="text" name="userName" placeholder="clienta" required />
+              </label>
+              <label>Password Client
+                <input type="password" name="password" placeholder="••••••••" required />
+              </label>
+              <button class="button" type="submit">Daftar dan Connect</button>
+            </form>
+
+            <div class="register-actions">
+              <a class="ghost-button" href="/panel/client">Buka Client Panel</a>
+              <a class="ghost-button" href="/panel/master">Buka Master Internal</a>
+            </div>
+
+            <p class="register-status" data-register-status style="margin-top: 14px;">Belum ada registrasi.</p>
+          </section>
+
+          <section class="register-summary-card">
+            <h3 style="margin: 0 0 12px;">Hasil registrasi</h3>
+            <div class="register-summary" data-register-summary>Belum ada client yang didaftarkan.</div>
+            <div class="register-preview" data-register-snippet>&lt;script src="__PUBLIC_BASE_URL__/widget.js" data-chat-url="__PUBLIC_BASE_URL__/embed?livechat=1&amp;tenantCode=__DEFAULT_TENANT_CODE__" data-title="__APP_NAME__" data-subtitle="Live support aktif"&gt;&lt;/script&gt;</div>
+          </section>
+        </div>
+      </section>
+
+      <footer class="register-footer">
+        <small>__APP_NAME__ • register flow</small>
+        <small>Tenant default: __DEFAULT_TENANT_CODE__ • Team __DEFAULT_TEAM_CODE__ • Channel __DEFAULT_CHANNEL_CODE__</small>
+      </footer>
+    </main>
+
+    <script>
+      const apiPrefix = "__API_PREFIX__";
+      const form = document.querySelector("[data-register-form]");
+      const statusNode = document.querySelector("[data-register-status]");
+      const summaryNode = document.querySelector("[data-register-summary]");
+      const snippetNode = document.querySelector("[data-register-snippet]");
+
+      const escapeHtml = (value) => String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+      const renderSnippet = (data) => {
+        const widget = data?.widget || {};
+        if (!widget?.snippet) {
+          return "";
+        }
+
+        return escapeHtml(widget.snippet)
+          .replace(/\n/g, "<br />");
+      };
+
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (statusNode) {
+          statusNode.textContent = "Memproses registrasi client...";
+        }
+
+        try {
+          const formData = new FormData(form);
+          const payload = {
+            tenantName: String(formData.get("tenantName") || ""),
+            userName: String(formData.get("userName") || ""),
+            password: String(formData.get("password") || "")
+          };
+
+          const response = await fetch(`${apiPrefix}/v1/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data?.message || `HTTP ${response.status}`);
+          }
+
+          sessionStorage.setItem("JIELIVE_PLATFORM_SESSION", data?.session?.token || "");
+          if (statusNode) {
+            statusNode.textContent = `Client ${data?.tenant?.tenantName || payload.tenantName} berhasil didaftarkan. Mengalihkan ke panel client...`;
+          }
+
+          if (summaryNode) {
+            summaryNode.innerHTML = `
+              <div><strong>Tenant:</strong> ${escapeHtml(data?.tenant?.tenantCode || "-")}</div>
+              <div><strong>Username:</strong> ${escapeHtml(data?.auth?.ownerName || payload.userName)}</div>
+              <div><strong>Trial Gratis:</strong> ${escapeHtml(data?.tenant?.subscriptionTrialDays || data?.subscriptionSettings?.defaultTrialDays || 30)} hari</div>
+              <div><strong>Berakhir:</strong> ${escapeHtml(data?.tenant?.subscriptionExpiresAt || "-")}</div>
+              <div><strong>ID Sistem:</strong> ${escapeHtml(data?.widget?.widgetId || "-")}</div>
+              <div><strong>Nomor Sistem:</strong> ${escapeHtml(data?.widget?.widgetNumber || "-")}</div>
+              <div><strong>Panel:</strong> /panel/client</div>
+            `;
+          }
+
+          if (snippetNode && data?.widget?.snippet) {
+            snippetNode.textContent = data.widget.snippet;
+          }
+
+          window.setTimeout(() => {
+            window.location.assign("/panel/client");
+          }, 900);
+        } catch (error) {
+          if (statusNode) {
+            statusNode.textContent = `Registrasi gagal: ${error.message}`;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

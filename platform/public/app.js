@@ -46,7 +46,7 @@ const hydrateStatus = async () => {
 
     const data = await statusResponse.json();
     const bootstrap = await bootstrapResponse.json();
-    updateText("[data-app-name]", data.service || "JIELive Control Panel");
+    updateText("[data-app-name]", data.service || "JIELive Admin Panel");
     updateText("[data-surface-count]", String((data.routes || []).length));
     updateText("[data-tenant-code]", data.defaultTenantCode || "JIELIVE");
     updateText("[data-team-code]", data.defaultTeamCode || "GENERAL");

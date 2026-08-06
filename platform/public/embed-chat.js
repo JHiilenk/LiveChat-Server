@@ -3,10 +3,14 @@
   const tenantCode = String(params.get("tenantCode") || document.body.dataset.defaultTenant || "JIELIVE").trim().toUpperCase();
   const isEmbedded = window.self !== window.top || params.get("embed") === "1" || params.get("livechat") === "1";
   const appName = document.body.dataset.appName || "JIELive";
+  const widgetId = String(params.get("widgetId") || document.body.dataset.widgetId || tenantCode).trim().toUpperCase();
+  const widgetNumber = String(params.get("widgetNumber") || document.body.dataset.widgetNumber || "1").trim();
   const storageKey = `JIELIVE_EMBED_CHAT_${tenantCode}`;
   const visitorNameKey = `JIELIVE_EMBED_VISITOR_${tenantCode}`;
 
   document.body.dataset.embedded = isEmbedded ? "true" : "false";
+  document.body.dataset.widgetId = widgetId;
+  document.body.dataset.widgetNumber = widgetNumber;
 
   const titleNode = document.querySelector("[data-chat-title]");
   const subtitleNode = document.querySelector("[data-chat-subtitle]");
@@ -134,6 +138,8 @@
   const sendInboxMessage = async (text) => {
     const payload = {
       tenantCode,
+      widgetId,
+      widgetNumber,
       visitorName,
       message: text,
       sourceUrl: window.location.href

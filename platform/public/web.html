@@ -21,6 +21,7 @@
         </div>
         <nav class="nav">
           <a href="/admin">Admin</a>
+          <a href="/register">Register</a>
           <a href="/embed">Embed</a>
           <a href="__PUBLIC_BASE_URL____API_PREFIX__/v1/status">API</a>
         </nav>
@@ -32,7 +33,8 @@
           <h1>JIELive untuk web publik, admin, embed, dan API.</h1>
           <p>Scaffold ini memisahkan surface frontend dan backend tanpa menyentuh server lama. Cocok untuk subdomain berbeda, deploy bertahap, dan kontrol tenant per client.</p>
           <div class="hero-actions">
-            <a class="button" href="/admin">Buka Control Panel</a>
+            <a class="button" href="/admin">Buka Admin Panel</a>
+            <a class="ghost-button" href="/register">Daftar Client</a>
             <a class="ghost-button" href="/embed">Lihat Embed Widget</a>
           </div>
         </div>
@@ -64,6 +66,7 @@
             <div class="surface-switch">
               <a href="/">web</a>
               <a href="/admin">admin</a>
+              <a href="/register">register</a>
               <a href="/embed">embed</a>
               <a href="/healthz">health</a>
             </div>
@@ -94,9 +97,9 @@
         <p>Gunakan snippet di bawah ini untuk uji cepat integrasi widget di website. Untuk pengembangan di domain ini, script dan chat URL otomatis diarahkan ke service public.</p>
         <div class="hero-actions">
           <button class="button" type="button" data-copy-widget-snippet>Copy snippet</button>
-          <a class="ghost-button" href="/panel/client">Buka Client Console</a>
+          <a class="ghost-button" href="/panel/client">Buka Client Panel</a>
         </div>
-        <pre class="codebox" data-widget-snippet>&lt;script src="https://jiechat.up.railway.app/widget.js" data-chat-url="https://jiechat.up.railway.app/embed?livechat=1&amp;tenantCode=JIELIVE" data-title="JIELive Control Panel" data-subtitle="GENERAL • MAIN"&gt;&lt;/script&gt;</pre>
+        <pre class="codebox" data-widget-snippet>&lt;script src="https://jiechat.up.railway.app/widget.js" data-chat-url="https://jiechat.up.railway.app/embed?livechat=1&amp;tenantCode=JIELIVE" data-title="JIELive Widget" data-subtitle="GENERAL • MAIN"&gt;&lt;/script&gt;</pre>
       </section>
 
       <section class="section panel">
