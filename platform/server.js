@@ -7,6 +7,7 @@ const cors = require("cors");
 const compression = require("compression");
 const morgan = require("morgan");
 const Datastore = require("nedb-promises");
+const { resolvePublicBaseUrl, resolveLivechatBackendUrl } = require("./lib/runtime-config");
 require("dotenv").config();
 
 const app = express();
@@ -16,8 +17,8 @@ const dataDirectory = path.join(__dirname, "data");
 const PORT = Number(process.env.PORT) || 4001;
 const APP_NAME = process.env.APP_NAME || "JIELive Control Panel";
 const APP_TAGLINE = process.env.APP_TAGLINE || "Frontend, admin, embed, dan API untuk deployment terpisah.";
-const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const DEFAULT_LIVECHAT_BACKEND_URL = "http://127.0.0.1:4000";
+const PUBLIC_BASE_URL = resolvePublicBaseUrl(process.env, PORT).replace(/\/$/, "");
 const LIVECHAT_BACKEND_URL_INPUT = String(process.env.LIVECHAT_BACKEND_URL || DEFAULT_LIVECHAT_BACKEND_URL).replace(/\/$/, "");
 const DEFAULT_TENANT_CODE = process.env.DEFAULT_TENANT_CODE || "JIELIVE";
 const DEFAULT_TEAM_CODE = process.env.DEFAULT_TEAM_CODE || "GENERAL";
@@ -47,7 +48,11 @@ const getSafeAbsoluteUrl = (value, fallback, warningLabel) => {
   }
 };
 
-const LIVECHAT_BACKEND_URL = getSafeAbsoluteUrl(LIVECHAT_BACKEND_URL_INPUT, DEFAULT_LIVECHAT_BACKEND_URL, "LIVECHAT_BACKEND_URL");
+const LIVECHAT_BACKEND_URL = resolveLivechatBackendUrl(
+  process.env,
+  PUBLIC_BASE_URL,
+  DEFAULT_LIVECHAT_BACKEND_URL
+);
 
 const buildRuntimeWarnings = () => {
   const warnings = [...runtimeWarnings];
