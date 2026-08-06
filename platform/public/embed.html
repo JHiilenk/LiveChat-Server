@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>__APP_NAME__ | Embed</title>
+    <meta name="description" content="Embed surface for JIELive chat widget." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body data-surface="embed" data-api-prefix="__API_PREFIX__">
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">EM</div>
+          <div class="brand-copy">
+            <strong>Embed preview</strong>
+            <span>Widget surface untuk website client</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="/">Web</a>
+          <a href="/admin">Admin</a>
+          <a href="/api/v1/status">API</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <div class="pill">Iframe / widget ready</div>
+          <h1>Surface embed yang ringan dan terpisah.</h1>
+          <p>Di sini kamu bisa pasang snippet, iframe, atau launcher widget untuk live chat tanpa mengganggu portal utama.</p>
+          <div class="panel" style="margin-top:18px;">
+            <h2>Real backend links</h2>
+            <p><a href="/widget.js">/widget.js</a> dan <a href="/livechat-widget.js">/livechat-widget.js</a> diproxy ke backend livechat lama agar embed tetap memakai engine chat yang sama.</p>
+            <p><a href="/chat/embed">/chat/embed</a> membuka response backend embed untuk validasi koneksi.</p>
+          </div>
+          <div class="hero-actions">
+            <a class="button" href="/api/v1/status">Inspect JSON</a>
+            <a class="ghost-button" href="/healthz">Health</a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Embed snippet</h2>
+          <div class="codebox" data-widget-snippet>&lt;script src="https://embed.example.com/widget.js" defer&gt;&lt;/script&gt;<br />&lt;div id="jielive-widget" data-client="__DEFAULT_TENANT_CODE__"&gt;&lt;/div&gt;</div>
+          <div class="hero-actions" style="margin-top:12px;">
+            <button class="button" type="button" data-copy-widget-snippet>Copy snippet</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-3">
+        <article class="card">
+          <div class="badge">Preview</div>
+          <h3>Launcher</h3>
+          <p>Bagian ini dapat diisi dengan UI launcher, bubble, atau iframe chat yang terisolasi dari panel admin.</p>
+        </article>
+        <article class="card">
+          <div class="badge">Responsive</div>
+          <h3>Mobile first</h3>
+          <p>Layout embed tetap aman di mobile agar bisa disisipkan ke halaman client tanpa layout shift besar.</p>
+        </article>
+        <article class="card">
+          <div class="badge">Origin</div>
+          <h3>Cross-domain</h3>
+          <p>Surface ini bisa diarahkan ke subdomain tersendiri supaya aturan CORS dan CSP lebih mudah dikontrol.</p>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <small>Default tenant <span data-tenant-code>__DEFAULT_TENANT_CODE__</span></small>
+        <small>Widget URL: <span data-widget-url>-</span></small>
+      </footer>
+    </main>
+  </body>
+</html>
