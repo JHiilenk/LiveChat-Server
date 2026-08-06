@@ -1132,7 +1132,7 @@ app.get("/api/v1/status", (req, res) => {
     service: APP_NAME,
     surface: resolveSurfaceFromHost(req.hostname),
     host: req.hostname,
-    routes: ["/", "/admin", "/panel/master", "/panel/client", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview"],
+    routes: ["/", "/admin", "/panel/master", "/panel/client", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview", "/api/v1/client/inbox", "/api/v1/inbox/message"],
     defaultTenantCode: DEFAULT_TENANT_CODE,
     defaultTeamCode: DEFAULT_TEAM_CODE,
     defaultChannelCode: DEFAULT_CHANNEL_CODE,
