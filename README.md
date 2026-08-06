@@ -11,8 +11,8 @@ Versi ini adalah project terpisah untuk deploy live chat saja, tanpa landing mar
 
 ## Struktur Penting
 
-- `src/server/server.js` : server live chat utama
-- `src/server/routes/publicSite.js` : route chat-only untuk app/login/daftar/embed
+- `app/server.js` : server live chat utama
+- `app/routes/publicSite.js` : route chat-only untuk app/login/daftar/embed
 - `public/pages/index.html` : UI aplikasi chat
 - `public/assets/js/app.js` : client chat realtime
 - `public/assets/js/widget.js` : widget embed

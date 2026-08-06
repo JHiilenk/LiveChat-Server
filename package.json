@@ -2,10 +2,10 @@
   "name": "server-livechat",
   "version": "1.0.0",
   "description": "Standalone live chat server deployment for client-specific hosting.",
-  "main": "src/server/server.js",
+  "main": "app/server.js",
   "scripts": {
-    "dev": "nodemon src/server/server.js",
-    "start": "node src/server/server.js",
+    "dev": "nodemon app/server.js",
+    "start": "node app/server.js",
     "test": "echo \"No tests yet\""
   },
   "keywords": [

@@ -476,7 +476,6 @@ const AUTO_CROWD_THREAD_ENDINGS = [
   "Setuju, yang penting obrolannya tetap ringan dan jelas."
 ];
 
-const pageQuery = new URLSearchParams(window.location.search);
 const isEmbedMode = pageQuery.has("embed");
 const isLiveChatEmbed = pageQuery.has("livechat");
 if (isEmbedMode) {

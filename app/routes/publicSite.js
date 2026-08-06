@@ -13,8 +13,10 @@ const registerPublicSiteRoutes = ({
   const pageDirectory = path.join(publicDirectory, "pages");
   const assetDirectory = path.join(publicDirectory, "assets");
 
-  const indexTemplatePath = path.join(pageDirectory, "index.html");
-  const indexTemplate = fs.readFileSync(indexTemplatePath, "utf8");
+  const homeTemplatePath = path.join(pageDirectory, "home.html");
+  const appTemplatePath = path.join(pageDirectory, "app.html");
+  const homeTemplate = fs.readFileSync(homeTemplatePath, "utf8");
+  const appTemplate = fs.readFileSync(appTemplatePath, "utf8");
 
   const buildSeoJsonLd = ({ title, description, canonicalUrl, schemas = [] }) => JSON.stringify({
     "@context": "https://schema.org",
@@ -37,7 +39,7 @@ const registerPublicSiteRoutes = ({
     ]
   });
 
-  const renderSeoPage = (res, meta, options = {}) => {
+  const renderSeoPage = (res, meta, options = {}, template = appTemplate) => {
     const title = String(meta.title || `${appName} Live Chat`);
     const description = String(meta.description || appDescription);
     const canonicalUrl = String(meta.canonicalUrl || publicBaseUrl);
@@ -45,7 +47,7 @@ const registerPublicSiteRoutes = ({
     const ogImage = String(meta.ogImage || `${publicBaseUrl}/social-preview.svg`);
     const bodyClass = String(meta.bodyClass || "route-app");
     const schemas = Array.isArray(meta.schemas) ? meta.schemas : [];
-    const html = indexTemplate
+    const html = template
       .replaceAll("__SEO_TITLE__", title)
       .replaceAll("__SEO_DESCRIPTION__", description)
       .replaceAll("__SEO_ROBOTS__", robots)
@@ -117,7 +119,7 @@ const registerPublicSiteRoutes = ({
       title: `${appName} | Live Chat Server`,
       description: appDescription,
       canonicalUrl: `${publicBaseUrl}/`,
-      bodyClass: "route-app",
+      bodyClass: "route-home",
       schemas: [
         {
           "@type": "Organization",
@@ -127,7 +129,7 @@ const registerPublicSiteRoutes = ({
           sameAs: [publicBaseUrl]
         },
       ]
-    });
+    }, {}, homeTemplate);
   });
 
   app.get(["/app", "/app/"], (_req, res) => {
@@ -137,7 +139,7 @@ const registerPublicSiteRoutes = ({
       canonicalUrl: `${publicBaseUrl}/app`,
       robots: "noindex,nofollow",
       bodyClass: "route-app"
-    });
+    }, {}, appTemplate);
   });
 
   app.get(["/admin", "/admin/login", "/admin/panel", "/admin/dashboard", "/admin/settings", "/admin/settings/"], (req, res) => {
