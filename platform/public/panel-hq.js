@@ -15,6 +15,15 @@ const setHtml = (selector, value) => {
   }
 };
 
+const escapeHtml = (value) => String(value ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;");
+
+let currentClientTenantCode = "";
+
 const getSessionToken = () => sessionStorage.getItem("JIELIVE_PLATFORM_SESSION");
 const setSessionToken = (token) => sessionStorage.setItem("JIELIVE_PLATFORM_SESSION", token);
 
@@ -41,6 +50,29 @@ const renderTenantRows = (tenants = []) => {
       <td>${tenant.backendBaseUrl}</td>
     </tr>
   `).join("");
+};
+
+const renderInboxRows = (inbox = []) => {
+  if (!Array.isArray(inbox) || inbox.length === 0) {
+    return "<tr><td colspan=\"4\">Belum ada pesan customer.</td></tr>";
+  }
+
+  return inbox.map((entry) => {
+    const createdAt = entry?.createdAt ? new Date(entry.createdAt).toLocaleString("id-ID") : "-";
+    const source = String(entry?.sourceUrl || "").trim();
+    const sourceCell = source
+      ? `<a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source)}</a>`
+      : "-";
+
+    return `
+      <tr>
+        <td>${escapeHtml(createdAt)}</td>
+        <td>${escapeHtml(entry?.visitorName || "Guest")}</td>
+        <td>${escapeHtml(entry?.message || "")}</td>
+        <td>${sourceCell}</td>
+      </tr>
+    `;
+  }).join("");
 };
 
 const hydrateMasterOverview = async () => {
@@ -144,8 +176,26 @@ const hydrateClientOverview = async (tenantCode = "") => {
     setText("[data-client-admin-names]", (data?.auth?.adminNames || []).join(", ") || "-");
     setText("[data-client-operator-names]", (data?.auth?.operatorNames || []).join(", ") || "-");
     setText("[data-client-snippet]", data?.widget?.snippet || "-");
+    currentClientTenantCode = String(data?.tenant?.tenantCode || tenantCode || "").trim().toUpperCase();
+    await hydrateClientInbox(currentClientTenantCode);
   } catch (error) {
     setText("[data-client-snippet]", error.message);
+  }
+};
+
+const hydrateClientInbox = async (tenantCode = "") => {
+  try {
+    const safeTenantCode = String(tenantCode || currentClientTenantCode || "").trim().toUpperCase();
+    const suffix = safeTenantCode ? `?tenantCode=${encodeURIComponent(safeTenantCode)}&limit=80` : "?limit=80";
+    const response = await authedFetch(`${apiPrefix}/v1/client/inbox${suffix}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.message || `HTTP ${response.status}`);
+    }
+
+    setHtml("[data-client-inbox-rows]", renderInboxRows(data?.inbox || []));
+  } catch (error) {
+    setHtml("[data-client-inbox-rows]", `<tr><td colspan=\"4\">${escapeHtml(error.message)}</td></tr>`);
   }
 };
 
@@ -216,6 +266,17 @@ const bindSnippetCopy = () => {
   });
 };
 
+const bindClientInboxRefresh = () => {
+  const button = query("[data-client-refresh-inbox]");
+  if (!button) {
+    return;
+  }
+
+  button.addEventListener("click", async () => {
+    await hydrateClientInbox(currentClientTenantCode);
+  });
+};
+
 const bootstrapPage = () => {
   const role = document.body.dataset.panelRole;
   if (role === "master") {
@@ -228,6 +289,7 @@ const bootstrapPage = () => {
   if (role === "client") {
     bindClientLogin();
     bindSnippetCopy();
+    bindClientInboxRefresh();
     hydrateClientOverview();
   }
 };

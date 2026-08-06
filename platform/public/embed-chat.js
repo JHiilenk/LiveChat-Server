@@ -4,6 +4,7 @@
   const isEmbedded = window.self !== window.top || params.get("embed") === "1" || params.get("livechat") === "1";
   const appName = document.body.dataset.appName || "JIELive";
   const storageKey = `JIELIVE_EMBED_CHAT_${tenantCode}`;
+  const visitorNameKey = `JIELIVE_EMBED_VISITOR_${tenantCode}`;
 
   document.body.dataset.embedded = isEmbedded ? "true" : "false";
 
@@ -27,6 +28,27 @@
   }
 
   const nowClock = () => new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  const getVisitorName = () => {
+    try {
+      const saved = String(localStorage.getItem(visitorNameKey) || "").trim();
+      if (saved) {
+        return saved;
+      }
+    } catch {
+      // Ignore storage read failures.
+    }
+
+    const generated = `Guest-${Math.floor(1000 + Math.random() * 9000)}`;
+    try {
+      localStorage.setItem(visitorNameKey, generated);
+    } catch {
+      // Ignore storage write failures.
+    }
+    return generated;
+  };
+
+  const visitorName = getVisitorName();
 
   const loadMessages = () => {
     try {
@@ -109,6 +131,25 @@
     }, 480);
   };
 
+  const sendInboxMessage = async (text) => {
+    const payload = {
+      tenantCode,
+      visitorName,
+      message: text,
+      sourceUrl: window.location.href
+    };
+
+    try {
+      await fetch("/api/v1/inbox/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      // Keep local chat UX responsive even when inbox API fails.
+    }
+  };
+
   const submitMessage = () => {
     const text = String(inputNode?.value || "").trim();
     if (!text) {
@@ -116,6 +157,7 @@
     }
 
     appendMessage(state, "me", text);
+    sendInboxMessage(text);
     if (inputNode) {
       inputNode.value = "";
       inputNode.focus();

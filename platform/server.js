@@ -76,9 +76,11 @@ fs.mkdirSync(dataDirectory, { recursive: true });
 const tenantsDb = Datastore.create({ filename: path.join(dataDirectory, "tenants.db"), autoload: true });
 const authDb = Datastore.create({ filename: path.join(dataDirectory, "tenant-auth.db"), autoload: true });
 const sessionsDb = Datastore.create({ filename: path.join(dataDirectory, "platform-sessions.db"), autoload: true });
+const inboxDb = Datastore.create({ filename: path.join(dataDirectory, "inbox-messages.db"), autoload: true });
 const loginAttemptStore = new Map();
 
 const sanitizeName = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 48);
+const sanitizeCustomerMessage = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 1200);
 const sanitizeCode = (value, fallback) => {
   const code = String(value || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
   return code || fallback;
@@ -945,6 +947,73 @@ app.get("/api/v1/widget-config", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat widget config: ${error.message}` });
+  }
+});
+
+app.post("/api/v1/inbox/message", async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.body?.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const visitorName = sanitizeName(req.body?.visitorName || "Guest") || "Guest";
+    const message = sanitizeCustomerMessage(req.body?.message || "");
+    const sourceUrl = String(req.body?.sourceUrl || "").trim().slice(0, 500);
+
+    if (!message) {
+      res.status(400).json({ ok: false, message: "Pesan customer tidak boleh kosong." });
+      return;
+    }
+
+    const tenant = await getTenantRecord(tenantCode);
+    const messageId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString("hex");
+    const now = nowIso();
+
+    const saved = await inboxDb.insert({
+      messageId,
+      tenantCode: tenant.tenantCode,
+      visitorName,
+      message,
+      sourceUrl,
+      status: "new",
+      createdAt: now,
+      updatedAt: now
+    });
+
+    res.json({
+      ok: true,
+      inbox: {
+        messageId: saved.messageId,
+        tenantCode: saved.tenantCode,
+        visitorName: saved.visitorName,
+        message: saved.message,
+        sourceUrl: saved.sourceUrl,
+        status: saved.status,
+        createdAt: saved.createdAt
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal menyimpan pesan inbox: ${error.message}` });
+  }
+});
+
+app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.query?.tenantCode || req.platformSession.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const limit = Math.min(Math.max(Number(req.query?.limit || 50), 1), 200);
+    const docs = await inboxDb.find({ tenantCode }).sort({ createdAt: -1 }).limit(limit).exec();
+
+    res.json({
+      ok: true,
+      tenantCode,
+      inbox: docs.map((doc) => ({
+        messageId: doc.messageId,
+        visitorName: doc.visitorName,
+        message: doc.message,
+        sourceUrl: doc.sourceUrl,
+        status: doc.status,
+        createdAt: doc.createdAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal memuat inbox client: ${error.message}` });
   }
 });
 

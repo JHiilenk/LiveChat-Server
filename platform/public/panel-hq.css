@@ -221,6 +221,8 @@ button[data-client-copy-snippet] {
   text-align: left;
   padding: 10px;
   font-size: 0.9rem;
+  vertical-align: top;
+  word-break: break-word;
 }
 
 .hq-table th {
