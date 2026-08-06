@@ -275,7 +275,6 @@
     }
 
     if (event.data.type === "liveteams:widget-minimize") {
-      setExpanded(false);
       openPanel();
       syncEmbedFrameExpandedState(false);
     }
