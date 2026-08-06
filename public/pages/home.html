@@ -3,24 +3,109 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LiveTeams | Realtime Team Chat</title>
-    <meta name="description" content="LiveTeams adalah platform live chat realtime untuk kolaborasi tim modern." />
+    <title>LiveTeams ・ Live Chat Realtime untuk Komunitas & Tim</title>
+    <meta name="description" content="LiveTeams — Live chat realtime untuk komunitas, team, support, dan channel diskusi. Login member, guest access, widget embed, dan panel admin lengkap." />
+    <meta name="keywords" content="LiveTeams, live chat, komunitas, team chat, realtime, widget, admin panel" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="route-home">
-    <main class="landing-shell">
-      <section class="landing-hero">
-        <div class="landing-card">
-          <p class="eyebrow">LiveTeams</p>
-          <h1>Realtime chat untuk tim dan komunitas Anda.</h1>
-          <p class="landing-copy">Kelola obrolan, tim, dan channel secara instan dengan dashboard admin serta widget embed yang siap pakai.</p>
-          <div class="landing-actions">
-            <a class="landing-nav-primary" href="/app">Buka Aplikasi Chat</a>
-            <a class="landing-nav-ghost" href="/admin">Admin Panel</a>
+    <main class="home-shell">
+      <header class="site-header">
+        <a class="brand" href="/">LiveTeams</a>
+        <nav class="main-nav">
+          <a href="/app">Buka App</a>
+          <a href="/login">Masuk</a>
+          <a href="/daftar">Daftar</a>
+          <a href="/admin">Admin</a>
+        </nav>
+        <button class="menu-btn">Buka menu</button>
+      </header>
+
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">Realtime Community Chat</p>
+            <h1>Live chat modern untuk komunitas, team, dan customer support</h1>
+            <p>LiveTeams membantu kamu membuat pengalaman live chat cepat, ringan, dan siap online dengan login member, guest access, channel, DM, upload file, widget embed, dan panel admin yang mudah dikelola.</p>
+            <div class="hero-cta">
+              <a class="btn-primary" href="/login">Masuk Login Member</a>
+              <a class="btn-ghost" href="/daftar">Daftar Member Baru</a>
+              <button class="btn-outline" onclick="location.href='/embed'">Coba Widget Demo</button>
+            </div>
+          </div>
+          <div class="hero-preview">
+            <div class="preview-status">
+              <div class="status-item"><strong>Status</strong><span>Online</span></div>
+              <div class="status-item"><strong>Team</strong><span>LIVE TEAM</span></div>
+            </div>
+            <div class="preview-panel">
+              <div class="avatar-row">J&nbsp;M&nbsp;A</div>
+              <div class="panel-card">
+                <h4>Jeetalk Admin</h4>
+                <p>Semua percakapan team, channel, dan member bisa dikelola dalam satu dashboard.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      <section id="features" class="features">
+        <div class="container">
+          <h2>Jeetalk untuk Live Chat Realtime, Komunitas, Team, dan Channel</h2>
+          <p>Pesan, file, GIF, audio, dan video dikirim langsung dengan pengalaman live chat yang ringan. Pisahkan percakapan per team dan channel, serta dukung login member dan guest.</p>
+          <div class="feature-list">
+            <article>
+              <h3>Chat Realtime Cepat</h3>
+              <p>Pengiriman pesan instan dengan pengalaman ringan dan responsif.</p>
+            </article>
+            <article>
+              <h3>Team dan Channel</h3>
+              <p>Struktur diskusi rapi untuk komunitas, support, dan kolaborasi.</p>
+            </article>
+            <article>
+              <h3>Login Member & Guest</h3>
+              <p>Dukungan portal member dan guest access untuk berbagai skenario.</p>
+            </article>
+            <article>
+              <h3>Panel Admin Lengkap</h3>
+              <p>Kelola role, batas upload, notifikasi, dan moderasi dari dashboard.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="embed-demo">
+        <div class="container">
+          <h2>Pasang widget LiveTeams ke website</h2>
+          <p>Snippet sederhana untuk memasang widget floating modern yang responsive.</p>
+          <pre class="embed-code">&lt;script src="https://jeetalk.onrender.com/widget.js" data-chat-url="https://jeetalk.onrender.com/embed"&gt;&lt;/script&gt;</pre>
+          <p>Ganti URL dengan instance kamu saat deploy ke server sendiri.</p>
+        </div>
+      </section>
+
+      <section class="testimonials">
+        <div class="container">
+          <h2>Testimoni singkat</h2>
+          <div class="test-row">
+            <blockquote>“Channel team bikin diskusi internal kami jauh lebih rapi. Member login dan guest access-nya juga enak untuk event komunitas.” — Nadia, Community Lead</blockquote>
+            <blockquote>“Panel admin, batas upload, notifikasi, dan widget embed membuat LiveTeams terasa seperti produk live chat yang siap dipakai langsung.” — Rafi, Product Operator</blockquote>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="container">
+          <div class="footer-left">
+            <p>&copy; 2026 LiveTeams. Realtime community chat platform built for modern teams.</p>
+          </div>
+          <div class="footer-links">
+            <a href="#features">Fitur</a>
+            <a href="/app">Buka App</a>
+            <a href="/admin">Admin Panel</a>
+          </div>
+        </div>
+      </footer>
     </main>
   </body>
 </html>
