@@ -1,0 +1,22 @@
+{
+  "name": "jielive-platform",
+  "version": "1.0.0",
+  "description": "Separate split-architecture scaffold for JIELive web, admin, embed, and API surfaces.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "nedb-promises": "^6.2.3",
+    "morgan": "^1.11.0"
+  }
+}

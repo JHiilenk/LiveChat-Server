@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>__APP_NAME__ | Admin</title>
+    <meta name="description" content="Admin control panel for split JIELive deployments." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body data-surface="admin" data-api-prefix="__API_PREFIX__">
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">AD</div>
+          <div class="brand-copy">
+            <strong>Control Panel</strong>
+            <span data-app-name>__APP_NAME__</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="/">Web</a>
+          <a href="/embed">Embed</a>
+          <a href="__PUBLIC_BASE_URL____API_PREFIX__/v1/tenants/demo">Demo tenant</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <div class="tag">Admin surface</div>
+          <h1>Panel untuk tenant, channel, dan akses operasional.</h1>
+          <p>Area ini disiapkan untuk kontrol per client: team, channel, template balasan, origin, dan konfigurasi widget.</p>
+          <div class="panel" style="margin-top:18px;">
+            <h2>Login admin</h2>
+            <div class="stack" style="margin-top:14px;">
+              <input data-login-tenant placeholder="Tenant code" value="__DEFAULT_TENANT_CODE__" />
+              <input data-login-username placeholder="Owner/Admin name" value="__DEFAULT_ADMIN_USERNAME__" />
+              <input data-login-password type="password" placeholder="Password" />
+              <button class="button" type="button" data-login-button>Masuk</button>
+            </div>
+            <p class="meta" data-login-status style="margin-top:12px;">Belum login.</p>
+          </div>
+          <div class="panel" data-tenant-editor style="margin-top:18px;">
+            <h2>Edit tenant</h2>
+            <div class="surface-switch" style="margin-top:14px;" data-tenant-list></div>
+            <div class="stack" style="margin-top:14px;">
+              <input data-tenant-code-input placeholder="Tenant code" />
+              <input data-tenant-name-input placeholder="Tenant name" />
+              <input data-tenant-plan-input placeholder="Plan" />
+              <input data-tenant-status-input placeholder="Status" />
+              <input data-tenant-public-url-input placeholder="Public base URL" />
+              <input data-tenant-backend-url-input placeholder="Backend base URL" />
+              <input data-tenant-team-input placeholder="Default team code" />
+              <input data-tenant-channel-input placeholder="Default channel code" />
+              <button class="button" type="button" data-tenant-save>Simpan tenant</button>
+            </div>
+            <p class="meta" data-tenant-save-status style="margin-top:12px;">Belum ada perubahan.</p>
+          </div>
+          <div class="panel" data-auth-editor style="margin-top:18px;">
+            <h2>Edit auth</h2>
+            <div class="stack" style="margin-top:14px;">
+              <input data-auth-owner-input placeholder="Owner name" />
+              <input data-auth-owner-password-input type="password" placeholder="Owner password baru" />
+              <input data-auth-admin-password-input type="password" placeholder="Admin password baru" />
+              <input data-auth-admins-input placeholder="Admin names, pisahkan dengan koma" />
+              <input data-auth-operators-input placeholder="Operator names, pisahkan dengan koma" />
+              <button class="button" type="button" data-auth-save>Simpan auth</button>
+            </div>
+            <p class="meta" data-auth-save-status style="margin-top:12px;">Belum ada perubahan auth.</p>
+          </div>
+          <div class="hero-actions">
+            <a class="button" href="/api/v1/bootstrap">Cek Bootstrap</a>
+            <a class="ghost-button" href="/healthz">Health</a>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <h2>Client overview</h2>
+            <p>Tenant code <strong data-tenant-code>__DEFAULT_TENANT_CODE__</strong> aktif di host <strong data-hostname>localhost</strong>.</p>
+            <p>Backend livechat: <strong data-backend-url>-</strong> (<span data-backend-state>unknown</span>)</p>
+            <p>Admin auth state: <strong data-admin-role>-</strong></p>
+            <p>Owner: <strong data-owner-name>-</strong></p>
+            <p>Deploy check: <strong data-deploy-ready>-</strong></p>
+            <p class="meta" data-runtime-warnings>Belum ada warning runtime.</p>
+          </div>
+          <div class="panel">
+            <h2>Release signals</h2>
+            <div class="stat-grid">
+              <div class="stat"><strong data-team-code>__DEFAULT_TEAM_CODE__</strong><span>default team</span></div>
+              <div class="stat"><strong data-channel-code>__DEFAULT_CHANNEL_CODE__</strong><span>default channel</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-3">
+        <article class="card">
+          <div class="badge">Tenant</div>
+          <h3>Isolation</h3>
+          <p>Setiap client dapat dipetakan ke domain sendiri dengan config yang berbeda, tanpa bercampur dengan deployment lain.</p>
+        </article>
+        <article class="card">
+          <div class="badge">Workflow</div>
+          <h3>Ops panel</h3>
+          <p>Ruang untuk audit ringan, moderasi, dan konfigurasi channel setelah backend chat penuh dihubungkan.</p>
+        </article>
+        <article class="card">
+          <div class="badge">Status</div>
+          <h3>Live readiness</h3>
+          <p>Timestamp deploy terakhir dan state endpoint dihidupkan oleh API status agar mudah divalidasi setelah push.</p>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <small>Admin surface • <span data-timestamp>loading</span></small>
+        <small>Host: <span data-hostname>localhost</span></small>
+      </footer>
+    </main>
+  </body>
+</html>

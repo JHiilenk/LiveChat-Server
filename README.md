@@ -1,5 +1,7 @@
 # Server-LiveChat
 
+Catatan: server produksi yang ada di `app/` tetap dibiarkan utuh. Scaffold baru untuk arsitektur terpisah ada di `platform/` dan bisa dipakai sebagai basis deploy frontend, admin, dan API di subdomain berbeda.
+
 Versi ini adalah project terpisah untuk deploy live chat saja, tanpa landing marketing dari folder `PEMULA`. Folder ini bisa dipakai sebagai instance khusus per client dengan domain, origin, akun admin, dan kode team default yang berbeda.
 
 ## Karakter Versi Ini
@@ -73,3 +75,13 @@ Contoh pola aman:
 3. Buka ulang `/app` dan pastikan asset baru termuat dari query version terbaru.
 4. Cek `/admin` untuk memastikan panel admin dan toggle chat langsung ke admin tetap tampil normal.
 5. Jika browser masih cache versi lama, lakukan hard refresh sekali setelah deploy.
+
+## Scaffold Terpisah
+
+Jika kamu ingin versi split untuk frontend, admin, embed, dan API, pakai folder `platform/`.
+
+Jalurnya:
+
+1. `platform/` untuk server baru yang bisa dipasang ke Railway atau subdomain terpisah.
+2. `platform/public/` untuk tampilan web, admin, dan embed.
+3. `platform/server.js` untuk routing web, admin, embed, dan endpoint API.
