@@ -85,8 +85,8 @@
         position: fixed;
         right: 16px;
         bottom: 16px;
-        width: min(430px, calc(100vw - 20px));
-        height: min(710px, calc(100dvh - 24px));
+        width: min(380px, calc(100vw - 20px));
+        height: min(620px, calc(100dvh - 24px));
         border-radius: 26px;
         overflow: hidden;
         border: 1px solid rgba(102, 166, 255, 0.45);
@@ -94,6 +94,11 @@
         background: #091a34;
         display: grid;
         grid-template-rows: auto 1fr;
+      }
+      .panel.expanded {
+        width: min(960px, calc(100vw - 24px));
+        height: min(900px, calc(100dvh - 24px));
+        border-radius: 18px;
       }
       .panel.hidden { display: none; }
       .panel-head {
@@ -162,6 +167,7 @@
           </div>
           <div class="head-actions">
             <button class="head-btn" type="button" data-widget-action="minimize" title="Minimize">&minus;</button>
+            <button class="head-btn" type="button" data-widget-action="maximize" title="Maximize">&#9723;</button>
             <button class="head-btn" type="button" data-widget-action="close" title="Tutup">&times;</button>
           </div>
         </header>
@@ -172,6 +178,7 @@
 
   const launcher = shadow.querySelector(".launcher");
   const panel = shadow.querySelector(".panel");
+  const maximizeButton = shadow.querySelector('[data-widget-action="maximize"]');
 
   const openPanel = () => {
     panel.classList.remove("hidden");
@@ -179,6 +186,18 @@
 
   const closePanel = () => {
     panel.classList.add("hidden");
+  };
+
+  const setExpanded = (expanded) => {
+    panel.classList.toggle("expanded", Boolean(expanded));
+    if (maximizeButton) {
+      maximizeButton.innerHTML = expanded ? "&#9633;" : "&#9723;";
+      maximizeButton.title = expanded ? "Kembalikan ukuran" : "Maximize";
+    }
+  };
+
+  const toggleExpanded = () => {
+    setExpanded(!panel.classList.contains("expanded"));
   };
 
   launcher?.addEventListener("click", () => {
@@ -192,6 +211,12 @@
 
   shadow.querySelectorAll("[data-widget-action]").forEach((button) => {
     button.addEventListener("click", () => {
+      const action = String(button.getAttribute("data-widget-action") || "").trim().toLowerCase();
+      if (action === "maximize") {
+        toggleExpanded();
+        return;
+      }
+
       closePanel();
     });
   });
@@ -203,6 +228,10 @@
 
     if (event.data.type === "liveteams:widget-close" || event.data.type === "liveteams:widget-minimize") {
       closePanel();
+    }
+
+    if (event.data.type === "liveteams:widget-maximize") {
+      toggleExpanded();
     }
   });
 

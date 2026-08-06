@@ -144,6 +144,12 @@
   document.querySelectorAll("[data-chat-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const action = button.getAttribute("data-chat-action") || "";
+      if (action === "maximize" && (!window.parent || window.parent === window)) {
+        const isExpanded = document.body.dataset.expanded === "true";
+        document.body.dataset.expanded = isExpanded ? "false" : "true";
+        return;
+      }
+
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: `liveteams:widget-${action}` }, "*");
       }

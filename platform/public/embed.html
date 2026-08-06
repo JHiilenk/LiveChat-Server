@@ -42,7 +42,7 @@
       }
 
       .embed-shell {
-        width: min(100%, 980px);
+        width: min(100%, 420px);
         min-height: 100dvh;
         height: 100dvh;
         margin: 0 auto;
@@ -52,6 +52,10 @@
         overflow: hidden;
         display: grid;
         grid-template-rows: auto auto minmax(0, 1fr) auto;
+      }
+
+      body[data-expanded="true"] .embed-shell {
+        width: min(100%, 980px);
       }
 
       .embed-topbar {
@@ -217,6 +221,7 @@
         </div>
         <div class="embed-actions">
           <button class="embed-action" type="button" title="Minimize" data-chat-action="minimize">&minus;</button>
+          <button class="embed-action" type="button" title="Maximize" data-chat-action="maximize">&#9723;</button>
           <button class="embed-action" type="button" title="Close" data-chat-action="close">&times;</button>
         </div>
       </header>
