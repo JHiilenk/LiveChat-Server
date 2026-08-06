@@ -1,8 +1,48 @@
 (function () {
   const currentScript = document.currentScript;
-  const configuredUrl = String(currentScript?.dataset?.chatUrl || "").trim();
-  const defaultUrl = `${window.location.origin}/embed?livechat=1&tenantCode=JIELIVE`;
-  const chatUrl = configuredUrl || defaultUrl;
+  const scriptOrigin = (() => {
+    try {
+      return new URL(currentScript?.src || window.location.href, window.location.href).origin;
+    } catch {
+      return window.location.origin;
+    }
+  })();
+
+  const isLocalHostName = (hostName) => {
+    const host = String(hostName || "").toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "[::1]";
+  };
+
+  const buildDefaultChatUrl = (tenantCode = "JIELIVE") => {
+    const url = new URL("/embed", scriptOrigin);
+    url.searchParams.set("livechat", "1");
+    url.searchParams.set("tenantCode", tenantCode);
+    return url.toString();
+  };
+
+  const normalizeChatUrl = (rawUrl) => {
+    const configuredUrl = String(rawUrl || "").trim();
+    if (!configuredUrl) {
+      return buildDefaultChatUrl();
+    }
+
+    try {
+      const candidate = new URL(configuredUrl, scriptOrigin);
+      const scriptHostIsLocal = isLocalHostName(new URL(scriptOrigin).hostname);
+      const candidateHostIsLocal = isLocalHostName(candidate.hostname);
+
+      if (candidateHostIsLocal && !scriptHostIsLocal) {
+        const tenantCode = String(candidate.searchParams.get("tenantCode") || "JIELIVE").trim().toUpperCase() || "JIELIVE";
+        return buildDefaultChatUrl(tenantCode);
+      }
+
+      return candidate.toString();
+    } catch {
+      return buildDefaultChatUrl();
+    }
+  };
+
+  const chatUrl = normalizeChatUrl(currentScript?.dataset?.chatUrl);
   const title = String(currentScript?.dataset?.title || "JIELive Live Chat");
   const subtitle = String(currentScript?.dataset?.subtitle || "Tim support siap membantu");
 
