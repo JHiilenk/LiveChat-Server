@@ -35,6 +35,7 @@
       }
 
       body[data-embedded="true"] .embed-shell {
+        width: 100%;
         max-width: none;
         min-height: 100dvh;
         border-radius: 0;
@@ -56,6 +57,10 @@
 
       body[data-expanded="true"] .embed-shell {
         width: min(100%, 980px);
+      }
+
+      body[data-embedded="true"][data-expanded="true"] .embed-shell {
+        width: 100%;
       }
 
       .embed-topbar {
