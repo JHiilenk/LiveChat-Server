@@ -3,76 +3,241 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>__APP_NAME__ | Embed</title>
-    <meta name="description" content="Embed surface for JIELive chat widget." />
+    <title>__APP_NAME__ | Live Chat</title>
+    <meta name="description" content="Modern live chat surface untuk widget client JIELive." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css" />
-    <script defer src="/app.js"></script>
+    <style>
+      :root {
+        --bg: #041126;
+        --panel: #0b1d3b;
+        --panel-soft: #112850;
+        --line: rgba(124, 170, 255, 0.28);
+        --ink: #eff6ff;
+        --muted: #9db2d7;
+        --acc: #53a8ff;
+        --acc-soft: rgba(83, 168, 255, 0.18);
+        --ok: #43da9c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(circle at 20% 0%, rgba(83, 168, 255, 0.2), transparent 24%), var(--bg);
+        color: var(--ink);
+      }
+
+      body[data-embedded="true"] .embed-shell {
+        max-width: none;
+        min-height: 100dvh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .embed-shell {
+        width: min(100%, 980px);
+        min-height: 100dvh;
+        margin: 0 auto;
+        background: linear-gradient(180deg, rgba(12, 30, 61, 0.95), rgba(8, 19, 40, 0.95));
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+      }
+
+      .embed-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 14px 12px;
+        background: linear-gradient(180deg, #0f2a53, #0c2244);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .embed-title {
+        display: grid;
+        gap: 3px;
+      }
+
+      .embed-title strong {
+        font-size: 0.98rem;
+        letter-spacing: 0.02em;
+      }
+
+      .embed-title span {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .embed-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .embed-action {
+        width: 31px;
+        height: 31px;
+        border-radius: 999px;
+        border: 1px solid rgba(124, 170, 255, 0.35);
+        background: rgba(8, 21, 45, 0.85);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .embed-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(124, 170, 255, 0.18);
+        background: rgba(8, 21, 44, 0.66);
+      }
+
+      .embed-badge {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: var(--acc-soft);
+        border: 1px solid rgba(124, 170, 255, 0.22);
+        color: #c8e4ff;
+        font-size: 0.74rem;
+      }
+
+      .chat-list {
+        overflow: auto;
+        padding: 16px 12px;
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .bubble {
+        max-width: min(90%, 420px);
+        border-radius: 14px;
+        padding: 10px 12px;
+        line-height: 1.5;
+        font-size: 0.92rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .bubble small {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.7rem;
+        color: rgba(230, 240, 255, 0.7);
+      }
+
+      .bubble.bot {
+        justify-self: start;
+        background: linear-gradient(180deg, rgba(15, 47, 98, 0.9), rgba(9, 29, 60, 0.9));
+      }
+
+      .bubble.me {
+        justify-self: end;
+        background: linear-gradient(180deg, rgba(60, 133, 229, 0.92), rgba(36, 100, 186, 0.92));
+      }
+
+      .composer {
+        border-top: 1px solid var(--line);
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+        background: rgba(8, 20, 41, 0.92);
+      }
+
+      .chips {
+        display: flex;
+        gap: 7px;
+        overflow: auto;
+      }
+
+      .chip {
+        border: 1px solid rgba(124, 170, 255, 0.24);
+        border-radius: 999px;
+        background: rgba(124, 170, 255, 0.08);
+        color: #cae6ff;
+        padding: 6px 10px;
+        font-size: 0.74rem;
+        cursor: pointer;
+      }
+
+      .composer-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+
+      .composer-row input {
+        border-radius: 12px;
+        border: 1px solid rgba(124, 170, 255, 0.28);
+        background: #0a1f3e;
+        color: var(--ink);
+        font-size: 0.9rem;
+        padding: 11px;
+      }
+
+      .composer-row button {
+        border: 0;
+        border-radius: 12px;
+        padding: 0 14px;
+        color: #f3f9ff;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--acc), #2f78d8);
+      }
+
+      .status {
+        font-size: 0.74rem;
+        color: var(--muted);
+      }
+
+      .status strong {
+        color: var(--ok);
+      }
+    </style>
+    <script defer src="/embed-chat.js"></script>
   </head>
-  <body data-surface="embed" data-api-prefix="__API_PREFIX__">
-    <main class="shell">
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark">EM</div>
-          <div class="brand-copy">
-            <strong>Embed preview</strong>
-            <span>Widget surface untuk website client</span>
-          </div>
+  <body data-surface="embed" data-app-name="__APP_NAME__" data-default-tenant="__DEFAULT_TENANT_CODE__">
+    <main class="embed-shell">
+      <header class="embed-topbar">
+        <div class="embed-title">
+          <strong data-chat-title>__APP_NAME__ Live Support</strong>
+          <span data-chat-subtitle>Tim support online sekarang</span>
         </div>
-        <nav class="nav">
-          <a href="/">Web</a>
-          <a href="/admin">Admin</a>
-          <a href="/api/v1/status">API</a>
-        </nav>
+        <div class="embed-actions">
+          <button class="embed-action" type="button" title="Minimize" data-chat-action="minimize">&minus;</button>
+          <button class="embed-action" type="button" title="Close" data-chat-action="close">&times;</button>
+        </div>
       </header>
 
-      <section class="hero">
-        <div>
-          <div class="pill">Iframe / widget ready</div>
-          <h1>Surface embed yang ringan dan terpisah.</h1>
-          <p>Di sini kamu bisa pasang snippet, iframe, atau launcher widget untuk live chat tanpa mengganggu portal utama.</p>
-          <div class="panel" style="margin-top:18px;">
-            <h2>Real backend links</h2>
-            <p><a href="/widget.js">/widget.js</a> dan <a href="/livechat-widget.js">/livechat-widget.js</a> diproxy ke backend livechat lama agar embed tetap memakai engine chat yang sama.</p>
-            <p><a href="/chat/embed">/chat/embed</a> membuka response backend embed untuk validasi koneksi.</p>
-          </div>
-          <div class="hero-actions">
-            <a class="button" href="/api/v1/status">Inspect JSON</a>
-            <a class="ghost-button" href="/healthz">Health</a>
-          </div>
+      <div class="embed-badge-row">
+        <span class="embed-badge">Realtime style</span>
+        <span class="embed-badge">No legacy backend</span>
+        <span class="embed-badge" data-tenant-chip>Tenant __DEFAULT_TENANT_CODE__</span>
+      </div>
+
+      <section class="chat-list" id="messageList"></section>
+
+      <form class="composer" id="messageForm">
+        <div class="chips">
+          <button class="chip" type="button" data-quick-message="Halo, saya butuh bantuan login.">Bantuan login</button>
+          <button class="chip" type="button" data-quick-message="Bagaimana cara pasang widget di website?">Pasang widget</button>
+          <button class="chip" type="button" data-quick-message="Minta info paket dan harga.">Info paket</button>
         </div>
-
-        <div class="panel">
-          <h2>Embed snippet</h2>
-          <div class="codebox" data-widget-snippet>&lt;script src="https://embed.example.com/widget.js" defer&gt;&lt;/script&gt;<br />&lt;div id="jielive-widget" data-client="__DEFAULT_TENANT_CODE__"&gt;&lt;/div&gt;</div>
-          <div class="hero-actions" style="margin-top:12px;">
-            <button class="button" type="button" data-copy-widget-snippet>Copy snippet</button>
-          </div>
+        <div class="composer-row">
+          <input id="messageInput" name="message" autocomplete="off" placeholder="Ketik pesan untuk tim support..." />
+          <button type="submit">Kirim</button>
         </div>
-      </section>
-
-      <section class="grid-3">
-        <article class="card">
-          <div class="badge">Preview</div>
-          <h3>Launcher</h3>
-          <p>Bagian ini dapat diisi dengan UI launcher, bubble, atau iframe chat yang terisolasi dari panel admin.</p>
-        </article>
-        <article class="card">
-          <div class="badge">Responsive</div>
-          <h3>Mobile first</h3>
-          <p>Layout embed tetap aman di mobile agar bisa disisipkan ke halaman client tanpa layout shift besar.</p>
-        </article>
-        <article class="card">
-          <div class="badge">Origin</div>
-          <h3>Cross-domain</h3>
-          <p>Surface ini bisa diarahkan ke subdomain tersendiri supaya aturan CORS dan CSP lebih mudah dikontrol.</p>
-        </article>
-      </section>
-
-      <footer class="footer">
-        <small>Default tenant <span data-tenant-code>__DEFAULT_TENANT_CODE__</span></small>
-        <small>Widget URL: <span data-widget-url>-</span></small>
-      </footer>
+        <div class="status">Status: <strong>online</strong> • Respons otomatis aktif untuk development.</div>
+      </form>
     </main>
   </body>
 </html>
