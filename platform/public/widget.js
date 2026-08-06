@@ -188,6 +188,7 @@
   const launcher = shadow.querySelector(".launcher");
   const panel = shadow.querySelector(".panel");
   const maximizeButton = shadow.querySelector('[data-widget-action="maximize"]');
+  const frameNode = shadow.querySelector(".frame");
 
   const openPanel = () => {
     panel.classList.remove("hidden");
@@ -207,6 +208,26 @@
 
   const toggleExpanded = () => {
     setExpanded(!panel.classList.contains("expanded"));
+  };
+
+  const forceEmbedFrameExpanded = () => {
+    try {
+      const frameWindow = frameNode?.contentWindow;
+      const frameDocument = frameWindow?.document;
+      if (!frameDocument?.body) {
+        return;
+      }
+
+      frameDocument.body.dataset.expanded = "true";
+      const shell = frameDocument.querySelector(".embed-shell");
+      if (shell) {
+        shell.style.width = "100%";
+        shell.style.maxWidth = "none";
+        shell.style.margin = "0";
+      }
+    } catch {
+      // Ignore cross-origin frames or not-yet-ready iframe documents.
+    }
   };
 
   launcher?.addEventListener("click", () => {
@@ -242,6 +263,7 @@
     if (event.data.type === "liveteams:widget-maximize") {
       setExpanded(true);
       openPanel();
+      forceEmbedFrameExpanded();
     }
   });
 
