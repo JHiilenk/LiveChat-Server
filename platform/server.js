@@ -824,205 +824,217 @@ const buildClientPanelTemplateValues = (panelAlias = "client") => {
 };
 
 const buildPanelPublicContent = (panelRole = "client", panelAlias = "client") => {
-  if (panelRole === "master") {
-    return `
-      <section class="hq-grid">
-        <article class="hq-card hq-card-hero">
-          <span class="hq-chip">Provider Control</span>
-          <h2>Kontrol penuh semua panel client dari satu dashboard.</h2>
-          <p>Master Internal dipisahkan dari panel group lama. Di sini kamu bisa lihat tenant, backend status, sesi aktif, serta kesiapan deploy per client.</p>
-          <form class="hq-form" data-master-login-form>
-            <label>Email Master
-              <input type="email" name="email" placeholder="master@jielive.local" required />
-            </label>
-            <label>Password Master
-              <input type="password" name="password" placeholder="••••••••" required />
-            </label>
-            <button type="submit">Masuk Master Internal</button>
-          </form>
-          <p class="hq-note" data-master-login-status>Belum login.</p>
-        </article>
-
-        <article class="hq-card">
-          <h3>Perpanjang Langganan</h3>
-          <form class="hq-form" data-master-renew-form>
-            <label>Tenant Code
-              <input type="text" name="tenantCode" placeholder="JIELIVE" required />
-            </label>
-            <label>Durasi (bulan)
-              <input type="number" name="months" min="1" step="1" value="1" required />
-            </label>
-            <button type="submit">Perpanjang Akses</button>
-          </form>
-          <p class="hq-note" data-master-renew-status>Belum ada perpanjangan.</p>
-        </article>
-
-        <article class="hq-card">
-          <h3>Trial Gratis Awal</h3>
-          <form class="hq-form" data-master-trial-settings-form>
-            <label>Durasi trial default (hari)
-              <input type="number" name="defaultTrialDays" min="1" step="1" value="30" required />
-            </label>
-            <button type="submit">Simpan Pengaturan Trial</button>
-          </form>
-          <p class="hq-note">Default trial aktif saat ini: <strong data-master-trial-days>30</strong> hari.</p>
-          <p class="hq-note" data-master-trial-settings-status>Belum ada perubahan pengaturan trial.</p>
-        </article>
-
-        <article class="hq-card">
-          <h3>Registrasi Client</h3>
-          <form class="hq-form" data-master-client-register-form>
-            <label>Nama Client
-              <input type="text" name="tenantName" placeholder="Client A" required />
-            </label>
-            <label>Username Client
-              <input type="text" name="userName" placeholder="clienta" required />
-            </label>
-            <label>Password Client
-              <input type="password" name="password" placeholder="••••••••" required />
-            </label>
-            <button type="submit">Daftarkan Client</button>
-          </form>
-          <p class="hq-note">Tenant baru otomatis mendapat trial gratis sesuai pengaturan master.</p>
-          <p class="hq-note" data-master-client-register-status>Belum ada registrasi baru.</p>
-        </article>
-
-        <article class="hq-card">
-          <h3>Global Stats</h3>
-          <div class="hq-stats">
-            <div><strong data-master-tenant-count>0</strong><span>Tenant</span></div>
-            <div><strong data-master-active-tenant-count>0</strong><span>Tenant Aktif</span></div>
-            <div><strong data-master-client-sessions>0</strong><span>Sesi Client</span></div>
-            <div><strong data-master-backend-state>unknown</strong><span>Backend State</span></div>
-          </div>
-        </article>
-
-        <article class="hq-card hq-card-wide">
-          <div class="hq-row-head">
-            <h3>Daftar Client Tenant</h3>
-            <button type="button" data-master-refresh>Refresh</button>
-          </div>
-          <div class="hq-table-wrap">
-            <table class="hq-table">
-              <thead>
-                <tr>
-                  <th>Kode</th>
-                  <th>Nama</th>
-                  <th>Username</th>
-                  <th>Widget</th>
-                  <th>Plan</th>
-                  <th>Status</th>
-                  <th>Langganan</th>
-                  <th>Demo</th>
-                  <th>Backend</th>
-                </tr>
-              </thead>
-              <tbody data-master-tenant-rows>
-                <tr><td colspan="9">Login master untuk melihat tenant.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
-
-        <article class="hq-card">
-          <h3>Deploy Warnings</h3>
-          <ul class="hq-list" data-master-warnings>
-            <li>Belum ada data warning.</li>
-          </ul>
-        </article>
-      </section>
-    `;
-  }
-
   const safeAlias = sanitizeName(panelAlias || "client") || "client";
   const prettyAlias = safeAlias.replace(/^client/i, "Client ").replace(/\s+/g, " ").trim();
 
-  return `
-      <section class="hq-grid">
-        <article class="hq-card hq-card-hero">
-          <span class="hq-chip">Tenant Control</span>
-          <h2>Panel client berbeda dari panel group lama.</h2>
-          <p>Client Panel fokus untuk tenant: status backend, identitas channel default, status langganan, dan snippet embed siap tempel.</p>
-          <form class="hq-form" data-client-login-form>
-            <label>Tenant Code
-              <input type="text" name="tenantCode" placeholder="JIELIVE" required />
-            </label>
-            <label>Username Client
-              <input type="text" name="userName" placeholder="admin" required />
-            </label>
-            <label>Password
-              <input type="password" name="password" placeholder="••••••••" required />
-            </label>
-            <button type="submit">Masuk Client Panel</button>
+  const rail = `
+    <nav class="crm-rail">
+      <a class="crm-rail-icon active" href="#" title="Inbox">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+      </a>
+      <a class="crm-rail-icon" href="/demo" title="Demo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+      </a>
+      <a class="crm-rail-icon" href="/embed" title="Widget">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </a>
+      <a class="crm-rail-icon" href="/" title="Web">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      </a>
+    </nav>`;
+
+  if (panelRole === "master") {
+    return `${rail}
+    <div class="crm-gate">
+      <div class="crm-login-card">
+        <span class="crm-chip">Provider Control</span>
+        <h2>Master Internal</h2>
+        <p class="crm-hint">Login hanya untuk internal agent. Kelola semua tenant dari sini.</p>
+        <form class="crm-form" data-master-login-form>
+          <label>Email Master<input type="email" name="email" placeholder="master@jielive.local" required /></label>
+          <label>Password<input type="password" name="password" placeholder="••••••••" required /></label>
+          <button type="submit" class="crm-btn crm-btn-primary">Masuk Master Internal</button>
+        </form>
+        <p class="crm-status-text" data-master-login-status>Belum login.</p>
+      </div>
+    </div>
+    <div class="crm-inbox-body">
+      <div class="crm-list-pane">
+        <div class="crm-list-header">
+          <div class="crm-list-header-row">
+            <h3>Daftar Tenant</h3>
+            <button class="crm-filter-tab active" type="button" data-master-refresh>&#8635;</button>
+          </div>
+        </div>
+        <div class="crm-list-scroll" data-master-tenant-list>
+          <div class="crm-empty"><span class="crm-empty-icon">&#127970;</span><span>Login untuk melihat tenant</span></div>
+        </div>
+      </div>
+      <div class="crm-main-pane">
+        <div class="crm-main-header">
+          <h3>Manajemen Tenant</h3>
+          <div class="crm-main-header-meta">
+            <div class="crm-stats-mini">
+              <span><strong data-master-tenant-count>0</strong> Tenant</span>
+              <span><strong data-master-active-tenant-count>0</strong> Aktif</span>
+              <span><strong data-master-client-sessions>0</strong> Sesi</span>
+            </div>
+          </div>
+        </div>
+        <div class="crm-main-scroll">
+          <div class="crm-section-card">
+            <div class="crm-section-card-head"><h3>Registrasi Client Baru</h3></div>
+            <div class="crm-section-card-body">
+              <form class="crm-form crm-form-inline" data-master-client-register-form>
+                <label>Nama Client<input type="text" name="tenantName" placeholder="Client A" required /></label>
+                <label>Username<input type="text" name="userName" placeholder="clienta" required /></label>
+                <label>Password<input type="password" name="password" placeholder="••••••••" required /></label>
+                <button type="submit" class="crm-btn crm-btn-primary">Daftarkan</button>
+              </form>
+              <p class="crm-status-text" data-master-client-register-status>Belum ada registrasi baru.</p>
+            </div>
+          </div>
+          <div class="crm-section-card">
+            <div class="crm-section-card-head"><h3>Perpanjang Langganan</h3></div>
+            <div class="crm-section-card-body">
+              <form class="crm-form crm-form-inline" data-master-renew-form>
+                <label>Tenant Code<input type="text" name="tenantCode" placeholder="JIELIVE" required /></label>
+                <label>Bulan<input type="number" name="months" min="1" step="1" value="1" required /></label>
+                <button type="submit" class="crm-btn crm-btn-primary">Perpanjang</button>
+              </form>
+              <p class="crm-status-text" data-master-renew-status>Belum ada perpanjangan.</p>
+            </div>
+          </div>
+          <div class="crm-section-card">
+            <div class="crm-section-card-head"><h3>Semua Client Tenant</h3></div>
+            <div class="crm-section-card-body">
+              <div class="crm-table-wrap">
+                <table class="crm-table">
+                  <thead><tr><th>Kode</th><th>Nama</th><th>Owner</th><th>Widget</th><th>Plan</th><th>Status</th><th>Langganan</th><th>Demo</th><th>Backend</th></tr></thead>
+                  <tbody data-master-tenant-rows><tr><td colspan="9">Login master untuk melihat tenant.</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="crm-detail-pane">
+        <div class="crm-detail-section">
+          <h4>Global Stats</h4>
+          <div class="crm-stats">
+            <div class="crm-stat-item"><strong data-master-tenant-count>0</strong><span>Tenant</span></div>
+            <div class="crm-stat-item"><strong data-master-active-tenant-count>0</strong><span>Aktif</span></div>
+            <div class="crm-stat-item"><strong data-master-client-sessions>0</strong><span>Sesi</span></div>
+            <div class="crm-stat-item"><strong data-master-backend-state>-</strong><span>Backend</span></div>
+          </div>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Trial Default</h4>
+          <form class="crm-form" data-master-trial-settings-form>
+            <label>Hari Trial<input type="number" name="defaultTrialDays" min="1" step="1" value="30" required /></label>
+            <button type="submit" class="crm-btn crm-btn-primary crm-btn-sm">Simpan</button>
           </form>
-          <p class="hq-note">Login ${prettyAlias.toLowerCase()} memakai username masing-masing. ID dan number sistem dibuat otomatis, dan akses fitur mengikuti status langganan tenant.</p>
-          <p class="hq-note" data-client-login-status>Belum login.</p>
-        </article>
+          <p class="crm-status-text" data-master-trial-settings-status></p>
+          <p style="margin:8px 0 0;font-size:0.78rem;color:#6b7280">Default: <strong data-master-trial-days>30</strong> hari</p>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Deploy Warnings</h4>
+          <ul class="crm-warn-list" data-master-warnings><li>Belum ada data warning.</li></ul>
+        </div>
+      </div>
+    </div>`;
+  }
 
-        <article class="hq-card">
-          <h3>Tenant Summary</h3>
-          <div class="hq-summary">
-            <p><strong>Kode:</strong> <span data-client-tenant-code>-</span></p>
-            <p><strong>Nama:</strong> <span data-client-tenant-name>-</span></p>
-            <p><strong>Plan:</strong> <span data-client-tenant-plan>-</span></p>
-            <p><strong>Status:</strong> <span data-client-tenant-status>-</span></p>
-            <p><strong>Langganan:</strong> <span data-client-subscription-label>-</span></p>
-            <p><strong>Berakhir:</strong> <span data-client-subscription-expires-at>-</span></p>
-            <p><strong>ID Sistem:</strong> <span data-client-widget-id>-</span></p>
-            <p><strong>Nomor Sistem:</strong> <span data-client-widget-number>-</span></p>
-            <p><strong>Team default:</strong> <span data-client-tenant-team>-</span></p>
-            <p><strong>Channel default:</strong> <span data-client-tenant-channel>-</span></p>
+  return `${rail}
+    <div class="crm-gate">
+      <div class="crm-login-card">
+        <span class="crm-chip">Tenant Control</span>
+        <h2>${prettyAlias} Panel</h2>
+        <p class="crm-hint">Login memakai username dan password tenant.</p>
+        <form class="crm-form" data-client-login-form>
+          <label>Tenant Code<input type="text" name="tenantCode" placeholder="JIELIVE" required /></label>
+          <label>Username<input type="text" name="userName" placeholder="admin" required /></label>
+          <label>Password<input type="password" name="password" placeholder="••••••••" required /></label>
+          <button type="submit" class="crm-btn crm-btn-primary">Masuk ${prettyAlias} Panel</button>
+        </form>
+        <p class="crm-status-text" data-client-login-status>Belum login.</p>
+      </div>
+    </div>
+    <div class="crm-inbox-body">
+      <div class="crm-list-pane">
+        <div class="crm-list-header">
+          <div class="crm-list-header-row">
+            <h3>Kotak Masuk</h3>
+            <button class="crm-filter-tab active" type="button" data-client-refresh-inbox>&#8635;</button>
           </div>
-        </article>
-
-        <article class="hq-card">
-          <h3>Status Akses</h3>
-          <p class="hq-note" data-client-access-message>Memuat status akses...</p>
-        </article>
-
-        <article class="hq-card hq-card-wide">
-          <div class="hq-row-head">
-            <h3>Snippet Embed Client</h3>
-            <button type="button" data-client-copy-snippet>Copy Snippet</button>
+          <div class="crm-filter-tabs">
+            <button class="crm-filter-tab active" type="button">Semua</button>
+            <button class="crm-filter-tab" type="button">Widget</button>
           </div>
-          <pre class="hq-code" data-client-snippet>// Login client dulu untuk mendapatkan snippet embed</pre>
-        </article>
-
-        <article class="hq-card">
-          <h3>Backend & Auth</h3>
-          <ul class="hq-list">
-            <li>Backend: <span data-client-backend-url>-</span></li>
-            <li>Backend state: <span data-client-backend-state>-</span></li>
-            <li>Owner: <span data-client-owner-name>-</span></li>
-            <li>Admin names: <span data-client-admin-names>-</span></li>
-            <li>Operator names: <span data-client-operator-names>-</span></li>
-          </ul>
-        </article>
-
-        <article class="hq-card hq-card-wide">
-          <div class="hq-row-head">
-            <h3>Kotak Masuk Customer</h3>
-            <button type="button" data-client-refresh-inbox>Refresh Inbox</button>
+        </div>
+        <div class="crm-list-scroll" data-inbox-list>
+          <div class="crm-empty"><span class="crm-empty-icon">&#128205;</span><span>Login untuk melihat pesan</span></div>
+        </div>
+      </div>
+      <div class="crm-main-pane">
+        <div class="crm-main-header">
+          <h3>Overview Tenant</h3>
+          <div class="crm-main-header-meta">
+            <span class="crm-chip" data-client-tenant-plan>-</span>
           </div>
-          <div class="hq-table-wrap">
-            <table class="hq-table">
-              <thead>
-                <tr>
-                  <th>Waktu</th>
-                  <th>Nama</th>
-                  <th>Widget</th>
-                  <th>Pesan</th>
-                  <th>Sumber</th>
-                </tr>
-              </thead>
-              <tbody data-client-inbox-rows>
-                <tr><td colspan="5">Login client dulu untuk melihat inbox customer.</td></tr>
-              </tbody>
-            </table>
+        </div>
+        <div class="crm-main-scroll">
+          <div class="crm-section-card">
+            <div class="crm-section-card-head"><h3>Informasi Tenant</h3></div>
+            <div class="crm-section-card-body">
+              <div class="crm-info-grid">
+                <div class="crm-info-item"><span>Kode</span><strong data-client-tenant-code>-</strong></div>
+                <div class="crm-info-item"><span>Nama</span><strong data-client-tenant-name>-</strong></div>
+                <div class="crm-info-item"><span>Status</span><strong data-client-tenant-status>-</strong></div>
+                <div class="crm-info-item"><span>Plan</span><strong data-client-tenant-plan>-</strong></div>
+                <div class="crm-info-item"><span>Team</span><strong data-client-tenant-team>-</strong></div>
+                <div class="crm-info-item"><span>Channel</span><strong data-client-tenant-channel>-</strong></div>
+                <div class="crm-info-item"><span>Widget ID</span><strong data-client-widget-id>-</strong></div>
+                <div class="crm-info-item"><span>Nomor</span><strong data-client-widget-number>-</strong></div>
+              </div>
+            </div>
           </div>
-        </article>
-      </section>
-    `;
+          <div class="crm-section-card">
+            <div class="crm-section-card-head"><h3>Status Akses</h3></div>
+            <div class="crm-section-card-body">
+              <p class="crm-access-message" data-client-access-message>Memuat status akses...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="crm-detail-pane">
+        <div class="crm-detail-section">
+          <h4>Langganan</h4>
+          <div class="crm-detail-row"><strong>Status</strong><span data-client-subscription-label>-</span></div>
+          <div class="crm-detail-row"><strong>Berakhir</strong><span data-client-subscription-expires-at>-</span></div>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Widget</h4>
+          <div class="crm-detail-row"><strong>ID</strong><span data-client-widget-id>-</span></div>
+          <div class="crm-detail-row"><strong>No.</strong><span data-client-widget-number>-</span></div>
+          <div class="crm-detail-row"><strong>State</strong><span data-client-backend-state>-</span></div>
+          <div class="crm-detail-row"><strong>Backend</strong><span data-client-backend-url>-</span></div>
+        </div>
+        <div class="crm-detail-section">
+          <div class="crm-detail-section-head">
+            <h4>Snippet Embed</h4>
+            <button class="crm-btn crm-btn-ghost crm-btn-sm" type="button" data-client-copy-snippet>Copy</button>
+          </div>
+          <pre class="crm-code" data-client-snippet>// Login untuk snippet</pre>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Auth</h4>
+          <div class="crm-detail-row"><strong>Owner</strong><span data-client-owner-name>-</span></div>
+          <div class="crm-detail-row"><strong>Admin</strong><span data-client-admin-names>-</span></div>
+          <div class="crm-detail-row"><strong>Operator</strong><span data-client-operator-names>-</span></div>
+        </div>
+      </div>
+    </div>`;
 };
 
 const registerClientTenant = async (input = {}) => {

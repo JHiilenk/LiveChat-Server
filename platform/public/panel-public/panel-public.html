@@ -9,35 +9,33 @@
     <link rel="stylesheet" href="/panel-public/panel-public.css" />
     <script defer src="/panel-public/panel-public.js"></script>
   </head>
-  <body data-panel-role="__PANEL_ROLE__" data-panel-alias="__PANEL_ALIAS__">
-    <main class="hq-shell">
-      <header class="hq-topbar">
-        <div class="hq-brand">
-          <div class="hq-logo">__PANEL_ALIAS__</div>
-          <div>
-            <h1>__PANEL_TITLE__</h1>
-            <p>__PANEL_SUBTITLE__</p>
+  <body data-panel-role="__PANEL_ROLE__" data-panel-alias="__PANEL_ALIAS__" data-logged-in="false">
+    <div class="crm-shell">
+      <header class="crm-topbar">
+        <div class="crm-brand">
+          <div class="crm-logo">__PANEL_ALIAS__</div>
+          <div class="crm-brand-text">
+            <strong>__APP_NAME__</strong>
+            <span>__PANEL_TITLE__</span>
           </div>
         </div>
-        <div class="hq-links">
-          <a href="/">Public Web</a>
-          <a href="/register">Register</a>
-          <a href="/panel/client">Client Panel</a>
-          <a href="/panel/client1">Client 1</a>
-          <a href="/panel/client2">Client 2</a>
-          <a href="/embed">Embed Surface</a>
+        <div class="crm-topbar-center">
+          <span class="crm-access-badge" data-client-subscription-label></span>
+          <span class="crm-tenant-chip" data-client-tenant-code></span>
+        </div>
+        <div class="crm-topbar-right">
+          <span class="crm-user-label" data-session-user></span>
+          <button class="crm-topbar-logout" type="button" data-logout-btn>Keluar</button>
+          <nav class="crm-topbar-nav">
+            <a href="/">Web</a>
+            <a href="/register">Register</a>
+            <a href="/panel/client1">Client 1</a>
+            <a href="/panel/client2">Client 2</a>
+            <a href="/embed">Embed</a>
+          </nav>
         </div>
       </header>
-
-      <section class="panel-public-copy">
-        <div class="panel-public-copy-inner">
-          <span class="hq-chip">Panel Public Client</span>
-          <h2>__PANEL_TITLE__</h2>
-          <p>__PANEL_HINT__</p>
-        </div>
-      </section>
-
-      __PANEL_BODY__
-    </main>
+      <div class="crm-workspace">__PANEL_BODY__</div>
+    </div>
   </body>
 </html>

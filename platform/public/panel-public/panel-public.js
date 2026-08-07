@@ -1,11 +1,10 @@
 const apiPrefix = "/api";
 
 const query = (selector) => document.querySelector(selector);
+const queryAll = (selector) => document.querySelectorAll(selector);
+
 const setText = (selector, value) => {
-  const node = query(selector);
-  if (node) {
-    node.textContent = String(value ?? "-");
-  }
+  queryAll(selector).forEach((node) => { node.textContent = String(value ?? "-"); });
 };
 
 const setHtml = (selector, value) => {
@@ -13,6 +12,20 @@ const setHtml = (selector, value) => {
   if (node) {
     node.innerHTML = String(value ?? "");
   }
+};
+
+const showLoggedIn = (userName = "") => {
+  document.body.dataset.loggedIn = "true";
+  const userEl = query("[data-session-user]");
+  if (userEl && userName) { userEl.textContent = userName; }
+};
+
+const showLoggedOut = () => {
+  document.body.dataset.loggedIn = "false";
+  const userEl = query("[data-session-user]");
+  if (userEl) { userEl.textContent = ""; }
+  queryAll("[data-client-subscription-label]").forEach((n) => { n.textContent = ""; });
+  queryAll("[data-client-tenant-code]").forEach((n) => { n.textContent = ""; });
 };
 
 const escapeHtml = (value) => String(value ?? "")
@@ -104,30 +117,44 @@ const renderTenantRows = (tenants = []) => {
   `).join("");
 };
 
-const renderInboxRows = (inbox = []) => {
+const renderInboxCards = (inbox = []) => {
   if (!Array.isArray(inbox) || inbox.length === 0) {
-    return "<tr><td colspan=\"5\">Belum ada pesan customer.</td></tr>";
+    return `<div class="crm-empty"><span class="crm-empty-icon">📭</span><span>Belum ada pesan</span></div>`;
   }
 
   return inbox.map((entry) => {
-    const createdAt = entry?.createdAt ? new Date(entry.createdAt).toLocaleString("id-ID") : "-";
-    const source = String(entry?.sourceUrl || "").trim();
-    const sourceCell = source
-      ? `<a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source)}</a>`
-      : "-";
-    const widgetLabel = entry?.widgetId
-      ? `${escapeHtml(entry.widgetId)}${entry?.widgetNumber ? ` #${escapeHtml(entry.widgetNumber)}` : ""}`
-      : "-";
+    const name = escapeHtml(entry?.visitorName || "Guest");
+    const initials = (entry?.visitorName || "G").slice(0, 2).toUpperCase();
+    const time = entry?.createdAt ? new Date(entry.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "";
+    const preview = escapeHtml(String(entry?.message || "").slice(0, 80));
+    const widget = entry?.widgetId ? `${escapeHtml(entry.widgetId)}${entry.widgetNumber ? " #" + escapeHtml(String(entry.widgetNumber)) : ""}` : "";
+    return `<div class="crm-conv-item">
+      <div class="crm-conv-avatar">${escapeHtml(initials)}</div>
+      <div class="crm-conv-body">
+        <div class="crm-conv-top"><span class="crm-conv-name">${name}</span><span class="crm-conv-time">${time}</span></div>
+        <div class="crm-conv-preview">${preview}</div>
+        ${widget ? `<div class="crm-conv-badges"><span class="crm-badge">${widget}</span></div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+};
 
-    return `
-      <tr>
-        <td>${escapeHtml(createdAt)}</td>
-        <td>${escapeHtml(entry?.visitorName || "Guest")}</td>
-        <td>${widgetLabel}</td>
-        <td>${escapeHtml(entry?.message || "")}</td>
-        <td>${sourceCell}</td>
-      </tr>
-    `;
+const renderTenantCards = (tenants = []) => {
+  if (!Array.isArray(tenants) || tenants.length === 0) {
+    return `<div class="crm-empty"><span class="crm-empty-icon">🏢</span><span>Belum ada tenant</span></div>`;
+  }
+
+  return tenants.map((tenant) => {
+    const initials = (tenant.tenantCode || "T").slice(0, 2).toUpperCase();
+    const statusClass = tenant.status === "expired" ? "crm-badge-err" : tenant.status === "active" ? "crm-badge-ok" : "crm-badge-warn";
+    return `<div class="crm-conv-item">
+      <div class="crm-conv-avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">${escapeHtml(initials)}</div>
+      <div class="crm-conv-body">
+        <div class="crm-conv-top"><span class="crm-conv-name">${escapeHtml(tenant.tenantCode || "-")}</span></div>
+        <div class="crm-conv-preview">${escapeHtml(tenant.tenantName || "-")}</div>
+        <div class="crm-conv-badges"><span class="crm-badge ${statusClass}">${escapeHtml(tenant.status || "-")}</span>${tenant.subscriptionDaysLeft != null ? `<span class="crm-badge">${tenant.subscriptionDaysLeft}h</span>` : ""}</div>
+      </div>
+    </div>`;
   }).join("");
 };
 
@@ -149,6 +176,7 @@ const hydrateMasterOverview = async () => {
       trialInput.value = String(data?.settings?.subscription?.defaultTrialDays || 30);
     }
     setHtml("[data-master-tenant-rows]", renderTenantRows(data?.tenants || []));
+    setHtml("[data-master-tenant-list]", renderTenantCards(data?.tenants || []));
 
     const warningItems = Array.isArray(data?.runtime?.warnings) && data.runtime.warnings.length > 0
       ? data.runtime.warnings.map((item) => `<li>${item}</li>`).join("")
@@ -238,6 +266,7 @@ const bindMasterLogin = () => {
       }
 
       setSessionToken(data?.session?.token || "");
+      showLoggedIn(data?.profile?.email || "master");
       if (status) {
         status.textContent = `Login berhasil sebagai ${data?.profile?.email || "master"}.`;
       }
@@ -403,9 +432,9 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
       throw new Error(data?.message || `HTTP ${response.status}`);
     }
 
-    setHtml("[data-client-inbox-rows]", renderInboxRows(data?.inbox || []));
+    setHtml("[data-inbox-list]", renderInboxCards(data?.inbox || []));
   } catch (error) {
-    setHtml("[data-client-inbox-rows]", `<tr><td colspan=\"5\">${escapeHtml(error.message)}</td></tr>`);
+    setHtml("[data-inbox-list]", `<div class="crm-empty"><span class="crm-empty-icon">⚠️</span><span>${escapeHtml(error.message)}</span></div>`);
   }
 };
 
@@ -442,6 +471,7 @@ const bindClientLogin = () => {
       }
 
       setSessionToken(data?.session?.token || "");
+      showLoggedIn(data?.role ? `${payload.userName} (${data.role})` : payload.userName);
       if (status) {
         status.textContent = `Login berhasil untuk tenant ${data?.tenantCode || payload.tenantCode}.`;
       }
@@ -487,6 +517,34 @@ const bindClientInboxRefresh = () => {
   });
 };
 
+const bindLogout = () => {
+  const btn = query("[data-logout-btn]");
+  if (!btn) { return; }
+  btn.addEventListener("click", () => {
+    setSessionToken("");
+    showLoggedOut();
+  });
+};
+
+const restoreSession = async () => {
+  const token = getSessionToken();
+  if (!token) { return; }
+  const role = document.body.dataset.panelRole;
+  try {
+    if (role === "master") {
+      const res = await authedFetch(`${apiPrefix}/v1/master/overview`);
+      if (res.ok) { showLoggedIn("master"); await hydrateMasterOverview(); }
+    } else {
+      const res = await authedFetch(`${apiPrefix}/v1/client/overview`);
+      if (res.ok) {
+        const data = await res.json();
+        showLoggedIn(data?.auth?.ownerName || "client");
+        await hydrateClientOverview(data?.tenant?.tenantCode || "");
+      }
+    }
+  } catch { /* session expired – stay on login */ }
+};
+
 const bootstrapPage = () => {
   const role = document.body.dataset.panelRole;
   if (role === "master") {
@@ -495,7 +553,8 @@ const bootstrapPage = () => {
     bindMasterRenew();
     bindMasterTrialSettings();
     bindMasterClientRegister();
-    hydrateMasterOverview();
+    bindLogout();
+    restoreSession();
     return;
   }
 
@@ -503,7 +562,8 @@ const bootstrapPage = () => {
     bindClientLogin();
     bindSnippetCopy();
     bindClientInboxRefresh();
-    hydrateClientOverview();
+    bindLogout();
+    restoreSession();
   }
 };
 
