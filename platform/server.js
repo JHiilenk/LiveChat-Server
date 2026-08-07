@@ -103,6 +103,18 @@ const sanitizeCode = (value, fallback) => {
   const code = String(value || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
   return code || fallback;
 };
+const sanitizeServiceType = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 64);
+const sanitizeServiceTypes = (values) => {
+  if (!values) {
+    return [];
+  }
+
+  const items = Array.isArray(values)
+    ? values
+    : String(values || "").split(",").map((item) => item.trim());
+
+  return [...new Set(items.map((item) => sanitizeServiceType(item)).filter(Boolean))].slice(0, 20);
+};
 const DEFAULT_DEMO_TENANT_CODE = sanitizeCode(process.env.DEFAULT_DEMO_TENANT_CODE || "DEWI", "DEWI");
 const nameKey = (value) => sanitizeName(value).toLowerCase().replace(/[^a-z0-9]+/g, "");
 const nowIso = () => new Date().toISOString();
@@ -407,6 +419,7 @@ const sanitizeTenantRecord = (record, fallbackCode = DEFAULT_TENANT_CODE) => {
     backendBaseUrl: String(record?.backendBaseUrl || LIVECHAT_BACKEND_URL).replace(/\/$/, ""),
     defaultTeamCode: sanitizeCode(record?.defaultTeamCode || DEFAULT_TEAM_CODE, DEFAULT_TEAM_CODE),
     defaultChannelCode: sanitizeCode(record?.defaultChannelCode || DEFAULT_CHANNEL_CODE, DEFAULT_CHANNEL_CODE),
+    serviceTypes: sanitizeServiceTypes(record?.serviceTypes || []),
     subscriptionMode: subscription.subscriptionMode,
     subscriptionStartedAt: subscription.subscriptionStartedAt,
     subscriptionExpiresAt: subscription.subscriptionExpiresAt,
@@ -1037,6 +1050,17 @@ const buildPanelPublicContent = (panelRole = "client", panelAlias = "client") =>
           <div class="crm-detail-row"><strong>Berakhir</strong><span data-client-subscription-expires-at>-</span></div>
         </div>
         <div class="crm-detail-section">
+          <h4>Jenis Layanan</h4>
+          <form class="crm-form crm-form-inline" data-tenant-service-form>
+            <label>Tambah layanan
+              <input type="text" name="serviceType" placeholder="Contoh: Pengiriman" data-tenant-service-type-input />
+            </label>
+            <button type="submit" class="crm-btn crm-btn-primary crm-btn-sm">Tambah</button>
+          </form>
+          <div class="crm-service-type-list" data-tenant-service-types>Belum ada layanan.</div>
+          <p class="crm-status-text" data-tenant-service-status></p>
+        </div>
+        <div class="crm-detail-section">
           <h4>Agents</h4>
           <div class="crm-detail-row"><strong>Owner</strong><span data-client-owner-name>-</span></div>
           <div class="crm-detail-row"><strong>Admin</strong><span data-client-admin-names>-</span></div>
@@ -1515,7 +1539,8 @@ app.get("/api/v1/client/overview", requireScopedSession(["client", "master"]), a
         widgetId: bootstrap.tenant.widgetId,
         widgetNumber: bootstrap.tenant.widgetNumber,
         snippet: `<script src="${widgetScriptUrl}" data-chat-url="${widgetChatUrl}" data-title="${bootstrap.tenant.tenantName}" data-subtitle="${bootstrap.tenant.defaultTeamCode} • ${bootstrap.tenant.defaultChannelCode}" data-widget-id="${bootstrap.tenant.widgetId}" data-widget-number="${bootstrap.tenant.widgetNumber}"></script>`
-      }
+      },
+      serviceTypes: Array.isArray(bootstrap.tenant.serviceTypes) ? bootstrap.tenant.serviceTypes : []
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat client overview: ${error.message}` });
@@ -1635,10 +1660,16 @@ app.post("/api/v1/inbox/message", async (req, res) => {
     const widgetNumber = Math.max(Number(req.body?.widgetNumber || 1), 1);
     const visitorName = sanitizeName(req.body?.visitorName || "Guest") || "Guest";
     const message = sanitizeCustomerMessage(req.body?.message || "");
+    const serviceType = sanitizeServiceType(req.body?.serviceType || "");
     const sourceUrl = String(req.body?.sourceUrl || "").trim().slice(0, 500);
 
     if (!message) {
       res.status(400).json({ ok: false, message: "Pesan customer tidak boleh kosong." });
+      return;
+    }
+
+    if (!visitorName) {
+      res.status(400).json({ ok: false, message: "Nama pengunjung tidak boleh kosong." });
       return;
     }
 
@@ -1657,6 +1688,7 @@ app.post("/api/v1/inbox/message", async (req, res) => {
       widgetId: widgetId || tenant.widgetId,
       widgetNumber: widgetId ? widgetNumber : tenant.widgetNumber,
       visitorName,
+      serviceType,
       message,
       sourceUrl,
       status: "new",
@@ -1709,6 +1741,7 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
         widgetId: doc.widgetId,
         widgetNumber: doc.widgetNumber,
         visitorName: doc.visitorName,
+        serviceType: doc.serviceType || "",
         message: doc.message,
         sourceUrl: doc.sourceUrl,
         status: doc.status,
@@ -1743,6 +1776,7 @@ app.post("/api/v1/client/inbox/reply", requireScopedSession(["client", "master"]
       widgetId: sanitizeWidgetId(req.body?.widgetId || tenant.widgetId || "", ""),
       widgetNumber: Math.max(Number(req.body?.widgetNumber || tenant.widgetNumber || 1), 1),
       visitorName: sanitizeName(req.body?.visitorName || tenant.tenantName || "Guest") || "Guest",
+      serviceType: sanitizeServiceType(req.body?.serviceType || ""),
       message,
       replyToMessageId,
       sourceUrl: String(req.body?.sourceUrl || "").trim().slice(0, 500),
@@ -1799,6 +1833,7 @@ app.get("/api/v1/inbox/poll", async (req, res) => {
         widgetId: doc.widgetId,
         widgetNumber: doc.widgetNumber,
         visitorName: doc.visitorName,
+        serviceType: doc.serviceType || "",
         message: doc.message,
         sourceUrl: doc.sourceUrl,
         status: doc.status,
@@ -1851,7 +1886,8 @@ app.put("/api/v1/tenants/:tenantCode", async (req, res) => {
       publicBaseUrl: req.body?.publicBaseUrl,
       backendBaseUrl: req.body?.backendBaseUrl,
       defaultTeamCode: req.body?.defaultTeamCode,
-      defaultChannelCode: req.body?.defaultChannelCode
+      defaultChannelCode: req.body?.defaultChannelCode,
+      serviceTypes: req.body?.serviceTypes
     });
 
     res.json({ ok: true, tenant: updated });

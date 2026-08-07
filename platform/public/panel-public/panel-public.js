@@ -16,6 +16,28 @@ const setHtml = (selector, value) => {
   }
 };
 
+const renderTenantServiceTypes = (serviceTypes = []) => {
+  if (!Array.isArray(serviceTypes) || serviceTypes.length === 0) {
+    return `<div class="crm-service-empty">Belum ada layanan. Tambah layanan di panel ini.</div>`;
+  }
+
+  return `<div class="crm-service-type-pill-list">${serviceTypes
+    .map(
+      (type) => `
+        <span class="crm-service-type-pill" data-service-type="${escapeHtml(type)}">
+          ${escapeHtml(type)}
+          <button type="button" class="crm-service-type-delete" data-tenant-delete-service="${escapeHtml(type)}" aria-label="Hapus layanan ${escapeHtml(type)}">×</button>
+        </span>
+      `,
+    )
+    .join("")}</div>`;
+};
+
+const updateTenantServiceTypeDisplay = (serviceTypes = []) => {
+  currentTenantServiceTypes = Array.isArray(serviceTypes) ? serviceTypes : [];
+  setHtml("[data-tenant-service-types]", renderTenantServiceTypes(currentTenantServiceTypes));
+};
+
 const showLoggedIn = (userName = "") => {
   document.body.dataset.loggedIn = "true";
   const userEl = query("[data-session-user]");
@@ -93,6 +115,7 @@ const applyClientAccessState = (tenant = {}, subscription = {}) => {
 
 let currentClientTenantCode = "";
 let currentClientWidgetId = "";
+let currentTenantServiceTypes = [];
 let allInboxData = [];
 let inboxData = [];
 let currentConversation = null;
@@ -774,6 +797,7 @@ const hydrateClientOverview = async (tenantCode = "") => {
     setText("[data-client-admin-names]", (data?.auth?.adminNames || []).join(", ") || "-");
     setText("[data-client-operator-names]", (data?.auth?.operatorNames || []).join(", ") || "-");
     setText("[data-client-snippet]", data?.widget?.snippet || "-");
+    updateTenantServiceTypeDisplay(data?.tenant?.serviceTypes || []);
     applyClientAccessState(data?.tenant || {}, data?.subscription || {});
     currentClientTenantCode = String(data?.tenant?.tenantCode || tenantCode || "")
       .trim()
@@ -941,6 +965,82 @@ const bindClientInboxRefresh = () => {
   });
 };
 
+const saveTenantServiceTypes = async (serviceTypes) => {
+  if (!currentClientTenantCode) {
+    return;
+  }
+
+  const status = query("[data-tenant-service-status]");
+  if (status) {
+    status.textContent = "Menyimpan layanan...";
+  }
+
+  try {
+    const response = await authedFetch(`${apiPrefix}/v1/tenants/${encodeURIComponent(currentClientTenantCode)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceTypes }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.message || `HTTP ${response.status}`);
+    }
+
+    updateTenantServiceTypeDisplay(data?.tenant?.serviceTypes || serviceTypes);
+    if (status) {
+      status.textContent = "Layanan disimpan.";
+    }
+  } catch (error) {
+    if (status) {
+      status.textContent = `Gagal simpan layanan: ${error.message}`;
+    }
+  }
+};
+
+const bindTenantServiceTypeManagement = () => {
+  const form = query("[data-tenant-service-form]");
+  const input = query("[data-tenant-service-type-input]");
+  const list = query("[data-tenant-service-types]");
+
+  if (form && input) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const value = String(input.value || "").trim();
+      if (!value) {
+        const status = query("[data-tenant-service-status]");
+        if (status) {
+          status.textContent = "Masukkan nama layanan terlebih dahulu.";
+        }
+        return;
+      }
+
+      const nextTypes = Array.from(new Set([...(currentTenantServiceTypes || []), value]));
+      await saveTenantServiceTypes(nextTypes);
+      if (input) {
+        input.value = "";
+      }
+    });
+  }
+
+  if (list) {
+    list.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const serviceType = target.dataset.tenantDeleteService;
+      if (!serviceType) {
+        return;
+      }
+
+      const nextTypes = (currentTenantServiceTypes || []).filter((type) => type !== serviceType);
+      await saveTenantServiceTypes(nextTypes);
+    });
+  }
+};
+
 const bindLogout = () => {
   const btn = query("[data-logout-btn]");
   if (!btn) {
@@ -995,6 +1095,7 @@ const bootstrapPage = () => {
     bindClientLogin();
     bindSnippetCopy();
     bindClientInboxRefresh();
+    bindTenantServiceTypeManagement();
     bindChatInput();
     bindChatMessageDelete();
     bindLogout();
