@@ -325,6 +325,7 @@ const sendConversationReply = async () => {
     currentConversation = refreshedEntry;
     setActiveConversationItem();
     openConversation(refreshedEntry);
+    appendOutboundMessage(message);
   } catch (error) {
     window.alert(`Gagal mengirim balasan: ${error.message}`);
   }
