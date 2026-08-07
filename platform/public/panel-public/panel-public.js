@@ -230,12 +230,10 @@ const getConversationThread = (entry) => {
   }
 
   const conversationKey = buildInboxConversationKey(entry);
-  const incoming = allInboxData
-    .filter((doc) => String(doc.kind || "in").toLowerCase() !== "out" && buildInboxConversationKey(doc) === conversationKey);
+  const incoming = allInboxData.filter((doc) => String(doc.kind || "in").toLowerCase() !== "out" && buildInboxConversationKey(doc) === conversationKey);
 
   const incomingIds = new Set(incoming.map((doc) => String(doc.messageId || "")));
-  const replies = allInboxData
-    .filter((doc) => String(doc.kind || "").toLowerCase() === "out" && incomingIds.has(String(doc.replyToMessageId || "")));
+  const replies = allInboxData.filter((doc) => String(doc.kind || "").toLowerCase() === "out" && incomingIds.has(String(doc.replyToMessageId || "")));
 
   return [...incoming, ...replies].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 };

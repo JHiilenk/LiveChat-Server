@@ -1,9 +1,13 @@
 (function () {
   const params = new URLSearchParams(window.location.search);
-  const tenantCode = String(params.get("tenantCode") || document.body.dataset.defaultTenant || "JIELIVE").trim().toUpperCase();
+  const tenantCode = String(params.get("tenantCode") || document.body.dataset.defaultTenant || "JIELIVE")
+    .trim()
+    .toUpperCase();
   const isEmbedded = window.self !== window.top || params.get("embed") === "1" || params.get("livechat") === "1";
   const appName = document.body.dataset.appName || "JIELive";
-  const widgetId = String(params.get("widgetId") || document.body.dataset.widgetId || tenantCode).trim().toUpperCase();
+  const widgetId = String(params.get("widgetId") || document.body.dataset.widgetId || tenantCode)
+    .trim()
+    .toUpperCase();
   const widgetNumber = String(params.get("widgetNumber") || document.body.dataset.widgetNumber || "1").trim();
   const storageKey = `JIELIVE_EMBED_CHAT_${tenantCode}`;
   const visitorNameKey = `JIELIVE_EMBED_VISITOR_${tenantCode}`;
@@ -18,6 +22,8 @@
   const listNode = document.getElementById("messageList");
   const formNode = document.getElementById("messageForm");
   const inputNode = document.getElementById("messageInput");
+  const visitorNameInput = document.getElementById("visitorNameInput");
+  const serviceTypeSelect = document.getElementById("serviceTypeSelect");
 
   if (titleNode) {
     titleNode.textContent = `${appName} Live Support`;
@@ -30,6 +36,9 @@
   if (tenantChipNode) {
     tenantChipNode.textContent = `Tenant ${tenantCode}`;
   }
+
+  persistVisitorInfo();
+  hydrateEmbedServiceTypes();
 
   const nowClock = () => new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
@@ -53,6 +62,23 @@
   };
 
   const visitorName = getVisitorName();
+  const serviceTypeKey = `JIELIVE_EMBED_SERVICE_TYPE_${tenantCode}`;
+
+  const getStoredServiceType = () => {
+    try {
+      return String(localStorage.getItem(serviceTypeKey) || "").trim();
+    } catch {
+      return "";
+    }
+  };
+
+  const setStoredServiceType = (value) => {
+    try {
+      localStorage.setItem(serviceTypeKey, String(value || ""));
+    } catch {
+      // ignore storage errors in restricted browsers
+    }
+  };
 
   const loadMessages = () => {
     try {
@@ -96,12 +122,9 @@
 
     const entry = {
       role,
-      text: cleanText
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;"),
+      text: cleanText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
       label: role === "me" ? "Anda" : "Support",
-      time: nowClock()
+      time: nowClock(),
     };
 
     state.messages.push(entry);
@@ -113,12 +136,12 @@
     "Terima kasih, pesan kamu sudah masuk. Tim kami akan membalas secepatnya.",
     "Untuk pemasangan widget, kamu bisa pakai snippet dari halaman utama atau panel client.",
     "Jika butuh tenant/panel setup, tulis kebutuhanmu, nanti kami bantu konfigurasi.",
-    "Mode development aktif: data chat disimpan lokal di browser ini."
+    "Mode development aktif: data chat disimpan lokal di browser ini.",
   ];
 
   const state = {
     messages: loadMessages(),
-    replyIndex: 0
+    replyIndex: 0,
   };
 
   if (state.messages.length === 0) {
@@ -135,13 +158,91 @@
     }, 480);
   };
 
+  const renderServiceTypeOptions = (items = []) => {
+    if (!serviceTypeSelect) {
+      return;
+    }
+    const normalized = Array.isArray(items) ? items : [];
+    serviceTypeSelect.innerHTML = `
+      <option value="">Pilih jenis layanan</option>
+      ${normalized.map((item) => `<option value="${item.replace(/"/g, "&quot;")}">${item.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</option>`).join("")}
+    `;
+    const stored = getStoredServiceType();
+    if (stored) {
+      serviceTypeSelect.value = stored;
+    }
+  };
+
+  const hydrateEmbedServiceTypes = async () => {
+    if (!serviceTypeSelect) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenantCode)}`);
+      if (!response.ok) {
+        return;
+      }
+      const data = await response.json().catch(() => ({}));
+      renderServiceTypeOptions(Array.isArray(data?.tenant?.serviceTypes) ? data.tenant.serviceTypes : []);
+    } catch {
+      // ignore load failures
+    }
+  };
+
+  const persistVisitorInfo = () => {
+    try {
+      if (visitorNameInput) {
+        visitorNameInput.value = visitorName;
+      }
+      if (serviceTypeSelect) {
+        const stored = getStoredServiceType();
+        if (stored) {
+          serviceTypeSelect.value = stored;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const updateStoredVisitorName = () => {
+    try {
+      if (visitorNameInput) {
+        const value = String(visitorNameInput.value || "").trim();
+        if (value) {
+          localStorage.setItem(visitorNameKey, value);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const updateStoredServiceType = () => {
+    try {
+      if (serviceTypeSelect) {
+        setStoredServiceType(String(serviceTypeSelect.value || "").trim());
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   // Polling for replies sent from client panel (support) so widget can show outbound messages
   const lastSeenKey = `JIELIVE_EMBED_LAST_${tenantCode}`;
   const loadLastSeen = () => {
-    try { return String(localStorage.getItem(lastSeenKey) || ""); } catch { return ""; }
+    try {
+      return String(localStorage.getItem(lastSeenKey) || "");
+    } catch {
+      return "";
+    }
   };
   const saveLastSeen = (val) => {
-    try { if (val) localStorage.setItem(lastSeenKey, String(val)); } catch { /* ignore */ }
+    try {
+      if (val) localStorage.setItem(lastSeenKey, String(val));
+    } catch {
+      /* ignore */
+    }
   };
 
   const pollReplies = async () => {
@@ -149,12 +250,16 @@
       const since = loadLastSeen();
       const url = `/api/v1/inbox/poll?tenantCode=${encodeURIComponent(tenantCode)}&widgetId=${encodeURIComponent(widgetId)}&limit=20${since ? `&since=${encodeURIComponent(since)}` : ""}`;
       const response = await fetch(url);
-      if (!response.ok) { return; }
+      if (!response.ok) {
+        return;
+      }
       const data = await response.json().catch(() => ({}));
       const items = Array.isArray(data?.inbox) ? data.inbox : [];
       let newest = since;
       for (const item of items) {
-        if (!item || !item.messageId || !item.message) { continue; }
+        if (!item || !item.messageId || !item.message) {
+          continue;
+        }
         appendMessage(state, "bot", item.message);
         if (item.createdAt) {
           newest = newest && newest > item.createdAt ? newest : item.createdAt;
@@ -179,16 +284,17 @@
       tenantCode,
       widgetId,
       widgetNumber,
-      visitorName,
+      visitorName: String(visitorNameInput?.value || visitorName || "Guest").trim() || "Guest",
+      serviceType: String(serviceTypeSelect?.value || "").trim(),
       message: text,
-      sourceUrl: window.location.href
+      sourceUrl: window.location.href,
     };
 
     try {
       const response = await fetch("/api/v1/inbox/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -215,9 +321,20 @@
     queueReply();
   };
 
+  if (visitorNameInput) {
+    visitorNameInput.addEventListener("change", updateStoredVisitorName);
+    visitorNameInput.addEventListener("blur", updateStoredVisitorName);
+  }
+
+  if (serviceTypeSelect) {
+    serviceTypeSelect.addEventListener("change", updateStoredServiceType);
+  }
+
   if (formNode) {
     formNode.addEventListener("submit", (event) => {
       event.preventDefault();
+      updateStoredVisitorName();
+      updateStoredServiceType();
       submitMessage();
     });
   }

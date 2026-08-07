@@ -17,11 +17,10 @@ const buildInboxReplyDocument = (input = {}) => {
     sourceUrl: input.sourceUrl || "",
     status: "replied",
     createdAt: now,
-    updatedAt: input.updatedAt || now
+    updatedAt: input.updatedAt || now,
   };
 };
 
-
 module.exports = {
-  buildInboxReplyDocument
+  buildInboxReplyDocument,
 };

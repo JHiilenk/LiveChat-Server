@@ -50,11 +50,7 @@ const getSafeAbsoluteUrl = (value, fallback, warningLabel) => {
   }
 };
 
-const LIVECHAT_BACKEND_URL = resolveLivechatBackendUrl(
-  process.env,
-  PUBLIC_BASE_URL,
-  DEFAULT_LIVECHAT_BACKEND_URL
-);
+const LIVECHAT_BACKEND_URL = resolveLivechatBackendUrl(process.env, PUBLIC_BASE_URL, DEFAULT_LIVECHAT_BACKEND_URL);
 
 const buildRuntimeWarnings = () => {
   const warnings = [...runtimeWarnings];
@@ -79,7 +75,7 @@ const templates = {
   panelPublic: readTemplate("panel-public/panel-public.html"),
   panelMaster: readTemplate("panel-master/panel-master.html"),
   admin: readTemplate("admin.html"),
-  embed: readTemplate("embed.html")
+  embed: readTemplate("embed.html"),
 };
 
 fs.mkdirSync(dataDirectory, { recursive: true });
@@ -92,18 +88,34 @@ const settingsDb = Datastore.create({ filename: path.join(dataDirectory, "platfo
 const loginAttemptStore = new Map();
 const SUBSCRIPTION_SETTINGS_DOC_KEY = "__SUBSCRIPTION_SETTINGS__";
 
-const sanitizeName = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 48);
-const sanitizeCustomerMessage = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 1200);
-const sanitizeWidgetId = (value, fallback = "") => String(value || fallback || "")
-  .trim()
-  .toUpperCase()
-  .replace(/[^A-Z0-9_-]/g, "")
-  .slice(0, 32) || fallback;
+const sanitizeName = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 48);
+const sanitizeCustomerMessage = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 1200);
+const sanitizeWidgetId = (value, fallback = "") =>
+  String(value || fallback || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, "")
+    .slice(0, 32) || fallback;
 const sanitizeCode = (value, fallback) => {
-  const code = String(value || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+  const code = String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, "");
   return code || fallback;
 };
-const sanitizeServiceType = (value) => String(value || "").trim().replace(/\s+/g, " ").slice(0, 64);
+const sanitizeServiceType = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 64);
 const sanitizeServiceTypes = (values) => {
   if (!values) {
     return [];
@@ -111,18 +123,23 @@ const sanitizeServiceTypes = (values) => {
 
   const items = Array.isArray(values)
     ? values
-    : String(values || "").split(",").map((item) => item.trim());
+    : String(values || "")
+        .split(",")
+        .map((item) => item.trim());
 
   return [...new Set(items.map((item) => sanitizeServiceType(item)).filter(Boolean))].slice(0, 20);
 };
 const DEFAULT_DEMO_TENANT_CODE = sanitizeCode(process.env.DEFAULT_DEMO_TENANT_CODE || "DEWI", "DEWI");
-const nameKey = (value) => sanitizeName(value).toLowerCase().replace(/[^a-z0-9]+/g, "");
+const nameKey = (value) =>
+  sanitizeName(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
 const nowIso = () => new Date().toISOString();
 const parseDateMs = (value) => {
   const time = new Date(String(value || "")).getTime();
   return Number.isFinite(time) ? time : 0;
 };
-const addDaysIso = (baseValue, days) => new Date((parseDateMs(baseValue) || Date.now()) + (Math.max(Number(days || 0), 0) * DAY_IN_MS)).toISOString();
+const addDaysIso = (baseValue, days) => new Date((parseDateMs(baseValue) || Date.now()) + Math.max(Number(days || 0), 0) * DAY_IN_MS).toISOString();
 const addMonthsIso = (baseValue, months) => {
   const date = new Date(parseDateMs(baseValue) || Date.now());
   date.setMonth(date.getMonth() + Math.max(Number(months || 0), 0));
@@ -194,12 +211,12 @@ const buildTenantSubscriptionState = (record = {}) => {
     subscriptionRenewedAt: String(record.subscriptionRenewedAt || ""),
     subscriptionAccessEnabled,
     subscriptionDaysLeft,
-    subscriptionLabel
+    subscriptionLabel,
   };
 };
 
 const sanitizeSubscriptionSettings = (raw = {}) => ({
-  defaultTrialDays: Math.max(Number(raw.defaultTrialDays || FREE_TRIAL_DAYS), 1)
+  defaultTrialDays: Math.max(Number(raw.defaultTrialDays || FREE_TRIAL_DAYS), 1),
 });
 
 const getSubscriptionSettings = async () => {
@@ -209,11 +226,7 @@ const getSubscriptionSettings = async () => {
 
 const saveSubscriptionSettings = async (nextSettings = {}) => {
   const value = sanitizeSubscriptionSettings(nextSettings);
-  await settingsDb.update(
-    { key: SUBSCRIPTION_SETTINGS_DOC_KEY },
-    { $set: { key: SUBSCRIPTION_SETTINGS_DOC_KEY, value, updatedAt: nowIso() } },
-    { upsert: true }
-  );
+  await settingsDb.update({ key: SUBSCRIPTION_SETTINGS_DOC_KEY }, { $set: { key: SUBSCRIPTION_SETTINGS_DOC_KEY, value, updatedAt: nowIso() } }, { upsert: true });
 
   return value;
 };
@@ -264,12 +277,12 @@ const registerFailedAttempt = (attemptKey) => {
     loginAttemptStore.set(attemptKey, {
       firstFailedAtMs: now,
       failureCount: 1,
-      lockedUntilMs
+      lockedUntilMs,
     });
 
     return {
       locked: lockedUntilMs > now,
-      retryAfterSec: lockedUntilMs > now ? Math.ceil((lockedUntilMs - now) / 1000) : 0
+      retryAfterSec: lockedUntilMs > now ? Math.ceil((lockedUntilMs - now) / 1000) : 0,
     };
   }
 
@@ -279,12 +292,12 @@ const registerFailedAttempt = (attemptKey) => {
   loginAttemptStore.set(attemptKey, {
     firstFailedAtMs: Number(current.firstFailedAtMs || now),
     failureCount: nextFailureCount,
-    lockedUntilMs
+    lockedUntilMs,
   });
 
   return {
     locked: shouldLock,
-    retryAfterSec: shouldLock ? Math.ceil(LOGIN_LOCK_MS / 1000) : 0
+    retryAfterSec: shouldLock ? Math.ceil(LOGIN_LOCK_MS / 1000) : 0,
   };
 };
 
@@ -299,7 +312,7 @@ const buildWidgetIdentity = (tenantCode, widgetNumber) => {
   const safeNumber = Math.max(Number(widgetNumber || 1), 1);
   return {
     widgetNumber: safeNumber,
-    widgetId: `WIDGET-${String(safeNumber).padStart(4, "0")}-${safeTenantCode}`
+    widgetId: `WIDGET-${String(safeNumber).padStart(4, "0")}-${safeTenantCode}`,
   };
 };
 
@@ -329,7 +342,7 @@ const buildDefaultTenantRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
   widgetNumber: 1,
   widgetId: buildWidgetIdentity(tenantCode, 1).widgetId,
   createdAt: nowIso(),
-  updatedAt: nowIso()
+  updatedAt: nowIso(),
 });
 
 const buildDefaultAuthRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
@@ -341,7 +354,7 @@ const buildDefaultAuthRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
   operators: [],
   authVersion: AUTH_SCHEMA_VERSION,
   createdAt: nowIso(),
-  updatedAt: nowIso()
+  updatedAt: nowIso(),
 });
 
 const normalizeCommaList = (value) => {
@@ -360,13 +373,9 @@ const ensureAuthDocShape = (authDoc) => {
     return null;
   }
 
-  const admins = Array.isArray(authDoc.admins)
-    ? authDoc.admins.filter((entry) => entry && entry.key && entry.name)
-    : [];
+  const admins = Array.isArray(authDoc.admins) ? authDoc.admins.filter((entry) => entry && entry.key && entry.name) : [];
 
-  const operators = Array.isArray(authDoc.operators)
-    ? authDoc.operators.filter((entry) => entry && entry.key && entry.name)
-    : [];
+  const operators = Array.isArray(authDoc.operators) ? authDoc.operators.filter((entry) => entry && entry.key && entry.name) : [];
 
   return {
     ...authDoc,
@@ -374,7 +383,7 @@ const ensureAuthDocShape = (authDoc) => {
     operators,
     adminPasswordHash: String(authDoc.adminPasswordHash || authDoc.ownerPasswordHash || ""),
     ownerName: sanitizeName(authDoc.ownerName || ""),
-    ownerKey: nameKey(authDoc.ownerName || "")
+    ownerKey: nameKey(authDoc.ownerName || ""),
   };
 };
 
@@ -388,7 +397,7 @@ const buildTeamAuthState = (authDoc) => {
     hasOwner: true,
     ownerName: safeDoc.ownerName,
     adminNames: (safeDoc.admins || []).map((entry) => entry.name),
-    operatorNames: (safeDoc.operators || []).map((entry) => entry.name)
+    operatorNames: (safeDoc.operators || []).map((entry) => entry.name),
   };
 };
 
@@ -407,7 +416,7 @@ const sanitizeTenantRecord = (record, fallbackCode = DEFAULT_TENANT_CODE) => {
   const subscription = buildTenantSubscriptionState({
     ...record,
     tenantCode,
-    createdAt: String(record?.createdAt || now)
+    createdAt: String(record?.createdAt || now),
   });
 
   return {
@@ -431,7 +440,7 @@ const sanitizeTenantRecord = (record, fallbackCode = DEFAULT_TENANT_CODE) => {
     widgetNumber: Math.max(Number(record?.widgetNumber || 1), 1),
     widgetId: sanitizeWidgetId(record?.widgetId || buildWidgetIdentity(tenantCode, record?.widgetNumber || 1).widgetId, buildWidgetIdentity(tenantCode, record?.widgetNumber || 1).widgetId),
     createdAt: String(record?.createdAt || now),
-    updatedAt: now
+    updatedAt: now,
   };
 };
 
@@ -444,7 +453,7 @@ const getRuntimeDeploymentState = () => ({
   defaultTenantCode: DEFAULT_TENANT_CODE,
   defaultTeamCode: DEFAULT_TEAM_CODE,
   defaultChannelCode: DEFAULT_CHANNEL_CODE,
-  warnings: buildRuntimeWarnings()
+  warnings: buildRuntimeWarnings(),
 });
 
 const proxyBackendRequest = async (pathname, { method = "GET", body, headers = {}, contentType = "application/json" } = {}) => {
@@ -457,10 +466,10 @@ const proxyBackendRequest = async (pathname, { method = "GET", body, headers = {
       method,
       headers: {
         ...(body ? { "Content-Type": contentType } : {}),
-        ...headers
+        ...headers,
       },
       body: body ? (contentType === "application/json" ? JSON.stringify(body) : body) : undefined,
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     const text = await response.text();
@@ -485,7 +494,10 @@ const proxyBackendScript = async (pathname, res) => {
     const proxied = await proxyBackendRequest(pathname, { contentType: "application/javascript" });
     res.status(proxied.status).type("application/javascript").send(proxied.body);
   } catch (error) {
-    res.status(502).type("application/javascript").send(`console.error(${JSON.stringify(`Backend livechat tidak terjangkau: ${error.message}`)});`);
+    res
+      .status(502)
+      .type("application/javascript")
+      .send(`console.error(${JSON.stringify(`Backend livechat tidak terjangkau: ${error.message}`)});`);
   }
 };
 
@@ -516,14 +528,16 @@ const ensureSeedData = async () => {
 
   const demoAuth = await authDb.findOne({ teamCode: DEFAULT_DEMO_TENANT_CODE });
   if (!demoAuth) {
-    await authDb.insert(resolveDemoAuthDefaults(DEFAULT_DEMO_TENANT_CODE, null, {
-      demoTenantCode: DEFAULT_DEMO_TENANT_CODE,
-      ownerName: "dewi",
-      ownerPassword: DEFAULT_OWNER_PASSWORD,
-      adminName: DEFAULT_ADMIN_USERNAME,
-      adminPassword: DEFAULT_ADMIN_PASSWORD,
-      hashPassword
-    }));
+    await authDb.insert(
+      resolveDemoAuthDefaults(DEFAULT_DEMO_TENANT_CODE, null, {
+        demoTenantCode: DEFAULT_DEMO_TENANT_CODE,
+        ownerName: "dewi",
+        ownerPassword: DEFAULT_OWNER_PASSWORD,
+        adminName: DEFAULT_ADMIN_USERNAME,
+        adminPassword: DEFAULT_ADMIN_PASSWORD,
+        hashPassword,
+      }),
+    );
   }
 
   const existingSettings = await settingsDb.findOne({ key: SUBSCRIPTION_SETTINGS_DOC_KEY });
@@ -546,7 +560,7 @@ const getTenantBootstrap = async (tenantCode) => {
     simulationConfig: null,
     uploadConfig: null,
     directAdminConfig: null,
-    realMembers: []
+    realMembers: [],
   };
 
   if (isLocalBackend()) {
@@ -556,7 +570,7 @@ const getTenantBootstrap = async (tenantCode) => {
         fetchBackendJson("/api/simulation-config"),
         fetchBackendJson("/api/upload-config"),
         fetchBackendJson("/api/direct-admin-config"),
-        fetchBackendJson(`/api/real-members?teamCode=${encodeURIComponent(tenant.defaultTeamCode)}`)
+        fetchBackendJson(`/api/real-members?teamCode=${encodeURIComponent(tenant.defaultTeamCode)}`),
       ]);
 
       backendConfigs = {
@@ -564,7 +578,7 @@ const getTenantBootstrap = async (tenantCode) => {
         simulationConfig,
         uploadConfig,
         directAdminConfig,
-        realMembers: Array.isArray(realMembers?.members) ? realMembers.members : []
+        realMembers: Array.isArray(realMembers?.members) ? realMembers.members : [],
       };
     } catch {
       backendConfigs = {
@@ -572,7 +586,7 @@ const getTenantBootstrap = async (tenantCode) => {
         simulationConfig: null,
         uploadConfig: null,
         directAdminConfig: null,
-        realMembers: []
+        realMembers: [],
       };
     }
   }
@@ -587,20 +601,20 @@ const getTenantBootstrap = async (tenantCode) => {
       expiresAt: tenant.subscriptionExpiresAt,
       trialDays: tenant.subscriptionTrialDays,
       daysLeft: tenant.subscriptionDaysLeft,
-      label: tenant.subscriptionLabel
+      label: tenant.subscriptionLabel,
     },
     auth: buildTeamAuthState(auth),
     backend: {
       baseUrl: LIVECHAT_BACKEND_URL,
       available: isLocalBackend(),
-      ...backendConfigs
+      ...backendConfigs,
     },
     surfaces: {
       web: PUBLIC_BASE_URL,
       admin: `${PUBLIC_BASE_URL}/admin`,
       embed: `${PUBLIC_BASE_URL}/embed`,
-      api: `${PUBLIC_BASE_URL}/api/v1/status`
-    }
+      api: `${PUBLIC_BASE_URL}/api/v1/status`,
+    },
   };
 };
 
@@ -612,11 +626,14 @@ const getTenantRecord = async (tenantCode) => {
   }
 
   const widgetNumber = await getNextWidgetNumber();
-  const created = sanitizeTenantRecord({
-    ...buildDefaultTenantRecord(safeTenantCode),
-    widgetNumber,
-    widgetId: buildWidgetIdentity(safeTenantCode, widgetNumber).widgetId
-  }, safeTenantCode);
+  const created = sanitizeTenantRecord(
+    {
+      ...buildDefaultTenantRecord(safeTenantCode),
+      widgetNumber,
+      widgetId: buildWidgetIdentity(safeTenantCode, widgetNumber).widgetId,
+    },
+    safeTenantCode,
+  );
   await tenantsDb.insert(created);
   return created;
 };
@@ -636,9 +653,9 @@ const getAuthRecord = async (tenantCode) => {
           ownerPassword: DEFAULT_OWNER_PASSWORD,
           adminName: DEFAULT_ADMIN_USERNAME,
           adminPassword: DEFAULT_ADMIN_PASSWORD,
-          hashPassword
+          hashPassword,
         })
-      : buildDefaultAuthRecord(safeTenantCode)
+      : buildDefaultAuthRecord(safeTenantCode),
   );
   await authDb.insert(created);
   return created;
@@ -649,19 +666,18 @@ const saveTenantRecord = async (tenantCode, nextRecord) => {
   const current = await getTenantRecord(safeTenantCode);
   const currentWidgetNumber = Math.max(Number(current.widgetNumber || 1), 1);
   const currentWidgetIdentity = buildWidgetIdentity(safeTenantCode, currentWidgetNumber);
-  const updated = sanitizeTenantRecord({
-    ...current,
-    ...nextRecord,
-    tenantCode: safeTenantCode,
-    widgetNumber: currentWidgetIdentity.widgetNumber,
-    widgetId: sanitizeWidgetId(current.widgetId || currentWidgetIdentity.widgetId, currentWidgetIdentity.widgetId)
-  }, safeTenantCode);
-
-  await tenantsDb.update(
-    { tenantCode: safeTenantCode },
-    { $set: updated },
-    { upsert: true }
+  const updated = sanitizeTenantRecord(
+    {
+      ...current,
+      ...nextRecord,
+      tenantCode: safeTenantCode,
+      widgetNumber: currentWidgetIdentity.widgetNumber,
+      widgetId: sanitizeWidgetId(current.widgetId || currentWidgetIdentity.widgetId, currentWidgetIdentity.widgetId),
+    },
+    safeTenantCode,
   );
+
+  await tenantsDb.update({ tenantCode: safeTenantCode }, { $set: updated }, { upsert: true });
 
   return updated;
 };
@@ -669,13 +685,9 @@ const saveTenantRecord = async (tenantCode, nextRecord) => {
 const saveAuthRecord = async (tenantCode, nextRecord) => {
   const safeTenantCode = sanitizeCode(tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
   const current = await getAuthRecord(safeTenantCode);
-  const nextAdmins = Array.isArray(nextRecord.admins)
-    ? nextRecord.admins
-    : normalizeCommaList(nextRecord.adminNames).map((name) => ({ key: nameKey(name), name }));
+  const nextAdmins = Array.isArray(nextRecord.admins) ? nextRecord.admins : normalizeCommaList(nextRecord.adminNames).map((name) => ({ key: nameKey(name), name }));
 
-  const nextOperators = Array.isArray(nextRecord.operators)
-    ? nextRecord.operators
-    : normalizeCommaList(nextRecord.operatorNames).map((name) => ({ key: nameKey(name), name }));
+  const nextOperators = Array.isArray(nextRecord.operators) ? nextRecord.operators : normalizeCommaList(nextRecord.operatorNames).map((name) => ({ key: nameKey(name), name }));
 
   const updated = ensureAuthDocShape({
     ...current,
@@ -686,14 +698,10 @@ const saveAuthRecord = async (tenantCode, nextRecord) => {
     adminPasswordHash: nextRecord.adminPassword ? hashPassword(String(nextRecord.adminPassword)) : current.adminPasswordHash,
     admins: nextAdmins,
     operators: nextOperators,
-    updatedAt: nowIso()
+    updatedAt: nowIso(),
   });
 
-  await authDb.update(
-    { teamCode: safeTenantCode },
-    { $set: updated },
-    { upsert: true }
-  );
+  await authDb.update({ teamCode: safeTenantCode }, { $set: updated }, { upsert: true });
 
   return updated;
 };
@@ -732,18 +740,17 @@ const createScopedSession = async ({ tenantCode, userName, role, scope }) => {
   const safeTenantCode = sanitizeCode(tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
   const safeUserName = sanitizeName(userName || "") || "system";
 
-  await sessionsDb.remove({
-    tenantCode: safeTenantCode,
-    userName: safeUserName,
-    scope: safeScope
-  }, { multi: true });
+  await sessionsDb.remove(
+    {
+      tenantCode: safeTenantCode,
+      userName: safeUserName,
+      scope: safeScope,
+    },
+    { multi: true },
+  );
 
   const session = await createSession({ tenantCode, userName, role });
-  await sessionsDb.update(
-    { token: session.token },
-    { $set: { scope: safeScope } },
-    { upsert: false }
-  );
+  await sessionsDb.update({ token: session.token }, { $set: { scope: safeScope } }, { upsert: false });
 
   return { ...session, scope: safeScope };
 };
@@ -763,26 +770,28 @@ const requireAdminSession = async (req, res, next) => {
   }
 };
 
-const requireScopedSession = (expectedScopes = []) => async (req, res, next) => {
-  try {
-    const session = await getSessionFromRequest(req);
-    if (!session) {
-      res.status(401).json({ ok: false, message: "Sesi tidak valid." });
-      return;
-    }
+const requireScopedSession =
+  (expectedScopes = []) =>
+  async (req, res, next) => {
+    try {
+      const session = await getSessionFromRequest(req);
+      if (!session) {
+        res.status(401).json({ ok: false, message: "Sesi tidak valid." });
+        return;
+      }
 
-    const scope = sanitizeName(session.scope || "client") || "client";
-    if (Array.isArray(expectedScopes) && expectedScopes.length > 0 && !expectedScopes.includes(scope)) {
-      res.status(403).json({ ok: false, message: "Akses tidak diizinkan untuk sesi ini." });
-      return;
-    }
+      const scope = sanitizeName(session.scope || "client") || "client";
+      if (Array.isArray(expectedScopes) && expectedScopes.length > 0 && !expectedScopes.includes(scope)) {
+        res.status(403).json({ ok: false, message: "Akses tidak diizinkan untuk sesi ini." });
+        return;
+      }
 
-    req.platformSession = { ...session, scope };
-    next();
-  } catch (error) {
-    res.status(500).json({ ok: false, message: `Gagal memeriksa sesi: ${error.message}` });
-  }
-};
+      req.platformSession = { ...session, scope };
+      next();
+    } catch (error) {
+      res.status(500).json({ ok: false, message: `Gagal memeriksa sesi: ${error.message}` });
+    }
+  };
 
 const renderTemplate = (template, extraValues = {}) => {
   const replacements = {
@@ -793,7 +802,7 @@ const renderTemplate = (template, extraValues = {}) => {
     __DEFAULT_TENANT_CODE__: DEFAULT_TENANT_CODE,
     __DEFAULT_TEAM_CODE__: DEFAULT_TEAM_CODE,
     __DEFAULT_CHANNEL_CODE__: DEFAULT_CHANNEL_CODE,
-    ...extraValues
+    ...extraValues,
   };
 
   return Object.entries(replacements).reduce((html, [key, value]) => {
@@ -802,10 +811,14 @@ const renderTemplate = (template, extraValues = {}) => {
 };
 
 const getRequestPublicBaseUrl = (req) => {
-  const forwardedProto = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
-  const forwardedHost = String(req.headers["x-forwarded-host"] || "").split(",")[0].trim();
+  const forwardedProto = String(req.headers["x-forwarded-proto"] || "")
+    .split(",")[0]
+    .trim();
+  const forwardedHost = String(req.headers["x-forwarded-host"] || "")
+    .split(",")[0]
+    .trim();
   const host = String(req.headers.host || "").trim();
-  const protocol = forwardedProto || (req.protocol || "https");
+  const protocol = forwardedProto || req.protocol || "https";
   const targetHost = forwardedHost || host;
 
   if (!targetHost) {
@@ -822,24 +835,30 @@ const apiSurface = {
   defaultTenantCode: DEFAULT_TENANT_CODE,
   defaultTeamCode: DEFAULT_TEAM_CODE,
   defaultChannelCode: DEFAULT_CHANNEL_CODE,
-  surfaces: ["web", "admin", "embed", "api"]
+  surfaces: ["web", "admin", "embed", "api"],
 };
 
 const buildClientPanelTemplateValues = (panelAlias = "client") => {
   const safeAlias = sanitizeName(panelAlias || "client") || "client";
-  const prettyAlias = safeAlias.replace(/^client/i, "Client ").replace(/\s+/g, " ").trim();
+  const prettyAlias = safeAlias
+    .replace(/^client/i, "Client ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   return {
     __PANEL_ALIAS__: safeAlias,
     __PANEL_TITLE__: `${prettyAlias} Panel`,
     __PANEL_SUBTITLE__: `Panel operasional tenant livechat untuk ${prettyAlias.toLowerCase()}`,
-    __PANEL_HINT__: `Login ${prettyAlias.toLowerCase()} memakai username masing-masing. ID dan number sistem dibuat otomatis.`
+    __PANEL_HINT__: `Login ${prettyAlias.toLowerCase()} memakai username masing-masing. ID dan number sistem dibuat otomatis.`,
   };
 };
 
 const buildPanelPublicContent = (panelRole = "client", panelAlias = "client") => {
   const safeAlias = sanitizeName(panelAlias || "client") || "client";
-  const prettyAlias = safeAlias.replace(/^client/i, "Client ").replace(/\s+/g, " ").trim();
+  const prettyAlias = safeAlias
+    .replace(/^client/i, "Client ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   const rail = `
     <nav class="crm-rail">
@@ -1107,21 +1126,21 @@ const registerClientTenant = async (input = {}) => {
     subscriptionExpiresAt: addDaysIso(nowIso(), trialDays),
     subscriptionTrialDays: trialDays,
     defaultTeamCode: sanitizeCode(input.defaultTeamCode || tenantCode, tenantCode),
-    defaultChannelCode: sanitizeCode(input.defaultChannelCode || DEFAULT_CHANNEL_CODE, DEFAULT_CHANNEL_CODE)
+    defaultChannelCode: sanitizeCode(input.defaultChannelCode || DEFAULT_CHANNEL_CODE, DEFAULT_CHANNEL_CODE),
   });
 
   const auth = await saveAuthRecord(tenant.tenantCode, {
     ownerName,
     ownerPassword,
     adminNames: Array.isArray(input.adminNames) ? input.adminNames : [],
-    operatorNames: Array.isArray(input.operatorNames) ? input.operatorNames : []
+    operatorNames: Array.isArray(input.operatorNames) ? input.operatorNames : [],
   });
 
   const session = await createScopedSession({
     tenantCode: tenant.tenantCode,
     userName: ownerName,
     role: "owner",
-    scope: "client"
+    scope: "client",
   });
 
   return {
@@ -1134,30 +1153,30 @@ const registerClientTenant = async (input = {}) => {
       scriptUrl: `${PUBLIC_BASE_URL}/widget.js`,
       widgetId: tenant.widgetId,
       widgetNumber: tenant.widgetNumber,
-      snippet: `<script src="${PUBLIC_BASE_URL}/widget.js" data-chat-url="${PUBLIC_BASE_URL}/embed?livechat=1&tenantCode=${encodeURIComponent(tenant.tenantCode)}&widgetId=${encodeURIComponent(tenant.widgetId)}&widgetNumber=${encodeURIComponent(tenant.widgetNumber)}" data-title="${tenant.tenantName}" data-subtitle="${tenant.defaultTeamCode} • ${tenant.defaultChannelCode}" data-widget-id="${tenant.widgetId}" data-widget-number="${tenant.widgetNumber}"></script>`
-    }
+      snippet: `<script src="${PUBLIC_BASE_URL}/widget.js" data-chat-url="${PUBLIC_BASE_URL}/embed?livechat=1&tenantCode=${encodeURIComponent(tenant.tenantCode)}&widgetId=${encodeURIComponent(tenant.widgetId)}&widgetNumber=${encodeURIComponent(tenant.widgetNumber)}" data-title="${tenant.tenantName}" data-subtitle="${tenant.defaultTeamCode} • ${tenant.defaultChannelCode}" data-widget-id="${tenant.widgetId}" data-widget-number="${tenant.widgetNumber}"></script>`,
+    },
   };
 };
 
 const buildPanelPublicTemplateValues = (panelRole = "client", panelAlias = "client") => {
   const safeRole = sanitizeName(panelRole || "client") || "client";
   const safeAlias = sanitizeName(panelAlias || safeRole) || safeRole;
-  const prettyAlias = safeAlias.replace(/^client/i, "Client ").replace(/\s+/g, " ").trim();
-  const panelTitle = safeRole === "master"
-    ? "Master Internal"
-    : `${prettyAlias} Panel`;
+  const prettyAlias = safeAlias
+    .replace(/^client/i, "Client ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const panelTitle = safeRole === "master" ? "Master Internal" : `${prettyAlias} Panel`;
 
   return {
     __PANEL_ROLE__: safeRole,
     __PANEL_ALIAS__: safeAlias,
     __PANEL_TITLE__: panelTitle,
-    __PANEL_SUBTITLE__: safeRole === "master"
-      ? "Pusat kontrol provider livechat"
-      : `Panel operasional tenant livechat untuk ${prettyAlias.toLowerCase()}`,
-    __PANEL_HINT__: safeRole === "master"
-      ? "Master hanya untuk internal agent. Registrasi client dilakukan dari sini dan otomatis tampil di daftar tenant."
-      : `Login ${prettyAlias.toLowerCase()} memakai username masing-masing. ID dan number sistem dibuat otomatis.`,
-    __PANEL_BODY__: buildPanelPublicContent(safeRole, safeAlias)
+    __PANEL_SUBTITLE__: safeRole === "master" ? "Pusat kontrol provider livechat" : `Panel operasional tenant livechat untuk ${prettyAlias.toLowerCase()}`,
+    __PANEL_HINT__:
+      safeRole === "master"
+        ? "Master hanya untuk internal agent. Registrasi client dilakukan dari sini dan otomatis tampil di daftar tenant."
+        : `Login ${prettyAlias.toLowerCase()} memakai username masing-masing. ID dan number sistem dibuat otomatis.`,
+    __PANEL_BODY__: buildPanelPublicContent(safeRole, safeAlias),
   };
 };
 
@@ -1166,9 +1185,7 @@ const buildDemoTemplateValues = async (requestedTenantCode = "") => {
   const hasDesiredTenant = await tenantsDb.findOne({ tenantCode: desiredTenantCode });
   const tenantCode = hasDesiredTenant ? desiredTenantCode : DEFAULT_TENANT_CODE;
   const tenant = await getTenantRecord(tenantCode);
-  const brandName = tenant.tenantCode === DEFAULT_DEMO_TENANT_CODE
-    ? `${tenant.tenantName} Fashion`
-    : "Distro Tangerang Murah";
+  const brandName = tenant.tenantCode === DEFAULT_DEMO_TENANT_CODE ? `${tenant.tenantName} Fashion` : "Distro Tangerang Murah";
   const isDewiDemo = tenant.tenantCode === DEFAULT_DEMO_TENANT_CODE;
 
   return {
@@ -1178,9 +1195,7 @@ const buildDemoTemplateValues = async (requestedTenantCode = "") => {
     __DEMO_WIDGET_TITLE__: brandName,
     __DEMO_WIDGET_SUBTITLE__: "Tanya stok, size, dan reseller",
     __DEMO_WIDGET_CHAT_URL__: `/embed?livechat=1&tenantCode=${encodeURIComponent(tenant.tenantCode)}&widgetId=${encodeURIComponent(tenant.widgetId)}&widgetNumber=${encodeURIComponent(tenant.widgetNumber)}`,
-    __DEMO_HEADLINE__: isDewiDemo
-      ? "Dewi Langit jual baju distro murah Tangerang dengan chat order yang langsung nyambung"
-      : "Baju distro murah Tangerang untuk stok harian cepat jalan",
+    __DEMO_HEADLINE__: isDewiDemo ? "Dewi Langit jual baju distro murah Tangerang dengan chat order yang langsung nyambung" : "Baju distro murah Tangerang untuk stok harian cepat jalan",
     __DEMO_INTRO__: isDewiDemo
       ? "Dewi Langit Fashion fokus ke kaos casual, hoodie trend, dan paket reseller lokal Tangerang. Landing ini langsung terhubung ke widget live chat supaya calon pembeli bisa tanya stok, ukuran, dan ongkir tanpa pindah aplikasi."
       : "Koleksi kaos oversize, hoodie, celana cargo, dan paket reseller untuk pasar lokal Tangerang. Landing ini dibuat sebagai demo client yang langsung terhubung ke live chat widget supaya calon pembeli bisa tanya stok, ukuran, dan ongkir tanpa pindah aplikasi.",
@@ -1195,7 +1210,9 @@ const buildDemoTemplateValues = async (requestedTenantCode = "") => {
     __DEMO_PRICE_3_COPY__: isDewiDemo ? "Hoodie ringan dengan potongan longgar untuk pembeli yang suka look santai tapi tetap rapi." : "Fleece halus, potongan longgar, salah satu produk yang sering dicari pembeli muda.",
     __DEMO_PRICE_4_TITLE__: isDewiDemo ? "Chat Order Grosir" : "Drop Grosir",
     __DEMO_PRICE_4_COPY__: isDewiDemo ? "Semua permintaan partai, restock warna, dan sizing besar diarahkan langsung ke live chat admin Dewi Langit." : "Konsultasi langsung via live chat untuk stok partai, warna, dan jadwal restock.",
-    __DEMO_CONTACT_COPY__: isDewiDemo ? "Landing ini menunjukkan bagaimana brand Dewi Langit bisa punya halaman promosi sendiri, tetap memakai widget sistem, dan semua chat masuk otomatis ke panel client tenant DEWI." : "Halaman ini mencontohkan bagaimana client fashion bisa punya landing sendiri, tetap memakai widget yang disediakan sistem, dan semua chat masuk otomatis ke panel client sesuai tenant."
+    __DEMO_CONTACT_COPY__: isDewiDemo
+      ? "Landing ini menunjukkan bagaimana brand Dewi Langit bisa punya halaman promosi sendiri, tetap memakai widget sistem, dan semua chat masuk otomatis ke panel client tenant DEWI."
+      : "Halaman ini mencontohkan bagaimana client fashion bisa punya landing sendiri, tetap memakai widget yang disediakan sistem, dan semua chat masuk otomatis ke panel client sesuai tenant.",
   };
 };
 
@@ -1231,7 +1248,7 @@ const buildMasterOverview = async () => {
     ok: true,
     runtime: getRuntimeDeploymentState(),
     settings: {
-      subscription: subscriptionSettings
+      subscription: subscriptionSettings,
     },
     stats: {
       tenantCount: tenants.length,
@@ -1239,7 +1256,7 @@ const buildMasterOverview = async () => {
       authProfiles: authDocs.length,
       activeSessions: activeSessions.length,
       clientSessions: activeSessions.filter((entry) => sanitizeName(entry.scope || "client") === "client").length,
-      masterSessions: activeSessions.filter((entry) => sanitizeName(entry.scope || "client") === "master").length
+      masterSessions: activeSessions.filter((entry) => sanitizeName(entry.scope || "client") === "master").length,
     },
     tenants: tenants.map((tenant) => ({
       tenantCode: tenant.tenantCode,
@@ -1262,8 +1279,8 @@ const buildMasterOverview = async () => {
       widgetNumber: tenant.widgetNumber,
       defaultTeamCode: tenant.defaultTeamCode,
       defaultChannelCode: tenant.defaultChannelCode,
-      updatedAt: tenant.updatedAt
-    }))
+      updatedAt: tenant.updatedAt,
+    })),
   };
 };
 
@@ -1310,7 +1327,7 @@ app.get("/api/v1/deploy-check", async (_req, res) => {
       ok: true,
       runtime: getRuntimeDeploymentState(),
       backendOk,
-      readyForDeploy: backendOk || LIVECHAT_BACKEND_URL.includes("localhost") || LIVECHAT_BACKEND_URL.includes("127.0.0.1")
+      readyForDeploy: backendOk || LIVECHAT_BACKEND_URL.includes("localhost") || LIVECHAT_BACKEND_URL.includes("127.0.0.1"),
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Deploy check gagal: ${error.message}` });
@@ -1352,9 +1369,9 @@ app.get("/api/v1/tenants", async (_req, res) => {
         widgetNumber: tenant.widgetNumber,
         defaultTeamCode: tenant.defaultTeamCode,
         defaultChannelCode: tenant.defaultChannelCode,
-        updatedAt: tenant.updatedAt
+        updatedAt: tenant.updatedAt,
       })),
-      runtime: getRuntimeDeploymentState()
+      runtime: getRuntimeDeploymentState(),
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat daftar tenant: ${error.message}` });
@@ -1410,7 +1427,7 @@ app.post("/api/v1/master/login", async (req, res) => {
       tenantCode: "MASTER",
       userName: MASTER_PANEL_EMAIL,
       role: "master",
-      scope: "master"
+      scope: "master",
     });
 
     res.json({ ok: true, session, profile: { email: MASTER_PANEL_EMAIL, role: "master" } });
@@ -1424,16 +1441,14 @@ app.post("/api/v1/tenants/:tenantCode/renew", requireScopedSession(["master"]), 
     const tenantCode = sanitizeCode(req.params.tenantCode, DEFAULT_TENANT_CODE);
     const months = Math.max(Number(req.body?.months || 1), 1);
     const current = await getTenantRecord(tenantCode);
-    const baseDate = current.subscriptionExpiresAt && parseDateMs(current.subscriptionExpiresAt) > Date.now()
-      ? current.subscriptionExpiresAt
-      : nowIso();
+    const baseDate = current.subscriptionExpiresAt && parseDateMs(current.subscriptionExpiresAt) > Date.now() ? current.subscriptionExpiresAt : nowIso();
 
     const updated = await saveTenantRecord(tenantCode, {
       status: "active",
       subscriptionMode: "active",
       subscriptionStartedAt: current.subscriptionStartedAt || nowIso(),
       subscriptionExpiresAt: addMonthsIso(baseDate, months),
-      subscriptionRenewedAt: nowIso()
+      subscriptionRenewedAt: nowIso(),
     });
 
     res.json({ ok: true, tenant: updated });
@@ -1538,9 +1553,9 @@ app.get("/api/v1/client/overview", requireScopedSession(["client", "master"]), a
         scriptUrl: widgetScriptUrl,
         widgetId: bootstrap.tenant.widgetId,
         widgetNumber: bootstrap.tenant.widgetNumber,
-        snippet: `<script src="${widgetScriptUrl}" data-chat-url="${widgetChatUrl}" data-title="${bootstrap.tenant.tenantName}" data-subtitle="${bootstrap.tenant.defaultTeamCode} • ${bootstrap.tenant.defaultChannelCode}" data-widget-id="${bootstrap.tenant.widgetId}" data-widget-number="${bootstrap.tenant.widgetNumber}"></script>`
+        snippet: `<script src="${widgetScriptUrl}" data-chat-url="${widgetChatUrl}" data-title="${bootstrap.tenant.tenantName}" data-subtitle="${bootstrap.tenant.defaultTeamCode} • ${bootstrap.tenant.defaultChannelCode}" data-widget-id="${bootstrap.tenant.widgetId}" data-widget-number="${bootstrap.tenant.widgetNumber}"></script>`,
       },
-      serviceTypes: Array.isArray(bootstrap.tenant.serviceTypes) ? bootstrap.tenant.serviceTypes : []
+      serviceTypes: Array.isArray(bootstrap.tenant.serviceTypes) ? bootstrap.tenant.serviceTypes : [],
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat client overview: ${error.message}` });
@@ -1646,7 +1661,7 @@ app.get("/api/v1/widget-config", async (req, res) => {
       widgetChatUrl,
       snippet: `<script src="${widgetScriptUrl}" data-chat-url="${widgetChatUrl}" data-title="${bootstrap.tenant.tenantName}" data-subtitle="${bootstrap.tenant.defaultTeamCode} • ${bootstrap.tenant.defaultChannelCode}" data-widget-id="${bootstrap.tenant.widgetId}" data-widget-number="${bootstrap.tenant.widgetNumber}" data-apk-url=""></script>`,
       tenant: bootstrap.tenant,
-      backend: bootstrap.backend
+      backend: bootstrap.backend,
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat widget config: ${error.message}` });
@@ -1661,7 +1676,9 @@ app.post("/api/v1/inbox/message", async (req, res) => {
     const visitorName = sanitizeName(req.body?.visitorName || "Guest") || "Guest";
     const message = sanitizeCustomerMessage(req.body?.message || "");
     const serviceType = sanitizeServiceType(req.body?.serviceType || "");
-    const sourceUrl = String(req.body?.sourceUrl || "").trim().slice(0, 500);
+    const sourceUrl = String(req.body?.sourceUrl || "")
+      .trim()
+      .slice(0, 500);
 
     if (!message) {
       res.status(400).json({ ok: false, message: "Pesan customer tidak boleh kosong." });
@@ -1693,7 +1710,7 @@ app.post("/api/v1/inbox/message", async (req, res) => {
       sourceUrl,
       status: "new",
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
 
     res.json({
@@ -1707,8 +1724,8 @@ app.post("/api/v1/inbox/message", async (req, res) => {
         message: saved.message,
         sourceUrl: saved.sourceUrl,
         status: saved.status,
-        createdAt: saved.createdAt
-      }
+        createdAt: saved.createdAt,
+      },
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal menyimpan pesan inbox: ${error.message}` });
@@ -1779,9 +1796,11 @@ app.post("/api/v1/client/inbox/reply", requireScopedSession(["client", "master"]
       serviceType: sanitizeServiceType(req.body?.serviceType || ""),
       message,
       replyToMessageId,
-      sourceUrl: String(req.body?.sourceUrl || "").trim().slice(0, 500),
+      sourceUrl: String(req.body?.sourceUrl || "")
+        .trim()
+        .slice(0, 500),
       createdAt: nowIso(),
-      updatedAt: nowIso()
+      updatedAt: nowIso(),
     });
 
     const saved = await inboxDb.insert(replyDoc);
@@ -1797,8 +1816,8 @@ app.post("/api/v1/client/inbox/reply", requireScopedSession(["client", "master"]
         message: saved.message,
         sourceUrl: saved.sourceUrl,
         status: saved.status,
-        createdAt: saved.createdAt
-      }
+        createdAt: saved.createdAt,
+      },
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal mengirim balasan inbox: ${error.message}` });
@@ -1887,7 +1906,7 @@ app.put("/api/v1/tenants/:tenantCode", async (req, res) => {
       backendBaseUrl: req.body?.backendBaseUrl,
       defaultTeamCode: req.body?.defaultTeamCode,
       defaultChannelCode: req.body?.defaultChannelCode,
-      serviceTypes: req.body?.serviceTypes
+      serviceTypes: req.body?.serviceTypes,
     });
 
     res.json({ ok: true, tenant: updated });
@@ -1927,8 +1946,8 @@ app.get("/api/v1/auth/:tenantCode", async (req, res) => {
         operators: (auth.operators || []).map((entry) => entry.name),
         authVersion: auth.authVersion,
         createdAt: auth.createdAt,
-        updatedAt: auth.updatedAt
-      }
+        updatedAt: auth.updatedAt,
+      },
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat auth tenant: ${error.message}` });
@@ -1948,7 +1967,7 @@ app.put("/api/v1/auth/:tenantCode", async (req, res) => {
       ownerPassword: req.body?.ownerPassword,
       adminPassword: req.body?.adminPassword,
       adminNames: req.body?.adminNames,
-      operatorNames: req.body?.operatorNames
+      operatorNames: req.body?.operatorNames,
     });
 
     res.json({
@@ -1960,8 +1979,8 @@ app.put("/api/v1/auth/:tenantCode", async (req, res) => {
         operators: (updated.operators || []).map((entry) => entry.name),
         authVersion: updated.authVersion,
         createdAt: updated.createdAt,
-        updatedAt: updated.updatedAt
-      }
+        updatedAt: updated.updatedAt,
+      },
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal menyimpan auth tenant: ${error.message}` });
@@ -1987,12 +2006,36 @@ app.get("/api/v1/status", (req, res) => {
     service: APP_NAME,
     surface: resolveSurfaceFromHost(req.hostname),
     host: req.hostname,
-    routes: ["/", "/demo", "/register", "/admin", "/panel/master", "/panel/client", "/panel/client1", "/panel/client2", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/tenants/:tenantCode/renew", "/api/v1/settings/subscription", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview", "/api/v1/client/inbox", "/api/v1/inbox/message", "/api/v1/inbox/poll", "/api/v1/register"],
+    routes: [
+      "/",
+      "/demo",
+      "/register",
+      "/admin",
+      "/panel/master",
+      "/panel/client",
+      "/panel/client1",
+      "/panel/client2",
+      "/embed",
+      "/healthz",
+      "/api/v1/status",
+      "/api/v1/bootstrap",
+      "/api/v1/tenants",
+      "/api/v1/tenants/:tenantCode",
+      "/api/v1/tenants/:tenantCode/renew",
+      "/api/v1/settings/subscription",
+      "/api/v1/deploy-check",
+      "/api/v1/master/overview",
+      "/api/v1/client/overview",
+      "/api/v1/client/inbox",
+      "/api/v1/inbox/message",
+      "/api/v1/inbox/poll",
+      "/api/v1/register",
+    ],
     defaultTenantCode: DEFAULT_TENANT_CODE,
     defaultTeamCode: DEFAULT_TEAM_CODE,
     defaultChannelCode: DEFAULT_CHANNEL_CODE,
     timestamp: new Date().toISOString(),
-    warnings: buildRuntimeWarnings()
+    warnings: buildRuntimeWarnings(),
   });
 });
 
@@ -2053,10 +2096,15 @@ app.use((req, res) => {
     return res.status(404).json({ ok: false, error: "Not Found" });
   }
 
-  res.status(404).type("html").send(renderTemplate(templates.web, {
-    __PAGE_TITLE__: "Page not found",
-    __PAGE_MESSAGE__: "Halaman tidak ditemukan di scaffold split ini."
-  }));
+  res
+    .status(404)
+    .type("html")
+    .send(
+      renderTemplate(templates.web, {
+        __PAGE_TITLE__: "Page not found",
+        __PAGE_MESSAGE__: "Halaman tidak ditemukan di scaffold split ini.",
+      }),
+    );
 });
 
 const startServer = async () => {
