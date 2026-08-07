@@ -99,6 +99,14 @@ let currentConversation = null;
 let clientInboxPollingId = null;
 let clientInboxPollingInProgress = false;
 
+const buildInboxConversationKey = (entry) => {
+  if (!entry) {
+    return "";
+  }
+
+  return `${String(entry.widgetId || "").trim()}|${String(entry.visitorName || "").trim()}`;
+};
+
 const getSessionToken = () => sessionStorage.getItem("JIELIVE_PLATFORM_SESSION");
 const setSessionToken = (token) => sessionStorage.setItem("JIELIVE_PLATFORM_SESSION", token);
 
@@ -136,10 +144,39 @@ const renderTenantRows = (tenants = []) => {
 };
 
 const renderInboxCards = (inbox = []) => {
-  inboxData = Array.isArray(inbox) ? inbox : [];
-  if (inboxData.length === 0) {
+  const allEntries = Array.isArray(inbox) ? inbox : [];
+  if (allEntries.length === 0) {
+    inboxData = [];
     return `<div class="crm-empty"><span class="crm-empty-icon">📭</span><span>Belum ada pesan</span></div>`;
   }
+
+  const conversationMap = new Map();
+  for (const entry of allEntries) {
+    const key = buildInboxConversationKey(entry);
+    const existing = conversationMap.get(key);
+    const createdAt = new Date(entry.createdAt).getTime();
+
+    if (!existing) {
+      conversationMap.set(key, { entry: { ...entry }, count: 1 });
+      continue;
+    }
+
+    existing.count += 1;
+    if (createdAt > new Date(existing.entry.createdAt).getTime()) {
+      conversationMap.set(key, { entry: { ...entry }, count: existing.count });
+    }
+  }
+
+  const sortedConversations = Array.from(conversationMap.values())
+    .map((item) => {
+      if (item.count > 1) {
+        item.entry._messageCount = item.count;
+      }
+      return item.entry;
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  inboxData = sortedConversations;
 
   const avatarPalette = ["#3b82f6,#8b5cf6", "#0ea5e9,#6366f1", "#10b981,#3b82f6", "#f97316,#ef4444", "#8b5cf6,#ec4899"];
 
@@ -151,12 +188,13 @@ const renderInboxCards = (inbox = []) => {
       const preview = escapeHtml(String(entry?.message || "").slice(0, 80));
       const grad = avatarPalette[idx % avatarPalette.length];
       const sourceBadge = entry?.sourceUrl ? `<span class="crm-badge">Web</span>` : `<span class="crm-badge">Widget</span>`;
+      const countBadge = entry._messageCount && entry._messageCount > 1 ? `<span class="crm-badge crm-badge-warn">${entry._messageCount}</span>` : "";
       return `<div class="crm-conv-item" data-conv-idx="${idx}" tabindex="0">
       <div class="crm-conv-avatar" style="background:linear-gradient(135deg,${grad})">${escapeHtml(initials)}</div>
       <div class="crm-conv-body">
         <div class="crm-conv-top"><span class="crm-conv-name">${name}</span><span class="crm-conv-time">${time}</span></div>
         <div class="crm-conv-preview">${preview}</div>
-        <div class="crm-conv-badges"><span class="crm-badge crm-badge-warn">Unassigned</span>${sourceBadge}</div>
+        <div class="crm-conv-badges"><span class="crm-badge crm-badge-warn">Unassigned</span>${sourceBadge}${countBadge}</div>
       </div>
     </div>`;
     })
