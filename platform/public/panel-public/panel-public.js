@@ -226,6 +226,23 @@ const bindConversationClicks = () => {
   });
 };
 
+const setActiveConversationItem = () => {
+  document.querySelectorAll(".crm-conv-item").forEach((el) => el.classList.remove("active"));
+  if (!currentConversation) {
+    return;
+  }
+
+  const idx = inboxData.findIndex((entry) => entry.messageId === currentConversation.messageId);
+  if (idx < 0) {
+    return;
+  }
+
+  const activeEl = query(`[data-conv-idx="${idx}"]`);
+  if (activeEl) {
+    activeEl.classList.add("active");
+  }
+};
+
 const appendOutboundMessage = (message) => {
   const msgs = query("[data-chat-messages]");
   if (!msgs) { return; }
@@ -275,10 +292,12 @@ const sendConversationReply = async () => {
 
     input.value = "";
     input.style.height = "auto";
-    appendOutboundMessage(message);
     await hydrateClientInbox(currentClientTenantCode, currentClientWidgetId);
     const refreshedEntry = inboxData.find((entry) => entry.messageId === currentConversation.messageId) || currentConversation;
+    currentConversation = refreshedEntry;
+    setActiveConversationItem();
     openConversation(refreshedEntry);
+    appendOutboundMessage(message);
   } catch (error) {
     window.alert(`Gagal mengirim balasan: ${error.message}`);
   }
