@@ -11,6 +11,7 @@ const buildInboxReplyDocument = (input = {}) => {
     widgetId: input.widgetId || "",
     widgetNumber: Number(input.widgetNumber || 1),
     visitorName: input.visitorName || "Guest",
+    serviceType: input.serviceType || "",
     message: input.message || "",
     replyToMessageId: input.replyToMessageId || "",
     sourceUrl: input.sourceUrl || "",
@@ -19,6 +20,7 @@ const buildInboxReplyDocument = (input = {}) => {
     updatedAt: input.updatedAt || now
   };
 };
+
 
 module.exports = {
   buildInboxReplyDocument
