@@ -1694,7 +1694,12 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
 
     const widgetId = sanitizeWidgetId(req.query?.widgetId || "", "");
     const limit = Math.min(Math.max(Number(req.query?.limit || 50), 1), 200);
-    const docs = await inboxDb.find(widgetId ? { tenantCode, widgetId } : { tenantCode }).sort({ createdAt: -1 }).limit(limit).exec();
+    const query = { tenantCode, kind: { $ne: "out" } };
+    if (widgetId) {
+      query.widgetId = widgetId;
+    }
+
+    const docs = await inboxDb.find(query).sort({ createdAt: -1 }).limit(limit).exec();
 
     res.json({
       ok: true,
