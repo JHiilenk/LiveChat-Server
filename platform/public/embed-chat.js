@@ -19,6 +19,8 @@
   const titleNode = document.querySelector("[data-chat-title]");
   const subtitleNode = document.querySelector("[data-chat-subtitle]");
   const tenantChipNode = document.querySelector("[data-tenant-chip]");
+  const visitorSetupSection = document.querySelector("[data-visitor-setup]");
+  const visitorSetupButton = document.getElementById("visitorSetupButton");
   const listNode = document.getElementById("messageList");
   const formNode = document.getElementById("messageForm");
   const inputNode = document.getElementById("messageInput");
@@ -173,6 +175,35 @@
     }
   };
 
+  const isReadyForChat = () => {
+    const nameValue = String(visitorNameInput?.value || "").trim();
+    const serviceValue = String(serviceTypeSelect?.value || "").trim();
+    return !!nameValue && !!serviceValue;
+  };
+
+  const setChatVisibility = (visible) => {
+    if (listNode) {
+      listNode.classList.toggle("hidden", !visible);
+    }
+    if (formNode) {
+      formNode.classList.toggle("hidden", !visible);
+    }
+    if (visitorSetupSection) {
+      visitorSetupSection.classList.toggle("hidden", visible);
+    }
+    if (visible && inputNode) {
+      inputNode.focus();
+    }
+  };
+
+  const ensureChatReady = () => {
+    updateStoredVisitorName();
+    updateStoredServiceType();
+    const ready = isReadyForChat();
+    setChatVisibility(ready);
+    return ready;
+  };
+
   const hydrateEmbedServiceTypes = async () => {
     if (!serviceTypeSelect) {
       return;
@@ -184,6 +215,7 @@
       }
       const data = await response.json().catch(() => ({}));
       renderServiceTypeOptions(Array.isArray(data?.tenant?.serviceTypes) ? data.tenant.serviceTypes : []);
+      ensureChatReady();
     } catch {
       // ignore load failures
     }
@@ -330,11 +362,20 @@
     serviceTypeSelect.addEventListener("change", updateStoredServiceType);
   }
 
+  if (visitorSetupButton) {
+    visitorSetupButton.addEventListener("click", () => {
+      if (!ensureChatReady()) {
+        visitorNameInput?.focus();
+      }
+    });
+  }
+
   if (formNode) {
     formNode.addEventListener("submit", (event) => {
       event.preventDefault();
-      updateStoredVisitorName();
-      updateStoredServiceType();
+      if (!ensureChatReady()) {
+        return;
+      }
       submitMessage();
     });
   }
@@ -349,8 +390,11 @@
     });
   });
 
+  if (visitorSetupSection) {
+    setChatVisibility(false);
+  }
+
   document.querySelectorAll("[data-chat-action]").forEach((button) => {
-    button.addEventListener("click", () => {
       const action = button.getAttribute("data-chat-action") || "";
       if (action === "maximize") {
         document.body.dataset.expanded = "true";

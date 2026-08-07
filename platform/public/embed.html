@@ -153,6 +153,33 @@
         background: rgba(8, 20, 41, 0.92);
       }
 
+      .visitor-setup {
+        padding: 18px 16px 16px;
+        display: grid;
+        gap: 14px;
+        background: linear-gradient(180deg, rgba(9, 27, 55, 0.98), rgba(9, 25, 52, 0.95));
+      }
+
+      .visitor-setup .setup-copy {
+        color: rgba(235, 245, 255, 0.85);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .visitor-setup button {
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, var(--acc), #2f78d8);
+        color: #fff;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
       .composer-meta {
         display: grid;
         gap: 10px;
@@ -256,14 +283,8 @@
         <span class="embed-badge" data-tenant-chip>Tenant __DEFAULT_TENANT_CODE__</span>
       </div>
 
-      <section class="chat-list" id="messageList"></section>
-
-      <form class="composer" id="messageForm">
-        <div class="chips">
-          <button class="chip" type="button" data-quick-message="Halo, saya butuh bantuan login.">Bantuan login</button>
-          <button class="chip" type="button" data-quick-message="Bagaimana cara pasang widget di website?">Pasang widget</button>
-          <button class="chip" type="button" data-quick-message="Minta info paket dan harga.">Info paket</button>
-        </div>
+      <section class="visitor-setup" data-visitor-setup>
+        <div class="setup-copy">Isi nama dan pilih jenis layanan terlebih dahulu untuk memulai chat. Setelah kedua data terisi, kolom chat akan terbuka di bawah secara otomatis.</div>
         <div class="composer-meta">
           <label>
             Nama
@@ -275,6 +296,17 @@
               <option value="">Pilih jenis layanan</option>
             </select>
           </label>
+        </div>
+        <button type="button" id="visitorSetupButton">Mulai Chat</button>
+      </section>
+
+      <section class="chat-list hidden" id="messageList"></section>
+
+      <form class="composer hidden" id="messageForm">
+        <div class="chips">
+          <button class="chip" type="button" data-quick-message="Halo, saya butuh bantuan login.">Bantuan login</button>
+          <button class="chip" type="button" data-quick-message="Bagaimana cara pasang widget di website?">Pasang widget</button>
+          <button class="chip" type="button" data-quick-message="Minta info paket dan harga.">Info paket</button>
         </div>
         <div class="composer-row">
           <input id="messageInput" name="message" autocomplete="off" placeholder="Ketik pesan untuk tim support..." />
