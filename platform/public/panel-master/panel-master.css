@@ -231,14 +231,24 @@ body[data-logged-in="true"] .crm-topbar-logout { display: inline-flex; }
   color: #fff;
 }
 
-/* ── Login Gate ──────────────────────────────── */
+/* ── Login Gate (modal overlay) ─────────────── */
 .crm-gate {
-  flex: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(15, 20, 40, 0.60);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--crm-main-bg);
+  animation: crm-fade-in 0.18s ease;
+}
+
+@keyframes crm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 body[data-logged-in="true"] .crm-gate { display: none; }
@@ -267,17 +277,13 @@ body[data-logged-in="true"] .crm-gate { display: none; }
   margin: 0 0 20px;
 }
 
-/* ── Inbox Body (shown when logged in) ───────── */
+/* ── Inbox Body (always visible as background) ── */
 .crm-inbox-body {
-  display: none;
+  display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
   min-width: 0;
-}
-
-body[data-logged-in="true"] .crm-inbox-body {
-  display: flex;
 }
 
 /* ── List Pane ───────────────────────────────── */
@@ -854,4 +860,5 @@ body[data-logged-in="true"] .crm-inbox-body {
   .crm-info-grid { grid-template-columns: 1fr; }
   .crm-stats { grid-template-columns: 1fr; }
 }
-
+
+
