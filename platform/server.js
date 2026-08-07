@@ -415,7 +415,7 @@ const sanitizeTenantRecord = (record, fallbackCode = DEFAULT_TENANT_CODE) => {
     backendBaseUrl: String(record?.backendBaseUrl || LIVECHAT_BACKEND_URL).replace(/\/$/, ""),
     defaultTeamCode: sanitizeCode(record?.defaultTeamCode || DEFAULT_TEAM_CODE, DEFAULT_TEAM_CODE),
     defaultChannelCode: sanitizeCode(record?.defaultChannelCode || DEFAULT_CHANNEL_CODE, DEFAULT_CHANNEL_CODE),
-    serviceTypes: sanitizeServiceTypes(record?.serviceTypes || []),
+    serviceTypes: sanitizeServiceTypes(record?.serviceTypes || (tenantCode === DEFAULT_DEMO_TENANT_CODE ? DEFAULT_DEMO_SERVICE_TYPES : [])),
     subscriptionMode: subscription.subscriptionMode,
     subscriptionStartedAt: subscription.subscriptionStartedAt,
     subscriptionExpiresAt: subscription.subscriptionExpiresAt,
