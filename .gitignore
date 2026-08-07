@@ -8,3 +8,4 @@ pnpm-debug.log*
 data/*.db
 data/uploads/*
 !data/uploads/.gitkeep
+PEMULA/
