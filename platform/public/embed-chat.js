@@ -146,13 +146,17 @@
     };
 
     try {
-      await fetch("/api/v1/inbox/message", {
+      const response = await fetch("/api/v1/inbox/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-    } catch {
-      // Keep local chat UX responsive even when inbox API fails.
+
+      if (!response.ok) {
+        console.warn("Inbox message failed", await response.text());
+      }
+    } catch (error) {
+      console.warn("Inbox message failed", error);
     }
   };
 

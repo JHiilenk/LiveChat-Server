@@ -9,6 +9,7 @@ const morgan = require("morgan");
 const Datastore = require("nedb-promises");
 const { resolvePublicBaseUrl, resolveLivechatBackendUrl } = require("./lib/runtime-config");
 const { resolveDemoAuthDefaults } = require("./lib/demo-auth");
+const { buildInboxReplyDocument } = require("./lib/inboxThread");
 require("dotenv").config();
 
 const app = express();
@@ -948,77 +949,104 @@ const buildPanelPublicContent = (panelRole = "client", panelAlias = "client") =>
   return `${rail}
     <div class="crm-gate">
       <div class="crm-login-card">
-        <span class="crm-chip">Tenant Control</span>
+        <div class="crm-login-logo">JL</div>
         <h2>${prettyAlias} Panel</h2>
-        <p class="crm-hint">Login memakai username dan password tenant.</p>
+        <p class="crm-hint">Login dengan akun tenant untuk mengakses inbox dan panel operasional.</p>
         <form class="crm-form" data-client-login-form>
-          <label>Tenant Code<input type="text" name="tenantCode" placeholder="JIELIVE" required /></label>
-          <label>Username<input type="text" name="userName" placeholder="admin" required /></label>
-          <label>Password<input type="password" name="password" placeholder="••••••••" required /></label>
-          <button type="submit" class="crm-btn crm-btn-primary">Masuk ${prettyAlias} Panel</button>
+          <label>Tenant Code<input type="text" name="tenantCode" placeholder="JIELIVE" required autocomplete="organization" /></label>
+          <label>Username<input type="text" name="userName" placeholder="admin" required autocomplete="username" /></label>
+          <label>Password<input type="password" name="password" placeholder="••••••••" required autocomplete="current-password" /></label>
+          <button type="submit" class="crm-btn crm-btn-primary" style="margin-top:4px">Masuk ${prettyAlias} Panel</button>
         </form>
-        <p class="crm-status-text" data-client-login-status>Belum login.</p>
+        <p class="crm-status-text" data-client-login-status style="text-align:center">Belum login.</p>
       </div>
     </div>
     <div class="crm-inbox-body">
       <div class="crm-list-pane">
         <div class="crm-list-header">
           <div class="crm-list-header-row">
-            <h3>Kotak Masuk</h3>
-            <button class="crm-filter-tab active" type="button" data-client-refresh-inbox>&#8635;</button>
+            <h3>Inbox</h3>
+            <button class="crm-input-action" type="button" data-client-refresh-inbox title="Refresh" style="color:var(--crm-muted)">&#8635;</button>
           </div>
-          <div class="crm-filter-tabs">
-            <button class="crm-filter-tab active" type="button">Semua</button>
-            <button class="crm-filter-tab" type="button">Widget</button>
-          </div>
+        </div>
+        <div class="crm-tabs">
+          <button class="crm-tab active" type="button">Semua</button>
+          <button class="crm-tab" type="button">Unassigned</button>
+          <button class="crm-tab" type="button">Assigned</button>
+          <button class="crm-tab" type="button">Resolved</button>
+        </div>
+        <div class="crm-search-wrap">
+          <input class="crm-search" type="search" placeholder="Cari percakapan atau kontak..." data-inbox-search />
         </div>
         <div class="crm-list-scroll" data-inbox-list>
           <div class="crm-empty"><span class="crm-empty-icon">&#128205;</span><span>Login untuk melihat pesan</span></div>
         </div>
+        <div class="crm-list-footer">Unassigned: <strong data-inbox-count>0</strong></div>
       </div>
       <div class="crm-main-pane">
-        <div class="crm-main-header">
-          <h3>Overview Tenant</h3>
-          <div class="crm-main-header-meta">
-            <span class="crm-chip" data-client-tenant-plan>-</span>
+        <div class="crm-welcome" data-chat-welcome>
+          <div class="crm-welcome-inner">
+            <span class="crm-welcome-icon">&#128172;</span>
+            <h3>Pilih percakapan</h3>
+            <p>Klik nama kontak di kiri untuk membuka pesan customer</p>
           </div>
         </div>
-        <div class="crm-main-scroll">
-          <div class="crm-section-card">
-            <div class="crm-section-card-head"><h3>Informasi Tenant</h3></div>
-            <div class="crm-section-card-body">
-              <div class="crm-info-grid">
-                <div class="crm-info-item"><span>Kode</span><strong data-client-tenant-code>-</strong></div>
-                <div class="crm-info-item"><span>Nama</span><strong data-client-tenant-name>-</strong></div>
-                <div class="crm-info-item"><span>Status</span><strong data-client-tenant-status>-</strong></div>
-                <div class="crm-info-item"><span>Plan</span><strong data-client-tenant-plan>-</strong></div>
-                <div class="crm-info-item"><span>Team</span><strong data-client-tenant-team>-</strong></div>
-                <div class="crm-info-item"><span>Channel</span><strong data-client-tenant-channel>-</strong></div>
-                <div class="crm-info-item"><span>Widget ID</span><strong data-client-widget-id>-</strong></div>
-                <div class="crm-info-item"><span>Nomor</span><strong data-client-widget-number>-</strong></div>
+        <div class="crm-chat-view" data-chat-view style="display:none">
+          <div class="crm-chat-header">
+            <div class="crm-chat-header-contact">
+              <div class="crm-conv-avatar" data-chat-avatar style="width:34px;height:34px;font-size:0.78rem">?</div>
+              <div>
+                <div class="crm-chat-contact-name" data-chat-contact-name>-</div>
+                <div class="crm-chat-contact-meta" data-chat-contact-meta>-</div>
               </div>
             </div>
-          </div>
-          <div class="crm-section-card">
-            <div class="crm-section-card-head"><h3>Status Akses</h3></div>
-            <div class="crm-section-card-body">
-              <p class="crm-access-message" data-client-access-message>Memuat status akses...</p>
+            <div class="crm-chat-header-actions">
+              <span class="crm-chip" data-client-access-message style="font-size:0.68rem;padding:3px 9px"></span>
+              <button class="crm-btn crm-btn-ok crm-btn-sm" type="button">&#10003; Selesai</button>
             </div>
+          </div>
+          <div class="crm-chat-messages" data-chat-messages>
+            <div class="crm-empty"><span class="crm-empty-icon">&#128172;</span><span>Memuat percakapan...</span></div>
+          </div>
+          <div class="crm-chat-input-bar">
+            <button class="crm-input-action" type="button" title="Emoji">&#128522;</button>
+            <button class="crm-input-action" type="button" title="Lampiran">&#128206;</button>
+            <textarea class="crm-chat-input" placeholder="Tulis balasan... (Shift+Enter baris baru)" rows="1" data-chat-input></textarea>
+            <button class="crm-btn crm-btn-primary crm-btn-sm" type="button" data-chat-send>Kirim</button>
           </div>
         </div>
       </div>
       <div class="crm-detail-pane">
+        <div class="crm-contact-header" data-contact-header>
+          <div class="crm-contact-avatar-lg">?</div>
+          <div class="crm-contact-name-lg">Pilih percakapan</div>
+          <div class="crm-contact-id-lg">-</div>
+        </div>
         <div class="crm-detail-section">
-          <h4>Langganan</h4>
-          <div class="crm-detail-row"><strong>Status</strong><span data-client-subscription-label>-</span></div>
+          <h4>Tentang Percakapan</h4>
+          <div class="crm-detail-row"><strong>Waktu</strong><span data-contact-created-at>-</span></div>
+          <div class="crm-detail-row"><strong>Widget</strong><span data-contact-widget>-</span></div>
+          <div class="crm-detail-row"><strong>Sumber</strong><span data-contact-source>-</span></div>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Tenant</h4>
+          <div class="crm-detail-row"><strong>Kode</strong><span data-client-tenant-code>-</span></div>
+          <div class="crm-detail-row"><strong>Nama</strong><span data-client-tenant-name>-</span></div>
+          <div class="crm-detail-row"><strong>Plan</strong><span data-client-tenant-plan>-</span></div>
+          <div class="crm-detail-row"><strong>Akses</strong><span data-client-subscription-label>-</span></div>
           <div class="crm-detail-row"><strong>Berakhir</strong><span data-client-subscription-expires-at>-</span></div>
+        </div>
+        <div class="crm-detail-section">
+          <h4>Agents</h4>
+          <div class="crm-detail-row"><strong>Owner</strong><span data-client-owner-name>-</span></div>
+          <div class="crm-detail-row"><strong>Admin</strong><span data-client-admin-names>-</span></div>
+          <div class="crm-detail-row"><strong>Operator</strong><span data-client-operator-names>-</span></div>
         </div>
         <div class="crm-detail-section">
           <h4>Widget</h4>
           <div class="crm-detail-row"><strong>ID</strong><span data-client-widget-id>-</span></div>
           <div class="crm-detail-row"><strong>No.</strong><span data-client-widget-number>-</span></div>
-          <div class="crm-detail-row"><strong>State</strong><span data-client-backend-state>-</span></div>
-          <div class="crm-detail-row"><strong>Backend</strong><span data-client-backend-url>-</span></div>
+          <div class="crm-detail-row"><strong>Backend</strong><span data-client-backend-state>-</span></div>
         </div>
         <div class="crm-detail-section">
           <div class="crm-detail-section-head">
@@ -1026,12 +1054,6 @@ const buildPanelPublicContent = (panelRole = "client", panelAlias = "client") =>
             <button class="crm-btn crm-btn-ghost crm-btn-sm" type="button" data-client-copy-snippet>Copy</button>
           </div>
           <pre class="crm-code" data-client-snippet>// Login untuk snippet</pre>
-        </div>
-        <div class="crm-detail-section">
-          <h4>Auth</h4>
-          <div class="crm-detail-row"><strong>Owner</strong><span data-client-owner-name>-</span></div>
-          <div class="crm-detail-row"><strong>Admin</strong><span data-client-admin-names>-</span></div>
-          <div class="crm-detail-row"><strong>Operator</strong><span data-client-operator-names>-</span></div>
         </div>
       </div>
     </div>`;
@@ -1690,6 +1712,55 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat inbox client: ${error.message}` });
+  }
+});
+
+app.post("/api/v1/client/inbox/reply", requireScopedSession(["client", "master"]), async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.body?.tenantCode || req.platformSession.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const tenant = await getTenantRecord(tenantCode);
+    if (req.platformSession.scope !== "master" && !tenant.subscriptionAccessEnabled) {
+      res.status(403).json({ ok: false, message: "Langganan tenant sudah kedaluwarsa. Balasan inbox dinonaktifkan." });
+      return;
+    }
+
+    const message = sanitizeCustomerMessage(req.body?.message || "");
+    const replyToMessageId = String(req.body?.replyToMessageId || "").trim();
+    if (!message) {
+      res.status(400).json({ ok: false, message: "Pesan balasan tidak boleh kosong." });
+      return;
+    }
+
+    const replyDoc = buildInboxReplyDocument({
+      tenantCode: tenant.tenantCode,
+      widgetId: sanitizeWidgetId(req.body?.widgetId || tenant.widgetId || "", ""),
+      widgetNumber: Math.max(Number(req.body?.widgetNumber || tenant.widgetNumber || 1), 1),
+      visitorName: sanitizeName(req.body?.visitorName || tenant.tenantName || "Guest") || "Guest",
+      message,
+      replyToMessageId,
+      sourceUrl: String(req.body?.sourceUrl || "").trim().slice(0, 500),
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    });
+
+    const saved = await inboxDb.insert(replyDoc);
+
+    res.json({
+      ok: true,
+      inbox: {
+        messageId: saved.messageId,
+        tenantCode: saved.tenantCode,
+        widgetId: saved.widgetId,
+        widgetNumber: saved.widgetNumber,
+        visitorName: saved.visitorName,
+        message: saved.message,
+        sourceUrl: saved.sourceUrl,
+        status: saved.status,
+        createdAt: saved.createdAt
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal mengirim balasan inbox: ${error.message}` });
   }
 });
 

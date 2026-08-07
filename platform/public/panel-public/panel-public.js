@@ -84,6 +84,8 @@ const applyClientAccessState = (tenant = {}, subscription = {}) => {
 
 let currentClientTenantCode = "";
 let currentClientWidgetId = "";
+let inboxData = [];
+let currentConversation = null;
 
 const getSessionToken = () => sessionStorage.getItem("JIELIVE_PLATFORM_SESSION");
 const setSessionToken = (token) => sessionStorage.setItem("JIELIVE_PLATFORM_SESSION", token);
@@ -118,25 +120,203 @@ const renderTenantRows = (tenants = []) => {
 };
 
 const renderInboxCards = (inbox = []) => {
-  if (!Array.isArray(inbox) || inbox.length === 0) {
+  inboxData = Array.isArray(inbox) ? inbox : [];
+  if (inboxData.length === 0) {
     return `<div class="crm-empty"><span class="crm-empty-icon">📭</span><span>Belum ada pesan</span></div>`;
   }
 
-  return inbox.map((entry) => {
+  const avatarPalette = [
+    "#3b82f6,#8b5cf6", "#0ea5e9,#6366f1", "#10b981,#3b82f6",
+    "#f97316,#ef4444", "#8b5cf6,#ec4899"
+  ];
+
+  return inboxData.map((entry, idx) => {
     const name = escapeHtml(entry?.visitorName || "Guest");
     const initials = (entry?.visitorName || "G").slice(0, 2).toUpperCase();
-    const time = entry?.createdAt ? new Date(entry.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "";
+    const time = entry?.createdAt
+      ? new Date(entry.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      : "";
     const preview = escapeHtml(String(entry?.message || "").slice(0, 80));
-    const widget = entry?.widgetId ? `${escapeHtml(entry.widgetId)}${entry.widgetNumber ? " #" + escapeHtml(String(entry.widgetNumber)) : ""}` : "";
-    return `<div class="crm-conv-item">
-      <div class="crm-conv-avatar">${escapeHtml(initials)}</div>
+    const grad = avatarPalette[idx % avatarPalette.length];
+    const sourceBadge = entry?.sourceUrl
+      ? `<span class="crm-badge">Web</span>`
+      : `<span class="crm-badge">Widget</span>`;
+    return `<div class="crm-conv-item" data-conv-idx="${idx}" tabindex="0">
+      <div class="crm-conv-avatar" style="background:linear-gradient(135deg,${grad})">${escapeHtml(initials)}</div>
       <div class="crm-conv-body">
         <div class="crm-conv-top"><span class="crm-conv-name">${name}</span><span class="crm-conv-time">${time}</span></div>
         <div class="crm-conv-preview">${preview}</div>
-        ${widget ? `<div class="crm-conv-badges"><span class="crm-badge">${widget}</span></div>` : ""}
+        <div class="crm-conv-badges"><span class="crm-badge crm-badge-warn">Unassigned</span>${sourceBadge}</div>
       </div>
     </div>`;
   }).join("");
+};
+
+const openConversation = (entry) => {
+  if (!entry) { return; }
+
+  currentConversation = entry;
+
+  const welcome = query("[data-chat-welcome]");
+  const chatView = query("[data-chat-view]");
+  if (welcome) { welcome.style.display = "none"; }
+  if (chatView) { chatView.style.display = "flex"; }
+
+  const name = entry.visitorName || "Guest";
+  const initials = name.slice(0, 2).toUpperCase();
+  const time = entry.createdAt
+    ? new Date(entry.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+    : "";
+  const dateLabel = entry.createdAt
+    ? new Date(entry.createdAt).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })
+    : "Hari ini";
+
+  queryAll("[data-chat-contact-name]").forEach((el) => { el.textContent = name; });
+  queryAll("[data-chat-contact-meta]").forEach((el) => {
+    el.textContent = entry.widgetId ? `${entry.widgetId} \u2022 Widget` : "Widget";
+  });
+  queryAll("[data-chat-avatar]").forEach((el) => { el.textContent = initials; });
+
+  setHtml("[data-chat-messages]", `
+    <div class="crm-date-divider">${escapeHtml(dateLabel)}</div>
+    <div class="crm-message crm-message-out">
+      <div class="crm-message-body">
+        <div class="crm-message-sender">Support</div>
+        <div class="crm-bubble">Halo! Selamat datang. Ada yang bisa kami bantu?<div class="crm-bubble-time">${escapeHtml(time)}</div></div>
+      </div>
+      <div class="crm-message-avatar">S</div>
+    </div>
+    <div class="crm-message crm-message-in">
+      <div class="crm-message-avatar">${escapeHtml(initials)}</div>
+      <div class="crm-message-body">
+        <div class="crm-message-sender">${escapeHtml(name)}</div>
+        <div class="crm-bubble">${escapeHtml(entry.message || "")}<div class="crm-bubble-time">${escapeHtml(time)}</div></div>
+      </div>
+    </div>
+  `);
+
+  const contactHeader = query("[data-contact-header]");
+  if (contactHeader) {
+    contactHeader.innerHTML = `
+      <div class="crm-contact-avatar-lg">${escapeHtml(initials)}</div>
+      <div class="crm-contact-name-lg">${escapeHtml(name)}</div>
+      <div class="crm-contact-id-lg">${escapeHtml(entry.widgetId || "-")}</div>
+    `;
+  }
+
+  setText("[data-contact-created-at]", entry.createdAt ? new Date(entry.createdAt).toLocaleString("id-ID") : "-");
+  setText("[data-contact-widget]", entry.widgetId || "-");
+  setText("[data-contact-source]", entry.sourceUrl || "Widget");
+
+  const msgs = query("[data-chat-messages]");
+  if (msgs) { window.setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 40); }
+
+  document.querySelectorAll(".crm-conv-item").forEach((el) => el.classList.remove("active"));
+  const activeEl = query(`[data-conv-idx="${inboxData.indexOf(entry)}"]`);
+  if (activeEl) { activeEl.classList.add("active"); }
+};
+
+const bindConversationClicks = () => {
+  document.querySelectorAll("[data-conv-idx]").forEach((el) => {
+    const idx = Number(el.dataset.convIdx);
+    el.addEventListener("click", () => openConversation(inboxData[idx]));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { openConversation(inboxData[idx]); }
+    });
+  });
+};
+
+const appendOutboundMessage = (message) => {
+  const msgs = query("[data-chat-messages]");
+  if (!msgs) { return; }
+
+  const stamp = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const bubble = document.createElement("div");
+  bubble.className = "crm-message crm-message-out";
+  bubble.innerHTML = `
+    <div class="crm-message-body">
+      <div class="crm-message-sender">Support</div>
+      <div class="crm-bubble">${escapeHtml(message)}<div class="crm-bubble-time">${escapeHtml(stamp)}</div></div>
+    </div>
+    <div class="crm-message-avatar">S</div>
+  `;
+  msgs.appendChild(bubble);
+  msgs.scrollTop = msgs.scrollHeight;
+};
+
+const sendConversationReply = async () => {
+  if (!currentConversation) { return; }
+
+  const input = query("[data-chat-input]");
+  if (!input) { return; }
+
+  const message = input.value.trim();
+  if (!message) { return; }
+
+  try {
+    const response = await authedFetch(`${apiPrefix}/v1/client/inbox/reply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tenantCode: currentClientTenantCode,
+        widgetId: currentClientWidgetId,
+        widgetNumber: currentConversation.widgetNumber || 1,
+        visitorName: currentConversation.visitorName || "Guest",
+        message,
+        replyToMessageId: currentConversation.messageId || "",
+        sourceUrl: currentConversation.sourceUrl || ""
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.message || `HTTP ${response.status}`);
+    }
+
+    input.value = "";
+    input.style.height = "auto";
+    appendOutboundMessage(message);
+    await hydrateClientInbox(currentClientTenantCode, currentClientWidgetId);
+    const refreshedEntry = inboxData.find((entry) => entry.messageId === currentConversation.messageId) || currentConversation;
+    openConversation(refreshedEntry);
+  } catch (error) {
+    window.alert(`Gagal mengirim balasan: ${error.message}`);
+  }
+};
+
+const bindInboxSearch = () => {
+  const input = query("[data-inbox-search]");
+  if (!input) { return; }
+  input.addEventListener("input", () => {
+    const term = input.value.trim().toLowerCase();
+    document.querySelectorAll(".crm-conv-item").forEach((el) => {
+      el.style.display = term && !el.textContent.toLowerCase().includes(term) ? "none" : "";
+    });
+  });
+};
+
+const bindChatInput = () => {
+  const ta = query("[data-chat-input]");
+  const sendButton = query("[data-chat-send]");
+  if (!ta) { return; }
+
+  ta.addEventListener("input", () => {
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 96) + "px";
+  });
+
+  ta.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      await sendConversationReply();
+    }
+  });
+
+  if (sendButton) {
+    sendButton.addEventListener("click", async () => {
+      await sendConversationReply();
+    });
+  }
 };
 
 const renderTenantCards = (tenants = []) => {
@@ -426,13 +606,16 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
       safeWidgetId ? `widgetId=${encodeURIComponent(safeWidgetId)}` : "",
       "limit=80"
     ].filter(Boolean).join("&");
-    const response = await authedFetch(`${apiPrefix}/v1/client/inbox${suffix}`);
+    const response = await authedFetch(`${apiPrefix}/v1/client/inbox${suffix ? `?${suffix}` : ""}`);
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data?.message || `HTTP ${response.status}`);
     }
 
     setHtml("[data-inbox-list]", renderInboxCards(data?.inbox || []));
+    setText("[data-inbox-count]", inboxData.length);
+    bindConversationClicks();
+    bindInboxSearch();
   } catch (error) {
     setHtml("[data-inbox-list]", `<div class="crm-empty"><span class="crm-empty-icon">⚠️</span><span>${escapeHtml(error.message)}</span></div>`);
   }
@@ -562,6 +745,7 @@ const bootstrapPage = () => {
     bindClientLogin();
     bindSnippetCopy();
     bindClientInboxRefresh();
+    bindChatInput();
     bindLogout();
     restoreSession();
   }

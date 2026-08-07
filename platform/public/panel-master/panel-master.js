@@ -426,7 +426,7 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
       safeWidgetId ? `widgetId=${encodeURIComponent(safeWidgetId)}` : "",
       "limit=80"
     ].filter(Boolean).join("&");
-    const response = await authedFetch(`${apiPrefix}/v1/client/inbox${suffix}`);
+    const response = await authedFetch(`${apiPrefix}/v1/client/inbox${suffix ? `?${suffix}` : ""}`);
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data?.message || `HTTP ${response.status}`);
