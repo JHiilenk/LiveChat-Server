@@ -130,6 +130,7 @@ const sanitizeServiceTypes = (values) => {
   return [...new Set(items.map((item) => sanitizeServiceType(item)).filter(Boolean))].slice(0, 20);
 };
 const DEFAULT_DEMO_TENANT_CODE = sanitizeCode(process.env.DEFAULT_DEMO_TENANT_CODE || "DEWI", "DEWI");
+const DEFAULT_DEMO_SERVICE_TYPES = ["Konsultasi", "Penawaran", "Janji Tamu"];
 const nameKey = (value) =>
   sanitizeName(value)
     .toLowerCase()
@@ -341,21 +342,7 @@ const buildDefaultTenantRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
   subscriptionTrialDays: FREE_TRIAL_DAYS,
   widgetNumber: 1,
   widgetId: buildWidgetIdentity(tenantCode, 1).widgetId,
-  createdAt: nowIso(),
-  updatedAt: nowIso(),
-});
-
-const buildDefaultAuthRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
-  teamCode: tenantCode,
-  ownerName: DEFAULT_OWNER_USERNAME,
-  ownerPasswordHash: hashPassword(DEFAULT_OWNER_PASSWORD),
-  adminPasswordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
-  admins: [{ key: nameKey(DEFAULT_ADMIN_USERNAME), name: DEFAULT_ADMIN_USERNAME }],
-  operators: [],
-  authVersion: AUTH_SCHEMA_VERSION,
-  createdAt: nowIso(),
-  updatedAt: nowIso(),
-});
+  serviceTypes: tenantCode === DEFAULT_DEMO_TENANT_CODE ? DEFAULT_DEMO_SERVICE_TYPES : [],
 
 const normalizeCommaList = (value) => {
   if (!value) {

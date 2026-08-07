@@ -64,6 +64,7 @@
   };
 
   const visitorName = getVisitorName();
+  const DEFAULT_EMBED_SERVICE_TYPES = ["Konsultasi", "Penawaran", "Janji Tamu"];
   const serviceTypeKey = `JIELIVE_EMBED_SERVICE_TYPE_${tenantCode}`;
 
   const getStoredServiceType = () => {
@@ -164,7 +165,7 @@
     if (!serviceTypeSelect) {
       return;
     }
-    const normalized = Array.isArray(items) ? items : [];
+    const normalized = Array.isArray(items) && items.length > 0 ? items : DEFAULT_EMBED_SERVICE_TYPES;
     serviceTypeSelect.innerHTML = `
       <option value="">Pilih jenis layanan</option>
       ${normalized.map((item) => `<option value="${item.replace(/"/g, "&quot;")}">${item.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</option>`).join("")}
