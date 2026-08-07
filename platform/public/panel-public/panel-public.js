@@ -87,6 +87,7 @@ let currentClientWidgetId = "";
 let allInboxData = [];
 let inboxData = [];
 let currentConversation = null;
+let clientInboxPollingId = null;
 
 const getSessionToken = () => sessionStorage.getItem("JIELIVE_PLATFORM_SESSION");
 const setSessionToken = (token) => sessionStorage.setItem("JIELIVE_PLATFORM_SESSION", token);
@@ -633,6 +634,7 @@ const hydrateClientOverview = async (tenantCode = "") => {
     currentClientWidgetId = String(data?.tenant?.widgetId || data?.widget?.widgetId || "").trim().toUpperCase();
     if (data?.tenant?.subscriptionAccessEnabled ?? data?.subscription?.accessEnabled ?? true) {
       await hydrateClientInbox(currentClientTenantCode, currentClientWidgetId);
+      startClientInboxPolling();
     } else {
       setHtml("[data-client-inbox-rows]", "<tr><td colspan=\"5\">Langganan kedaluwarsa. Inbox dinonaktifkan sampai perpanjangan dilakukan.</td></tr>");
     }
@@ -679,6 +681,27 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
     }
   } catch (error) {
     setHtml("[data-inbox-list]", `<div class="crm-empty"><span class="crm-empty-icon">⚠️</span><span>${escapeHtml(error.message)}</span></div>`);
+  }
+};
+
+const startClientInboxPolling = () => {
+  if (clientInboxPollingId !== null) {
+    return;
+  }
+
+  clientInboxPollingId = window.setInterval(async () => {
+    try {
+      await hydrateClientInbox(currentClientTenantCode, currentClientWidgetId);
+    } catch {
+      // ignore polling failures
+    }
+  }, 3000);
+};
+
+const stopClientInboxPolling = () => {
+  if (clientInboxPollingId !== null) {
+    window.clearInterval(clientInboxPollingId);
+    clientInboxPollingId = null;
   }
 };
 
