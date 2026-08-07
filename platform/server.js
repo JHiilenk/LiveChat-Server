@@ -1694,7 +1694,7 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
 
     const widgetId = sanitizeWidgetId(req.query?.widgetId || "", "");
     const limit = Math.min(Math.max(Number(req.query?.limit || 50), 1), 200);
-    const query = { tenantCode, kind: { $ne: "out" } };
+    const query = { tenantCode };
     if (widgetId) {
       query.widgetId = widgetId;
     }
@@ -1712,6 +1712,8 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
         message: doc.message,
         sourceUrl: doc.sourceUrl,
         status: doc.status,
+        kind: doc.kind || "in",
+        replyToMessageId: doc.replyToMessageId || "",
         createdAt: doc.createdAt
       }))
     });

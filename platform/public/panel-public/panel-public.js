@@ -160,7 +160,8 @@ const getConversationThread = (entry) => {
   }
 
   const replies = allInboxData
-    .filter((doc) => String(doc.kind || "in") === "out" && String(doc.replyToMessageId || "") === String(entry.messageId || ""))
+    .filter((doc) => (String(doc.kind || "").toLowerCase() === "out" || String(doc.status || "").toLowerCase() === "replied")
+      && String(doc.replyToMessageId || "") === String(entry.messageId || ""))
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   return [entry, ...replies];
