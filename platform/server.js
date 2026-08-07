@@ -343,6 +343,9 @@ const buildDefaultTenantRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
   widgetNumber: 1,
   widgetId: buildWidgetIdentity(tenantCode, 1).widgetId,
   serviceTypes: tenantCode === DEFAULT_DEMO_TENANT_CODE ? DEFAULT_DEMO_SERVICE_TYPES : [],
+  createdAt: nowIso(),
+  updatedAt: nowIso(),
+});
 
 const normalizeCommaList = (value) => {
   if (!value) {
