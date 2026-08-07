@@ -700,6 +700,7 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
 
     allInboxData = Array.isArray(data?.inbox) ? data.inbox : [];
     const visibleInbox = allInboxData.filter((entry) => String(entry.kind || "in") !== "out");
+    inboxData = visibleInbox;
     setHtml("[data-inbox-list]", renderInboxCards(visibleInbox));
     setText("[data-inbox-count]", inboxData.length);
     bindConversationClicks();
