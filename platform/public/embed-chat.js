@@ -39,10 +39,6 @@
     tenantChipNode.textContent = `Tenant ${tenantCode}`;
   }
 
-  persistVisitorInfo();
-  renderServiceTypeOptions([]);
-  hydrateEmbedServiceTypes();
-
   const nowClock = () => new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
   const getVisitorName = () => {
@@ -261,6 +257,10 @@
       // ignore
     }
   };
+
+  persistVisitorInfo();
+  renderServiceTypeOptions([]);
+  hydrateEmbedServiceTypes();
 
   // Polling for replies sent from client panel (support) so widget can show outbound messages
   const lastSeenKey = `JIELIVE_EMBED_LAST_${tenantCode}`;
