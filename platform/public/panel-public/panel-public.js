@@ -84,6 +84,7 @@ const applyClientAccessState = (tenant = {}, subscription = {}) => {
 
 let currentClientTenantCode = "";
 let currentClientWidgetId = "";
+let allInboxData = [];
 let inboxData = [];
 let currentConversation = null;
 
@@ -152,6 +153,18 @@ const renderInboxCards = (inbox = []) => {
   }).join("");
 };
 
+const getConversationThread = (entry) => {
+  if (!entry) {
+    return [];
+  }
+
+  const replies = allInboxData
+    .filter((doc) => String(doc.kind || "in") === "out" && String(doc.replyToMessageId || "") === String(entry.messageId || ""))
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+  return [entry, ...replies];
+};
+
 const openConversation = (entry) => {
   if (!entry) { return; }
 
@@ -177,23 +190,37 @@ const openConversation = (entry) => {
   });
   queryAll("[data-chat-avatar]").forEach((el) => { el.textContent = initials; });
 
-  setHtml("[data-chat-messages]", `
-    <div class="crm-date-divider">${escapeHtml(dateLabel)}</div>
-    <div class="crm-message crm-message-out">
-      <div class="crm-message-body">
-        <div class="crm-message-sender">Support</div>
-        <div class="crm-bubble">Halo! Selamat datang. Ada yang bisa kami bantu?<div class="crm-bubble-time">${escapeHtml(time)}</div></div>
-      </div>
-      <div class="crm-message-avatar">S</div>
-    </div>
-    <div class="crm-message crm-message-in">
-      <div class="crm-message-avatar">${escapeHtml(initials)}</div>
-      <div class="crm-message-body">
-        <div class="crm-message-sender">${escapeHtml(name)}</div>
-        <div class="crm-bubble">${escapeHtml(entry.message || "")}<div class="crm-bubble-time">${escapeHtml(time)}</div></div>
-      </div>
-    </div>
-  `);
+  const thread = getConversationThread(entry);
+  const messagesHtml = [
+    `<div class="crm-date-divider">${escapeHtml(dateLabel)}</div>`,
+    ...thread.map((msg) => {
+      const msgTime = msg.createdAt
+        ? new Date(msg.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        : "";
+
+      if (msg.kind === "out") {
+        return `
+          <div class="crm-message crm-message-out">
+            <div class="crm-message-body">
+              <div class="crm-message-sender">Support</div>
+              <div class="crm-bubble">${escapeHtml(msg.message || "")}<div class="crm-bubble-time">${escapeHtml(msgTime)}</div></div>
+            </div>
+            <div class="crm-message-avatar">S</div>
+          </div>`;
+      }
+
+      return `
+        <div class="crm-message crm-message-in">
+          <div class="crm-message-avatar">${escapeHtml(initials)}</div>
+          <div class="crm-message-body">
+            <div class="crm-message-sender">${escapeHtml(name)}</div>
+            <div class="crm-bubble">${escapeHtml(msg.message || "")}<div class="crm-bubble-time">${escapeHtml(msgTime)}</div></div>
+          </div>
+        </div>`;
+    })
+  ].join("");
+
+  setHtml("[data-chat-messages]", messagesHtml);
 
   const contactHeader = query("[data-contact-header]");
   if (contactHeader) {
@@ -297,7 +324,6 @@ const sendConversationReply = async () => {
     currentConversation = refreshedEntry;
     setActiveConversationItem();
     openConversation(refreshedEntry);
-    appendOutboundMessage(message);
   } catch (error) {
     window.alert(`Gagal mengirim balasan: ${error.message}`);
   }
@@ -631,10 +657,26 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
       throw new Error(data?.message || `HTTP ${response.status}`);
     }
 
-    setHtml("[data-inbox-list]", renderInboxCards(data?.inbox || []));
+    allInboxData = Array.isArray(data?.inbox) ? data.inbox : [];
+    const visibleInbox = allInboxData.filter((entry) => String(entry.kind || "in") !== "out");
+    setHtml("[data-inbox-list]", renderInboxCards(visibleInbox));
     setText("[data-inbox-count]", inboxData.length);
     bindConversationClicks();
     bindInboxSearch();
+
+    if (currentConversation) {
+      const refreshedEntry = inboxData.find((entry) => entry.messageId === currentConversation.messageId);
+      if (refreshedEntry) {
+        currentConversation = refreshedEntry;
+        openConversation(refreshedEntry);
+      } else if (inboxData.length > 0) {
+        currentConversation = inboxData[0];
+        openConversation(currentConversation);
+      }
+    } else if (inboxData.length > 0) {
+      currentConversation = inboxData[0];
+      openConversation(currentConversation);
+    }
   } catch (error) {
     setHtml("[data-inbox-list]", `<div class="crm-empty"><span class="crm-empty-icon">⚠️</span><span>${escapeHtml(error.message)}</span></div>`);
   }
