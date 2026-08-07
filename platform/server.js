@@ -1764,6 +1764,44 @@ app.post("/api/v1/client/inbox/reply", requireScopedSession(["client", "master"]
   }
 });
 
+// Public endpoint for widget/embed to poll for outbound replies from client inbox
+app.get("/api/v1/inbox/poll", async (req, res) => {
+  try {
+    const tenantCode = sanitizeCode(req.query?.tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+    const widgetId = sanitizeWidgetId(req.query?.widgetId || "", "");
+    const since = String(req.query?.since || "").trim();
+    const limit = Math.min(Math.max(Number(req.query?.limit || 20), 1), 200);
+
+    const q = { tenantCode };
+    if (widgetId) { q.widgetId = widgetId; }
+    // return replies created by client panel (either marked as replied or kind=out)
+    q.$or = [{ status: "replied" }, { kind: "out" }];
+    if (since) {
+      q.createdAt = { $gt: since };
+    }
+
+    const docs = await inboxDb.find(q).sort({ createdAt: 1 }).limit(limit).exec();
+
+    res.json({
+      ok: true,
+      tenantCode,
+      inbox: docs.map((doc) => ({
+        messageId: doc.messageId,
+        widgetId: doc.widgetId,
+        widgetNumber: doc.widgetNumber,
+        visitorName: doc.visitorName,
+        message: doc.message,
+        sourceUrl: doc.sourceUrl,
+        status: doc.status,
+        kind: doc.kind || "in",
+        createdAt: doc.createdAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal memuat polling inbox: ${error.message}` });
+  }
+});
+
 app.put("/api/v1/tenants/:tenantCode", async (req, res) => {
   try {
     const session = await getSessionFromRequest(req);
@@ -1884,7 +1922,7 @@ app.get("/api/v1/status", (req, res) => {
     service: APP_NAME,
     surface: resolveSurfaceFromHost(req.hostname),
     host: req.hostname,
-    routes: ["/", "/demo", "/register", "/admin", "/panel/master", "/panel/client", "/panel/client1", "/panel/client2", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/tenants/:tenantCode/renew", "/api/v1/settings/subscription", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview", "/api/v1/client/inbox", "/api/v1/inbox/message", "/api/v1/register"],
+    routes: ["/", "/demo", "/register", "/admin", "/panel/master", "/panel/client", "/panel/client1", "/panel/client2", "/embed", "/healthz", "/api/v1/status", "/api/v1/bootstrap", "/api/v1/tenants", "/api/v1/tenants/:tenantCode", "/api/v1/tenants/:tenantCode/renew", "/api/v1/settings/subscription", "/api/v1/deploy-check", "/api/v1/master/overview", "/api/v1/client/overview", "/api/v1/client/inbox", "/api/v1/inbox/message", "/api/v1/inbox/poll", "/api/v1/register"],
     defaultTenantCode: DEFAULT_TENANT_CODE,
     defaultTeamCode: DEFAULT_TEAM_CODE,
     defaultChannelCode: DEFAULT_CHANNEL_CODE,

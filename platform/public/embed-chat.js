@@ -135,6 +135,45 @@
     }, 480);
   };
 
+  // Polling for replies sent from client panel (support) so widget can show outbound messages
+  const lastSeenKey = `JIELIVE_EMBED_LAST_${tenantCode}`;
+  const loadLastSeen = () => {
+    try { return String(localStorage.getItem(lastSeenKey) || ""); } catch { return ""; }
+  };
+  const saveLastSeen = (val) => {
+    try { if (val) localStorage.setItem(lastSeenKey, String(val)); } catch { /* ignore */ }
+  };
+
+  const pollReplies = async () => {
+    try {
+      const since = loadLastSeen();
+      const url = `/api/v1/inbox/poll?tenantCode=${encodeURIComponent(tenantCode)}&widgetId=${encodeURIComponent(widgetId)}&limit=20${since ? `&since=${encodeURIComponent(since)}` : ""}`;
+      const response = await fetch(url);
+      if (!response.ok) { return; }
+      const data = await response.json().catch(() => ({}));
+      const items = Array.isArray(data?.inbox) ? data.inbox : [];
+      let newest = since;
+      for (const item of items) {
+        if (!item || !item.messageId || !item.message) { continue; }
+        appendMessage(state, "bot", item.message);
+        if (item.createdAt) {
+          newest = newest && newest > item.createdAt ? newest : item.createdAt;
+        }
+      }
+      if (newest && newest !== since) {
+        saveLastSeen(newest);
+      }
+    } catch (e) {
+      // ignore polling errors for now
+    }
+  };
+
+  // Start polling for replies every 3s
+  window.setTimeout(() => {
+    pollReplies();
+    setInterval(pollReplies, 3000);
+  }, 800);
+
   const sendInboxMessage = async (text) => {
     const payload = {
       tenantCode,
