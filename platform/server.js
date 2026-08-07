@@ -1714,8 +1714,8 @@ app.get("/api/v1/client/inbox", requireScopedSession(["client", "master"]), asyn
         status: doc.status,
         kind: doc.kind || "in",
         replyToMessageId: doc.replyToMessageId || "",
-        createdAt: doc.createdAt
-      }))
+        createdAt: doc.createdAt,
+      })),
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat inbox client: ${error.message}` });
@@ -1780,7 +1780,9 @@ app.get("/api/v1/inbox/poll", async (req, res) => {
     const limit = Math.min(Math.max(Number(req.query?.limit || 20), 1), 200);
 
     const q = { tenantCode };
-    if (widgetId) { q.widgetId = widgetId; }
+    if (widgetId) {
+      q.widgetId = widgetId;
+    }
     // return replies created by client panel (either marked as replied or kind=out)
     q.$or = [{ status: "replied" }, { kind: "out" }];
     if (since) {
@@ -1801,11 +1803,31 @@ app.get("/api/v1/inbox/poll", async (req, res) => {
         sourceUrl: doc.sourceUrl,
         status: doc.status,
         kind: doc.kind || "in",
-        createdAt: doc.createdAt
-      }))
+        createdAt: doc.createdAt,
+      })),
     });
   } catch (error) {
     res.status(500).json({ ok: false, message: `Gagal memuat polling inbox: ${error.message}` });
+  }
+});
+
+app.delete("/api/v1/client/inbox/message/:messageId", requireScopedSession(["client", "master"]), async (req, res) => {
+  try {
+    const messageId = String(req.params?.messageId || "").trim();
+    if (!messageId) {
+      res.status(400).json({ ok: false, message: "messageId tidak boleh kosong." });
+      return;
+    }
+
+    const removedCount = await inboxDb.remove({ messageId }, {});
+    if (!removedCount) {
+      res.status(404).json({ ok: false, message: "Pesan tidak ditemukan." });
+      return;
+    }
+
+    res.json({ ok: true, removedCount });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: `Gagal menghapus pesan inbox: ${error.message}` });
   }
 });
 

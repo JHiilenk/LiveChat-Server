@@ -206,11 +206,15 @@ const getConversationThread = (entry) => {
     return [];
   }
 
-  const replies = allInboxData
-    .filter((doc) => (String(doc.kind || "").toLowerCase() === "out" || String(doc.status || "").toLowerCase() === "replied") && String(doc.replyToMessageId || "") === String(entry.messageId || ""))
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const conversationKey = buildInboxConversationKey(entry);
+  const incoming = allInboxData
+    .filter((doc) => String(doc.kind || "in").toLowerCase() !== "out" && buildInboxConversationKey(doc) === conversationKey);
 
-  return [entry, ...replies];
+  const incomingIds = new Set(incoming.map((doc) => String(doc.messageId || "")));
+  const replies = allInboxData
+    .filter((doc) => String(doc.kind || "").toLowerCase() === "out" && incomingIds.has(String(doc.replyToMessageId || "")));
+
+  return [...incoming, ...replies].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 };
 
 const openConversation = (entry) => {
@@ -252,7 +256,8 @@ const openConversation = (entry) => {
 
       if (msg.kind === "out") {
         return `
-          <div class="crm-message crm-message-out">
+          <div class="crm-message crm-message-out" data-message-id="${escapeHtml(msg.messageId || "")}">
+            <button type="button" class="crm-message-delete" data-delete-message-id="${escapeHtml(msg.messageId || "")}" aria-label="Hapus pesan">×</button>
             <div class="crm-message-body">
               <div class="crm-message-sender">Support</div>
               <div class="crm-bubble">${escapeHtml(msg.message || "")}<div class="crm-bubble-time">${escapeHtml(msgTime)}</div></div>
@@ -262,7 +267,8 @@ const openConversation = (entry) => {
       }
 
       return `
-        <div class="crm-message crm-message-in">
+        <div class="crm-message crm-message-in" data-message-id="${escapeHtml(msg.messageId || "")}">
+          <button type="button" class="crm-message-delete" data-delete-message-id="${escapeHtml(msg.messageId || "")}" aria-label="Hapus pesan">×</button>
           <div class="crm-message-avatar">${escapeHtml(initials)}</div>
           <div class="crm-message-body">
             <div class="crm-message-sender">${escapeHtml(name)}</div>
@@ -434,6 +440,72 @@ const bindChatInput = () => {
       await sendConversationReply();
     });
   }
+};
+
+const deleteConversationMessage = async (messageId) => {
+  if (!messageId) {
+    return;
+  }
+
+  if (!window.confirm("Hapus pesan ini?")) {
+    return;
+  }
+
+  try {
+    const response = await authedFetch(`${apiPrefix}/v1/client/inbox/message/${encodeURIComponent(messageId)}`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.message || `HTTP ${response.status}`);
+    }
+
+    const currentKey = currentConversation ? buildInboxConversationKey(currentConversation) : "";
+    await hydrateClientInbox(currentClientTenantCode, currentClientWidgetId);
+
+    if (currentKey) {
+      const refreshedEntry = inboxData.find((entry) => buildInboxConversationKey(entry) === currentKey);
+      if (refreshedEntry) {
+        currentConversation = refreshedEntry;
+        openConversation(refreshedEntry);
+      } else {
+        currentConversation = null;
+        const welcome = query("[data-chat-welcome]");
+        const chatView = query("[data-chat-view]");
+        if (welcome) {
+          welcome.style.display = "flex";
+        }
+        if (chatView) {
+          chatView.style.display = "none";
+        }
+      }
+    }
+  } catch (error) {
+    window.alert(`Gagal menghapus pesan: ${error.message}`);
+  }
+};
+
+const bindChatMessageDelete = () => {
+  const messages = query("[data-chat-messages]");
+  if (!messages) {
+    return;
+  }
+
+  messages.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const messageId = target.dataset.deleteMessageId;
+    if (!messageId) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    await deleteConversationMessage(messageId);
+  });
 };
 
 const renderTenantCards = (tenants = []) => {
@@ -745,7 +817,8 @@ const hydrateClientInbox = async (tenantCode = "", widgetId = "") => {
     bindInboxSearch();
 
     if (currentConversation) {
-      const refreshedEntry = inboxData.find((entry) => entry.messageId === currentConversation.messageId);
+      const currentKey = buildInboxConversationKey(currentConversation);
+      const refreshedEntry = inboxData.find((entry) => buildInboxConversationKey(entry) === currentKey);
       if (refreshedEntry) {
         currentConversation = refreshedEntry;
         openConversation(refreshedEntry);
@@ -923,6 +996,7 @@ const bootstrapPage = () => {
     bindSnippetCopy();
     bindClientInboxRefresh();
     bindChatInput();
+    bindChatMessageDelete();
     bindLogout();
     restoreSession();
   }
