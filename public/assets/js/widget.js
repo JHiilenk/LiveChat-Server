@@ -14,9 +14,9 @@
     <style>
       :host { all: initial; }
       .widget-root { position: fixed; right: 1rem; bottom: 1rem; z-index: 2147483647; font-family: "Space Grotesk", "Segoe UI", sans-serif; }
-      .widget-launcher { position: relative; min-width: 156px; height: 64px; border: 1px solid rgba(106, 162, 255, 0.4); border-radius: 999px; background: linear-gradient(120deg, #69adff 0%, #4f95ff 56%, #3879dd 100%); color: #f5f9ff; box-shadow: 0 16px 30px rgba(6, 16, 34, 0.46); display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.7rem; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease, opacity 140ms ease; padding: 0.7rem 1rem; overflow: hidden; }
-      .widget-launcher::before { content: ""; position: absolute; left: 18px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.16); }
-      .widget-launcher:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 18px 34px rgba(12, 26, 11, 0.45); filter: brightness(1.03); }
+      .widget-launcher { position: relative; min-width: 168px; height: 74px; border: 1px solid rgba(106, 162, 255, 0.4); border-radius: 999px; background: linear-gradient(120deg, #69adff 0%, #4f95ff 56%, #3879dd 100%); color: #f5f9ff; box-shadow: 0 16px 30px rgba(6, 16, 34, 0.46); display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.8rem; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease, opacity 140ms ease; padding: 0.85rem 1.2rem; overflow: hidden; font-size: 1.02rem; }
+      .widget-launcher::before { content: ""; position: absolute; left: 22px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 9px rgba(255, 255, 255, 0.16); }
+      .widget-launcher:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 20px 40px rgba(12, 26, 11, 0.55); filter: brightness(1.04); }
       .widget-launcher-icon { display: none; }
       .widget-launcher svg { width: 18px; height: 18px; position: relative; top: -0.5px; }
       .widget-launcher-label { display: grid; line-height: 1.03; text-align: left; position: relative; z-index: 1; padding-left: 1.25rem; }

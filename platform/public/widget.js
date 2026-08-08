@@ -75,23 +75,31 @@
       .launcher {
         border: 0;
         border-radius: 999px;
-        padding: 12px 15px;
-        min-width: 144px;
+        padding: 16px 20px;
+        min-width: 160px;
+        height: 72px;
         color: #eff7ff;
         cursor: pointer;
         font-weight: 700;
+        font-size: 1.02rem;
         background: linear-gradient(130deg, #58a9ff, #2a74d4);
         box-shadow: 0 18px 36px rgba(6, 23, 53, 0.42);
         display: inline-flex;
         align-items: center;
-        gap: 9px;
+        gap: 11px;
+        transition: transform 140ms ease, box-shadow 140ms ease;
+      }
+      .launcher:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 22px 44px rgba(6, 23, 53, 0.52);
       }
       .dot {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 999px;
         background: #6ef0b5;
-        box-shadow: 0 0 0 7px rgba(110, 240, 181, 0.22);
+        box-shadow: 0 0 0 8px rgba(110, 240, 181, 0.22);
+        flex-shrink: 0;
       }
       .panel {
         position: fixed;

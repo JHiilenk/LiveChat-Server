@@ -15,13 +15,13 @@
     <style>
       :host { all: initial; }
       .livechat-widget-root { position: fixed; right: 1rem; bottom: 8.8rem; z-index: 2147483647; font-family: "Space Grotesk", "Segoe UI", sans-serif; }
-      .livechat-widget-launcher { position: relative; min-width: 142px; height: 56px; border: 1px solid rgba(94, 179, 255, 0.55); border-radius: 999px; background: linear-gradient(120deg, #4c97ff 0%, #2f78d8 57%, #2665c1 100%); color: #fff; box-shadow: 0 16px 32px rgba(7, 17, 49, 0.42); display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.6rem; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease; padding: 0.65rem 1rem; overflow: hidden; }
-      .livechat-widget-launcher:hover { transform: translateY(-1px) scale(1.01); }
-      .livechat-widget-launcher-icon { width: 34px; height: 34px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-      .livechat-widget-launcher-icon svg { width: 18px; height: 18px; }
-      .livechat-widget-launcher-label { display: grid; line-height: 1.05; }
-      .livechat-widget-launcher-label strong { font-size: 0.95rem; letter-spacing: 0.02em; font-weight: 800; }
-      .livechat-widget-launcher-label span { font-size: 0.72rem; color: rgba(235, 245, 255, 0.88); }
+      .livechat-widget-launcher { position: relative; min-width: 160px; height: 74px; border: 1px solid rgba(94, 179, 255, 0.55); border-radius: 999px; background: linear-gradient(120deg, #4c97ff 0%, #2f78d8 57%, #2665c1 100%); color: #fff; box-shadow: 0 16px 32px rgba(7, 17, 49, 0.42); display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.8rem; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease; padding: 0.85rem 1.2rem; overflow: hidden; }
+      .livechat-widget-launcher:hover { transform: translateY(-2px) scale(1.02); }
+      .livechat-widget-launcher-icon { width: 42px; height: 42px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+      .livechat-widget-launcher-icon svg { width: 22px; height: 22px; }
+      .livechat-widget-launcher-label { display: grid; line-height: 1.08; }
+      .livechat-widget-launcher-label strong { font-size: 1.05rem; letter-spacing: 0.02em; font-weight: 800; }
+      .livechat-widget-launcher-label span { font-size: 0.78rem; color: rgba(235, 245, 255, 0.88); }
       .livechat-widget-panel { position: fixed; right: 1rem; bottom: ${panelBottom}rem; width: min(440px, calc(100vw - 1.5rem)); height: min(700px, calc(100dvh - 6.2rem)); max-height: calc(100dvh - 6.2rem); border-radius: 24px; overflow: hidden; background: #081a34; border: 1px solid rgba(94, 179, 255, 0.24); box-shadow: 0 32px 72px rgba(5, 13, 42, 0.46); display: flex; flex-direction: column; }
       .livechat-widget-panel.hidden { display: none; }
       .livechat-widget-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1rem 0.95rem; background: linear-gradient(180deg, rgba(9, 26, 57, 0.98) 0%, rgba(7, 18, 40, 0.98) 100%); border-bottom: 1px solid rgba(94, 179, 255, 0.14); }
