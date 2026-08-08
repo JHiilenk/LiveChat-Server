@@ -347,6 +347,24 @@ const buildDefaultTenantRecord = (tenantCode = DEFAULT_TENANT_CODE) => ({
   updatedAt: nowIso(),
 });
 
+const buildDefaultAuthRecord = (tenantCode = DEFAULT_TENANT_CODE) => {
+  const safeTenantCode = sanitizeCode(tenantCode || DEFAULT_TENANT_CODE, DEFAULT_TENANT_CODE);
+  const ownerName = sanitizeName(DEFAULT_OWNER_USERNAME || "owner");
+  const adminName = sanitizeName(DEFAULT_ADMIN_USERNAME || "admin");
+
+  return {
+    teamCode: safeTenantCode,
+    ownerName,
+    ownerPasswordHash: hashPassword(DEFAULT_OWNER_PASSWORD),
+    adminPasswordHash: hashPassword(DEFAULT_ADMIN_PASSWORD),
+    admins: [{ key: nameKey(adminName), name: adminName }],
+    operators: [],
+    authVersion: AUTH_SCHEMA_VERSION,
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+  };
+};
+
 const normalizeCommaList = (value) => {
   if (!value) {
     return [];
