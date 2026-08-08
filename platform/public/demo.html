@@ -21,16 +21,15 @@
         --shadow: 0 24px 60px rgba(61, 34, 18, 0.16);
       }
 
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
       body {
         margin: 0;
         font-family: "Sora", "Trebuchet MS", sans-serif;
         color: var(--ink);
-        background:
-          radial-gradient(circle at top left, rgba(209, 79, 43, 0.18), transparent 32%),
-          radial-gradient(circle at right center, rgba(245, 177, 95, 0.22), transparent 26%),
-          linear-gradient(180deg, #f7f0e7, var(--bg));
+        background: radial-gradient(circle at top left, rgba(209, 79, 43, 0.18), transparent 32%), radial-gradient(circle at right center, rgba(245, 177, 95, 0.22), transparent 26%), linear-gradient(180deg, #f7f0e7, var(--bg));
       }
 
       .shell {
@@ -163,9 +162,13 @@
         gap: 12px;
       }
 
-      .hero-actions { margin-top: 20px; }
+      .hero-actions {
+        margin-top: 20px;
+      }
 
-      .meta-row { margin-top: 22px; }
+      .meta-row {
+        margin-top: 22px;
+      }
 
       .meta-chip {
         padding: 11px 14px;
@@ -185,37 +188,6 @@
       .visual-stack {
         display: grid;
         gap: 14px;
-      }
-
-      .lookbook {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .lookbook-card {
-        min-height: 180px;
-        border-radius: 24px;
-        padding: 18px;
-        position: relative;
-        overflow: hidden;
-        color: #fff6ef;
-        background: linear-gradient(140deg, rgba(39, 21, 15, 0.95), rgba(209, 79, 43, 0.88));
-      }
-
-      .lookbook-card.alt {
-        background: linear-gradient(140deg, rgba(50, 39, 32, 0.95), rgba(245, 177, 95, 0.88));
-        color: var(--accent-dark);
-      }
-
-      .lookbook-card::after {
-        content: "";
-        position: absolute;
-        inset: auto -40px -40px auto;
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.16);
       }
 
       .section-grid {
@@ -270,7 +242,9 @@
       }
 
       .contact-panel p,
-      .contact-panel li { color: rgba(255, 244, 234, 0.78); }
+      .contact-panel li {
+        color: rgba(255, 244, 234, 0.78);
+      }
 
       .contact-list {
         margin: 18px 0 0;
@@ -361,19 +335,9 @@
         </article>
 
         <aside class="visual-stack">
-          <div class="lookbook">
-            <article class="lookbook-card">
-              <strong>Kaos combed premium</strong>
-              <p>Warna netral, sablon clean, cocok untuk distro lokal dan komunitas kampus.</p>
-            </article>
-            <article class="lookbook-card alt">
-              <strong>Hoodie best seller</strong>
-              <p>Potongan boxy fit dengan pilihan warna hitam, cream, dan army.</p>
-            </article>
-          </div>
           <section class="offer-panel" id="chat-demo">
             <span class="badge">Live support</span>
-            <h2 style="margin: 0 0 10px;">Tim admin siap bantu via widget</h2>
+            <h2 style="margin: 0 0 10px">Tim admin siap bantu via widget</h2>
             <p>__DEMO_SUPPORT_COPY__</p>
             <div class="meta-row">
               <div class="meta-chip">
@@ -392,7 +356,7 @@
       <section class="section-grid" id="katalog">
         <section class="offer-panel">
           <span class="badge">Katalog demo</span>
-          <h2 style="margin: 0 0 12px;">Pilihan paket paling sering ditanya buyer</h2>
+          <h2 style="margin: 0 0 12px">Pilihan paket paling sering ditanya buyer</h2>
           <div class="offer-grid">
             <article class="price-box">
               <strong>__DEMO_PRICE_1_TITLE__</strong>
@@ -418,8 +382,8 @@
         </section>
 
         <section class="contact-panel">
-          <span class="badge" style="background: rgba(255,255,255,0.12); color: #fff4ea;">Kenapa demo ini penting</span>
-          <h2 style="margin: 0 0 12px;">Landing client + widget + panel jadi satu alur</h2>
+          <span class="badge" style="background: rgba(255, 255, 255, 0.12); color: #fff4ea">Kenapa demo ini penting</span>
+          <h2 style="margin: 0 0 12px">Landing client + widget + panel jadi satu alur</h2>
           <p>__DEMO_CONTACT_COPY__</p>
           <ul class="contact-list">
             <li>Pertanyaan stok dan size masuk ke inbox tenant yang sama.</li>
@@ -429,7 +393,7 @@
         </section>
       </section>
 
-      <section class="feature-grid" style="margin-top: 16px;">
+      <section class="feature-grid" style="margin-top: 16px">
         <article class="card">
           <span class="badge">Produk</span>
           <strong>Streetwear lokal</strong>
@@ -453,12 +417,6 @@
       </footer>
     </main>
 
-    <script
-      src="/widget.js?v=demo-client-fashion"
-      data-chat-url="__DEMO_WIDGET_CHAT_URL__"
-      data-title="__DEMO_WIDGET_TITLE__"
-      data-subtitle="__DEMO_WIDGET_SUBTITLE__"
-      defer
-    ></script>
+    <script src="/widget.js?v=demo-client-fashion" data-chat-url="__DEMO_WIDGET_CHAT_URL__" data-title="__DEMO_WIDGET_TITLE__" data-subtitle="__DEMO_WIDGET_SUBTITLE__" defer></script>
   </body>
 </html>
